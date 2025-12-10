@@ -10,7 +10,7 @@ class Symptom(models.Model):
 
 class Drug(models.Model):
   symptom = models.ForeignKey(Symptom, related_name='symptoms', on_delete=models.CASCADE)
-  form = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
+  form = models.ForeignKey(Form, related_name='forms_drug', on_delete=models.CASCADE)
   name = models.TextField()
   company = models.TextField()
   basis = models.TextField()
@@ -25,7 +25,7 @@ class Drug(models.Model):
 class Review(models.Model):
   user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
   drug = models.ForeignKey(Drug, related_name='drugs', on_delete=models.CASCADE)
-  form = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
+  form = models.ForeignKey(Form, related_name='forms_review', on_delete=models.CASCADE)
   title = models.CharField(max_length=200)
   content = models.TextField()
   created_at = models.DateTimeField(auto_now_add=True)
