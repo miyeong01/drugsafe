@@ -3,6 +3,7 @@ from . import views
 
 
 urlpatterns = [
+    # 의약품 R
     path('drugs/', views.drug_list),
     # 리뷰 CRUD
     path('drugs/<int:drug_pk>/reviews/', views.review_list),    # GET(전체), POST
