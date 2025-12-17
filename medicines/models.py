@@ -38,6 +38,7 @@ class Score(models.Model):
     score = models.IntegerField()
 
 class Comment(models.Model):
+    review = models.ForeignKey(Review, related_name='comments', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
     content = models.TextField()
