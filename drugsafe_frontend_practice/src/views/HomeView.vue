@@ -1,133 +1,31 @@
 <script setup>
 import { ref, h } from "vue";
 import { useRouter } from "vue-router";
-import {
-  Search,
-  Thermometer,
-  Brain,
-  Heart,
-  Bone,
-  Activity,
-  Zap,
-  Droplet,
-  Wind,
-  Smile,
-  Pill,
-  Stethoscope,
-  AlertCircle,
-} from "lucide-vue-next";
+import HeadacheIcon from "@/assets/icons/headache.svg?component";
+import ToothIcon from "@/assets/icons/tooth.svg?component";
+import FeverIcon from "@/assets/icons/fever.svg?component";
+import StomachIcon from "@/assets/icons/stomach.svg?component";
+import BellyIcon from "@/assets/icons/belly.svg?component";
+import FluIcon from "@/assets/icons/virus.svg?component";
+import NoseIcon from "@/assets/icons/nose.svg?component";
+import CoughIcon from "@/assets/icons/cough.svg?component";
+import DigestiveIcon from "@/assets/icons/stomach_1.svg?component";
+import AllergyIcon from "@/assets/icons/allergy.svg?component";
+import TiredIcon from "@/assets/icons/tired.svg?component";
+import JointIcon from "@/assets/icons/joint.svg?component";
+import MuscleIcon from "@/assets/icons/muscle.svg?component"
+import Search from "@/assets/icons/search.svg?component"; 
+import Heart from "@/assets/icons/heart.svg?component"; 
+import Pill from "@/assets/icons/pill.svg?component";
 
 const router = useRouter();
 const searchQuery = ref("");
-
-const ToothIcon = (props) =>
-  h(
-    "svg",
-    {
-      class: props.class,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    },
-    [
-      h("path", {
-        d: "M8 2C6 2 5 4 5 6v10c0 2 0 4 2 6h2c1-2 1-4 1-6V6c0-2-1-4-2-4z",
-      }),
-      h("path", {
-        d: "M16 2c-1 0-2 2-2 4v10c0 2 0 4 1 6h2c2-2 2-4 2-6V6c0-2-1-4-3-4z",
-      }),
-    ]
-  );
-
-const StomachIcon = (props) =>
-  h(
-    "svg",
-    {
-      class: props.class,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    },
-    [
-      h("ellipse", { cx: "12", cy: "13", rx: "8", ry: "9" }),
-      h("path", { d: "M8 6c0-2 1-4 4-4s4 2 4 4" }),
-    ]
-  );
-
-const DigestiveIcon = (props) =>
-  h(
-    "svg",
-    {
-      class: props.class,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    },
-    [
-      h("path", {
-        d: "M8 3c-1 0-2 1-2 3v3c0 2-1 3-2 4 1 1 2 2 2 4v3c0 2 1 3 2 3",
-      }),
-      h("path", {
-        d: "M16 3c1 0 2 1 2 3v3c0 2 1 3 2 4-1 1-2 2-2 4v3c0 2-1 3-2 3",
-      }),
-    ]
-  );
-
-const NoseIcon = (props) =>
-  h(
-    "svg",
-    {
-      class: props.class,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    },
-    [
-      h("path", { d: "M12 2v8" }),
-      h("ellipse", { cx: "10", cy: "14", rx: "2", ry: "3" }),
-      h("ellipse", { cx: "14", cy: "14", rx: "2", ry: "3" }),
-      h("path", { d: "M12 10c-3 0-4 2-4 4" }),
-      h("path", { d: "M12 10c3 0 4 2 4 4" }),
-    ]
-  );
-
-const MuscleIcon = (props) =>
-  h(
-    "svg",
-    {
-      class: props.class,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    },
-    [
-      h("path", { d: "M6 8c0-2 2-4 4-4h4c2 0 4 2 4 4" }),
-      h("path", { d: "M6 8v4c0 3 1 6 6 8 5-2 6-5 6-8V8" }),
-      h("path", { d: "M10 10v6" }),
-      h("path", { d: "M14 10v6" }),
-    ]
-  );
 
 const commonColorClass = "bg-primary bg-opacity-10 text-primary";
 
 const symptoms = [
   {
-    icon: Brain,
+    icon: HeadacheIcon,
     label: "두통",
     description: "머리가 아플 때",
     color: commonColorClass,
@@ -139,7 +37,7 @@ const symptoms = [
     color: commonColorClass,
   },
   {
-    icon: Thermometer,
+    icon: FeverIcon,
     label: "발열",
     description: "열이 날 때",
     color: commonColorClass,
@@ -151,7 +49,7 @@ const symptoms = [
     color: commonColorClass,
   },
   {
-    icon: Heart,
+    icon: BellyIcon,
     label: "생리통",
     description: "생리 시 통증",
     color: commonColorClass,
@@ -163,7 +61,7 @@ const symptoms = [
     color: commonColorClass,
   },
   {
-    icon: Activity,
+    icon: FluIcon,
     label: "종합감기",
     description: "감기 증상 전반",
     color: commonColorClass,
@@ -175,37 +73,37 @@ const symptoms = [
     color: commonColorClass,
   },
   {
-    icon: Wind,
+    icon: CoughIcon,
     label: "기침",
     description: "기침이 날 때",
     color: commonColorClass,
   },
   {
-    icon: Droplet,
+    icon: CoughIcon,
     label: "재채기",
     description: "재채기가 날 때",
     color: commonColorClass,
   },
   {
-    icon: Pill,
+    icon: DigestiveIcon,
     label: "소화불량",
     description: "소화가 안 될 때",
     color: commonColorClass,
   },
   {
-    icon: Droplet,
+    icon: AllergyIcon,
     label: "알레르기",
     description: "알레르기 반응",
     color: commonColorClass,
   },
   {
-    icon: Zap,
+    icon: TiredIcon,
     label: "육체피로",
     description: "피로·권태감",
     color: commonColorClass,
   },
   {
-    icon: Bone,
+    icon: JointIcon,
     label: "관절통",
     description: "관절이 아플 때",
     color: commonColorClass,
@@ -285,7 +183,7 @@ const handleSymptomClick = (label) => {
               style="border-color: #e5e7eb; border-radius: 1rem"
             >
               <div
-                class="card-body d-flex flex-col align-items-center gap-3 p-0"
+                class="card-body d-flex flex-column align-items-center gap-3 p-0"
               >
                 <div
                   class="rounded-circle d-flex align-items-center justify-content-center mb-2"
