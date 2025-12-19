@@ -17,6 +17,7 @@ import MuscleIcon from "@/assets/icons/muscle.svg?component"
 import Search from "@/assets/icons/search.svg?component"; 
 import Heart from "@/assets/icons/heart.svg?component"; 
 import Pill from "@/assets/icons/pill.svg?component";
+import MaskIcon from "@/assets/icons/mask.svg?component";
 
 const router = useRouter();
 const searchQuery = ref("");
@@ -73,7 +74,7 @@ const symptoms = [
     color: commonColorClass,
   },
   {
-    icon: CoughIcon,
+    icon:MaskIcon,
     label: "기침",
     description: "기침이 날 때",
     color: commonColorClass,
