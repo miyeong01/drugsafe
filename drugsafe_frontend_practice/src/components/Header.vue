@@ -1,16 +1,16 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-// Heart 아이콘 다시 추가
 import { Heart, User, Menu, Pill } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 
-// 현재 페이지인지 확인 (글자색 파랗게 만들기 위해)
 const isActive = (pageName) => route.name === pageName
-
 const goHome = () => router.push('/')
-const goAuth = () => router.push('/auth')
+
+const goAuth = (mode) => {
+  router.push({ path: '/auth', query: { mode: mode } })
+}
 </script>
 
 <template>
@@ -32,7 +32,7 @@ const goAuth = () => router.push('/auth')
             class="text-decoration-none fw-medium"
             :class="isActive('home') ? 'text-primary' : 'text-dark'"
           >
-            홈
+            Home
           </RouterLink>
           
           <RouterLink 
@@ -40,7 +40,7 @@ const goAuth = () => router.push('/auth')
             class="text-decoration-none fw-medium"
             :class="isActive('community') ? 'text-primary' : 'text-dark'"
           >
-            커뮤니티
+            Community
           </RouterLink>
           
           <RouterLink 
@@ -66,18 +66,18 @@ const goAuth = () => router.push('/auth')
           </button>
 
           <button 
-            @click="goAuth"
+            @click="goAuth('signup')" 
             class="btn btn-outline-secondary btn-sm fw-medium px-3 ms-2"
             style="border-color: #dee2e6; color: #495057;"
           >
-            회원가입
+            SignUp
           </button>
 
           <button 
-            @click="goAuth"
+            @click="goAuth('login')"
             class="btn btn-primary btn-sm fw-medium px-3 text-white"
           >
-            로그인
+            Login
           </button>
           
           <button class="btn p-2 border-0 text-dark d-md-none">
@@ -91,7 +91,6 @@ const goAuth = () => router.push('/auth')
 </template>
 
 <style scoped>
-/* 간격 조정 */
 .gap-2 { gap: 0.5rem; }
-.gap-5 { gap: 3rem; } /* 메뉴 사이 간격을 넓게 */
+.gap-5 { gap: 3rem; }
 </style>

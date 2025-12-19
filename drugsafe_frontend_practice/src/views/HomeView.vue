@@ -20,7 +20,6 @@ import {
 const router = useRouter();
 const searchQuery = ref("");
 
-// --- 커스텀 아이콘 정의 (변경 없음) ---
 const ToothIcon = (props) =>
   h(
     "svg",
@@ -124,9 +123,6 @@ const MuscleIcon = (props) =>
     ]
   );
 
-// --- 데이터 정의 (Tailwind 클래스 -> Bootstrap 클래스로 변경) ---
-// bg-blue-100 -> bg-primary bg-opacity-10
-// text-blue-600 -> text-primary
 const commonColorClass = "bg-primary bg-opacity-10 text-primary";
 
 const symptoms = [
@@ -222,7 +218,6 @@ const symptoms = [
   },
 ];
 
-// --- 핸들러 ---
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({ name: "search", query: { q: searchQuery.value } });
@@ -402,12 +397,10 @@ const handleSymptomClick = (label) => {
 </template>
 
 <style scoped>
-/* 커스텀 폰트 사이즈 (Tailwind의 text-xs에 해당) */
 .x-small {
   font-size: 0.75rem;
 }
 
-/* 카드 호버 효과: 위로 살짝 뜨면서 그림자 진하게 */
 .hover-effect {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -416,7 +409,6 @@ const handleSymptomClick = (label) => {
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 커서 포인터 */
 .cursor-pointer {
   cursor: pointer;
 }
