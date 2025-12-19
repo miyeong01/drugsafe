@@ -16,7 +16,7 @@ class Drug(models.Model):
   basis = models.TextField()
   efficacy = models.TextField()
   use = models.TextField()
-  description = models.TextField()
+  description = modeles.TextField()
   caution = models.TextField()
   caution_intake = models.TextField()
   side_effect = models.TextField()
