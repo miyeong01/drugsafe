@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Drug, Review, Comment, Score
+from .models import Drug, Review, Comment
 
 class DrugListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,6 +11,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
+        extra_kwargs = {
+            'score' : {'required': True},
+            'title' : {
+                'required' : False,
+                'allow_blank' : True,
+                'allow_null' : True,
+            },
+            'content' : {
+                'required' : False,
+                'allow_blank' : True,
+                'allow_null' : True,
+            },
+        }
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,11 +35,5 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     class Meta:
         model = Review
-        fields = ('user', 'drug', 'form', 'created_at', 'updated_at', 'title', 'content', 'comments')
+        fields = ('user', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments')
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
-
-class ScoreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Score
-        fields = '__all__'
-        read_only_fields = ('user', 'form', 'drug',)

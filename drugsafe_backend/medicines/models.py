@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 class Form(models.Model):
@@ -16,7 +17,7 @@ class Drug(models.Model):
   basis = models.TextField()
   efficacy = models.TextField()
   use = models.TextField()
-  description = modeles.TextField()
+  description = models.TextField()
   caution = models.TextField()
   caution_intake = models.TextField()
   side_effect = models.TextField()
@@ -26,16 +27,11 @@ class Review(models.Model):
   user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
   drug = models.ForeignKey(Drug, related_name='drugs', on_delete=models.CASCADE)
   form = models.ForeignKey(Form, related_name='forms_review', on_delete=models.CASCADE)
-  title = models.CharField(max_length=200)
-  content = models.TextField()
+  score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+  title = models.CharField(max_length=200, blank=True, null=True)
+  content = models.TextField(blank=True, null=True)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
-
-class Score(models.Model):
-    drug = models.ForeignKey(Drug, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
-    score = models.IntegerField()
 
 class Comment(models.Model):
     review = models.ForeignKey(Review, related_name='comments', on_delete=models.CASCADE)

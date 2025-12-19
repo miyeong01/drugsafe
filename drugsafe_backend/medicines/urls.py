@@ -11,7 +11,4 @@ urlpatterns = [
     # 댓글 CRUD
     path('reviews/<int:review_pk>/comments/', views.comment_list),  # GET, POST
     path('reviews/<int:review_pk>/comments/<int:comment_pk>/', views.comment_detail),   # PUT, DELETE
-    # 별점 CRUD
-    path('drugs/<int:drug_pk>/scores/', views.score_list),  # GET, POST
-    path('drugs/<int:drug_pk>/scores/<int:score_pk>/', views.score_detail), # PUT, DELETE
 ]
