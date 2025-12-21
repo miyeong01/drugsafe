@@ -163,74 +163,8 @@ const handleSymptomClick = (label) => {
       </button>
     </div>
 
-    <section class="solution-section">
-      <div class="container-custom">
-        <div class="solution-grid">
-          <div class="solution-visual">
-            <div class="glass-card">
-              <div class="card-shine"></div>
-              <div class="floating-icon icon-1">🔬</div>
-              <div class="floating-icon icon-2">💊</div>
-              <div class="floating-icon icon-3">📊</div>
-              <div class="center-orb"></div>
-            </div>
-          </div>
-          <div class="solution-content">
-            <div class="label-badge">One-Stop Solution</div>
-            <h2 class="section-heading">통합 헬스케어<br>솔루션</h2>
-            <p class="section-text">증상부터 의약품 정보, 복용 관리까지<br>모든 것을 한 곳에서 해결하세요</p>
-            <button class="btn-premium" @click="router.push('/search')">
-              <span>탐색하기</span>
-              <ArrowRight :size="18" />
-              <div class="btn-glow"></div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="business-section">
-      <div class="container-custom">
-        <div class="business-grid">
-          <div class="business-card card-blue">
-            <div class="card-pattern"></div>
-            <div class="card-content">
-              <span class="business-number">01</span>
-              <h3 class="business-title">AI ChatBot</h3>
-              <p class="business-subtitle">AI 챗봇 서비스</p>
-              <p class="business-text">최신 의약품 데이터를<br>기반으로 더 나은 솔루션 제공</p>
-              <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button>
-            </div>
-            <div class="card-visual"><Activity :size="80" class="card-icon" /></div>
-          </div>
-          <div class="business-card card-purple">
-            <div class="card-pattern"></div>
-            <div class="card-content">
-              <span class="business-number">02</span>
-              <h3 class="business-title">Community</h3>
-              <p class="business-subtitle">커뮤니티</p>
-              <p class="business-text">의약품 후기 공유를 통해<br>더 안전한 선택을 돕습니다</p>
-              <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button>
-            </div>
-            <div class="card-visual"><Users :size="80" class="card-icon" /></div>
-          </div>
-          <div class="business-card card-green">
-            <div class="card-pattern"></div>
-            <div class="card-content">
-              <span class="business-number">03</span>
-              <h3 class="business-title">Search</h3>
-              <p class="business-subtitle">의약품 필터링 조회</p>
-              <p class="business-text">증상 및 제형 필터링을 통해<br>필요한 정보에 쉽게 접근할 수 있습니다</p>
-              <button class="card-btn" @click="router.push('/community')"><span>더 보기</span><ArrowRight :size="16" /></button>
-            </div>
-            <div class="card-visual"><SearchIcon :size="80" class="card-icon" /></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="search-section">
-      <div class="search-bg"><div class="search-pattern"></div></div>
+      <div class="search-bg"></div>
       <div class="container-custom">
         <h2 class="search-heading">어디가 아프신가요?</h2>
         <p class="search-subheading">빠르고 정확하게 약을 찾아드려요</p>
@@ -259,13 +193,53 @@ const handleSymptomClick = (label) => {
       </div>
     </section>
 
+    <section class="business-section">
+      <div class="container-custom">
+        <div class="business-grid">
+          <div class="business-card card-blue">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">01</span>
+              <h3 class="business-title">AI ChatBot</h3>
+              <p class="business-subtitle">AI 챗봇 서비스</p>
+              <p class="business-text">최신 의약품 데이터를<br>기반으로 더 나은 솔루션 제공</p>
+              <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
+            </div>
+            <div class="card-visual"><Activity :size="80" class="card-icon" /></div>
+          </div>
+          <div class="business-card card-purple">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">02</span>
+              <h3 class="business-title">Community</h3>
+              <p class="business-subtitle">커뮤니티</p>
+              <p class="business-text">의약품 후기 공유를 통해<br>더 안전한 선택을 돕습니다</p>
+              <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
+            </div>
+            <div class="card-visual"><Users :size="80" class="card-icon" /></div>
+          </div>
+          <div class="business-card card-green">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">03</span>
+              <h3 class="business-title">Search</h3>
+              <p class="business-subtitle">의약품 필터링 조회</p>
+              <p class="business-text">증상 및 제형 필터링을 통해<br>필요한 정보에 쉽게 접근할 수 있습니다</p>
+              <!-- <button class="card-btn" @click="router.push('/community')"><span>더 보기</span><ArrowRight :size="16" /></button> -->
+            </div>
+            <div class="card-visual"><SearchIcon :size="80" class="card-icon" /></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="network-section">
       <div class="network-pattern"></div>
       <div class="container-custom">
         <div class="network-content">
           <h2 class="network-heading">자주 묻는 질문으로<br>더 쉬운 의약품 정보</h2>
           <p class="network-text">사용자가 가장 많이 궁금해하는 내용을<br>빠르고 정확하게 확인하세요</p>
-          <button class="btn-glass" @click="router.push('/community')"><span>FAQ 바로가기</span><ArrowRight :size="18" /></button>
+          <button class="btn-glass" @click="router.push('/faq')"><span>FAQ 바로가기</span><ArrowRight :size="18" /></button>
         </div>
       </div>
     </section>
@@ -854,24 +828,17 @@ const handleSymptomClick = (label) => {
 .search-section {
   position: relative;
   padding: 140px 0;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(
+    to bottom,
+    rgb(250, 250, 250) 0%,
+    #ffffff 100%
+  );
   overflow: hidden;
 }
 
 .search-bg {
   position: absolute;
   inset: 0;
-}
-
-.search-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(30deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
-    linear-gradient(150deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
-    linear-gradient(30deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
-    linear-gradient(150deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03));
-  background-size: 80px 140px;
 }
 
 .search-heading {
