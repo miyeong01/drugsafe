@@ -1,17 +1,45 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Search, SlidersHorizontal, Star, Heart, Pill } from 'lucide-vue-next'
+import { useDrugStore } from '@/stores/drug'
 
 const router = useRouter()
 const route = useRoute()
+const drugStore = useDrugStore()
 
 // URL의 쿼리(?q=...)를 가져와서 검색어 초기화
 const keyword = ref(route.query.q || '')
 
-// 검색어가 URL에서 바뀌면 같이 업데이트
+// 실제 데이터는 스토어에서 가져옵니다
+const drugs = computed(() => drugStore.drugs)
+
+// 데이터 불러오기 함수
+const fetchDrugs = () => {
+  const queryKeyword = route.query.q || ''
+  const querySymptomId = route.query.symptom || null // URL에서 ID 꺼내기
+
+  console.log('데이터 요청 시도 - 검색어:', queryKeyword, '증상ID:', querySymptomId)
+  
+  if (querySymptomId) {
+    drugStore.getDrugs('', querySymptomId)
+  } else {
+    drugStore.getDrugs(queryKeyword, null)
+  }
+}
+
+watch(() => [route.query.q, route.query.symptom], () => {
+  fetchDrugs()
+})
+
+onMounted(() => {
+  fetchDrugs() // 초기 로드 시 실행
+})
+
+// [수정] 중복된 watch를 하나로 통합했습니다.
 watch(() => route.query.q, (newVal) => {
   keyword.value = newVal || ''
+  fetchDrugs()
 })
 
 const sortBy = ref('relevance')
@@ -42,37 +70,6 @@ const formLabels = {
   ointment: '연고',
   film: '필름',
 }
-
-// 더미 데이터
-const mockDrugs = ref([
-  {
-    id: '1',
-    name: '타이레놀정 500mg',
-    manufacturer: '한국얀센',
-    type: '해열진통제',
-    form: '정제',
-    rating: 4.5,
-    reviewCount: 1234,
-  },
-  {
-    id: '2',
-    name: '게보린정',
-    manufacturer: '삼진제약',
-    type: '해열진통제',
-    form: '정제',
-    rating: 4.3,
-    reviewCount: 892,
-  },
-  {
-    id: '3',
-    name: '어린이부루펜시럽',
-    manufacturer: '삼일제약',
-    type: '해열진통제',
-    form: '시럽',
-    rating: 4.7,
-    reviewCount: 567,
-  },
-])
 
 // 필터 초기화
 function resetFilters() {
@@ -115,7 +112,7 @@ function handleSearch() {
 
         <p class="text-secondary">
           <span class="text-primary fw-bold">'{{ keyword || "전체" }}'</span>
-          에 대한 검색 결과 <span class="fw-bold text-dark">{{ mockDrugs.length }}</span>건
+          에 대한 검색 결과 <span class="fw-bold text-dark">{{ drugs.length }}</span>건
         </p>
       </div>
 
@@ -156,7 +153,7 @@ function handleSearch() {
         <div class="col-lg-9">
 
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="small text-secondary">총 {{ mockDrugs.length }}개의 의약품</span>
+            <span class="small text-secondary">총 {{ drugs.length }}개의 의약품</span>
             
             <select class="form-select form-select-sm w-auto border-0 shadow-sm" v-model="sortBy">
               <option value="relevance">관련도순</option>
@@ -167,7 +164,7 @@ function handleSearch() {
 
           <div class="d-flex flex-column gap-3">
             <div 
-              v-for="drug in mockDrugs" 
+              v-for="drug in drugs" 
               :key="drug.id" 
               class="card border-0 shadow-sm hover-shadow cursor-pointer"
               @click="goDetail(drug.id)"
@@ -185,7 +182,7 @@ function handleSearch() {
                     <div class="d-flex justify-content-between align-items-start mb-1">
                       <div>
                         <h3 class="h5 fw-bold mb-1">{{ drug.name }}</h3>
-                        <p class="small text-secondary mb-2">{{ drug.manufacturer }} · {{ drug.type }}</p>
+                        <p class="small text-secondary mb-2">{{ drug.company }} · {{ drug.symptom_id }}</p>
                       </div>
                       <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-none d-sm-block" @click.stop>
                         <Heart :size="14" class="me-1" /> 즐겨찾기
@@ -198,10 +195,10 @@ function handleSearch() {
                         <span class="fw-bold text-dark">{{ drug.rating }}</span>
                       </div>
                       <span class="small text-secondary border-start ps-3">
-                        리뷰 {{ drug.reviewCount.toLocaleString() }}
+                        리뷰 {{ (drug.review_count || 0).toLocaleString() }}
                       </span>
                       <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal">
-                        {{ drug.form }}
+                        {{ drug.form_id }}
                       </span>
                     </div>
                   </div>
@@ -209,9 +206,15 @@ function handleSearch() {
                 </div>
               </div>
             </div>
+            
+            <div v-if="drugs.length === 0" class="text-center py-5 text-secondary">
+              검색 결과가 없습니다.
+            </div>
           </div>
 
-        </div> </div> </div>
+        </div> 
+      </div> 
+    </div>
   </div>
 </template>
 

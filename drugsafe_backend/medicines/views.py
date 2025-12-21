@@ -11,6 +11,20 @@ from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer
 @api_view(['GET'])
 def drug_list(request):
     drugs = Drug.objects.all()
+    symptom_id = request.GET.get('symptom')
+    search_query = request.GET.get('search')
+
+    print(f"--- 요청 들어옴 ---")
+    print(f"받은 증상 ID: {symptom_id}")
+    print(f"받은 검색어: {search_query}")
+
+    if symptom_id:
+        drugs = drugs.filter(symptom_id=symptom_id)
+        print(f"증상 필터링 적용됨. 결과: {drugs.count()}건")
+    
+    elif search_query:
+        drugs = drugs.filter(name__icontains=search_query)
+        print(f"이름 검색 적용됨. 결과: {drugs.count()}건")
     serializer = DrugListSerializer(drugs, many=True)
     return Response(serializer.data)
 

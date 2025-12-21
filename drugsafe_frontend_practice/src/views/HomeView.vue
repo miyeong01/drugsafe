@@ -30,21 +30,21 @@ const commonColorClass = "bg-primary bg-opacity-10 text-primary";
 
 // 15개 증상 리스트 유지
 const symptoms = [
-  { icon: HeadacheIcon, label: "두통", description: "머리가 아플 때", color: commonColorClass },
-  { icon: ToothIcon, label: "치통", description: "이가 아플 때", color: commonColorClass },
-  { icon: FeverIcon, label: "발열", description: "열이 날 때", color: commonColorClass },
-  { icon: StomachIcon, label: "복통", description: "배가 아플 때", color: commonColorClass },
-  { icon: BellyIcon, label: "생리통", description: "생리 시 통증", color: commonColorClass },
-  { icon: DigestiveIcon, label: "위장약", description: "위장이 불편할 때", color: commonColorClass },
-  { icon: FluIcon, label: "종합감기", description: "감기 증상 전반", color: commonColorClass },
-  { icon: NoseIcon, label: "코감기", description: "콧물·코막힘", color: commonColorClass },
-  { icon: MaskIcon, label: "기침", description: "기침이 날 때", color: commonColorClass },
-  { icon: CoughIcon, label: "재채기", description: "재채기가 날 때", color: commonColorClass },
-  { icon: DigestiveIcon, label: "소화불량", description: "소화가 안 될 때", color: commonColorClass },
-  { icon: AllergyIcon, label: "알레르기", description: "알레르기 반응", color: commonColorClass },
-  { icon: TiredIcon, label: "육체피로", description: "피로·권태감", color: commonColorClass },
-  { icon: JointIcon, label: "관절통", description: "관절이 아플 때", color: commonColorClass },
-  { icon: MuscleIcon, label: "근육통", description: "근육이 아플 때", color: commonColorClass },
+  { id: 1, icon: HeadacheIcon, label: "두통", description: "머리가 아플 때", color: commonColorClass },
+  { id: 2, icon: ToothIcon, label: "치통", description: "이가 아플 때", color: commonColorClass },
+  { id: 3, icon: FeverIcon, label: "발열", description: "열이 날 때", color: commonColorClass },
+  { id: 4, icon: StomachIcon, label: "복통", description: "배가 아플 때", color: commonColorClass },
+  { id: 5, icon: BellyIcon, label: "생리통", description: "생리 시 통증", color: commonColorClass },
+  { id: 6, icon: DigestiveIcon, label: "위장약", description: "위장이 불편할 때", color: commonColorClass },
+  { id: 7, icon: FluIcon, label: "종합감기", description: "감기 증상 전반", color: commonColorClass },
+  { id: 8, icon: NoseIcon, label: "코감기", description: "콧물·코막힘", color: commonColorClass },
+  { id: 9, icon: MaskIcon, label: "기침", description: "기침이 날 때", color: commonColorClass },
+  { id: 10, icon: CoughIcon, label: "재채기", description: "재채기가 날 때", color: commonColorClass },
+  { id: 11, icon: DigestiveIcon, label: "소화불량", description: "소화가 안 될 때", color: commonColorClass },
+  { id: 12, icon: AllergyIcon, label: "알레르기", description: "알레르기 반응", color: commonColorClass },
+  { id: 13, icon: TiredIcon, label: "육체피로", description: "피로·권태감", color: commonColorClass },
+  { id: 14, icon: JointIcon, label: "관절통", description: "관절이 아플 때", color: commonColorClass },
+  { id: 15, icon: MuscleIcon, label: "근육통", description: "근육이 아플 때", color: commonColorClass },
 ];
 
 const handleSearch = () => {
@@ -53,8 +53,14 @@ const handleSearch = () => {
   }
 };
 
-const handleSymptomClick = (label) => {
-  router.push({ name: "search", query: { q: label } });
+const handleSymptomClick = (symptom) => {
+  router.push({ 
+    name: "search", 
+    query: { 
+      q: symptom.label, 
+      symptom: symptom.id
+    } 
+  });
 };
 </script>
 
@@ -177,7 +183,7 @@ const handleSymptomClick = (label) => {
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4">
           <div v-for="(symptom, index) in symptoms" :key="index" class="col">
             <div
-              @click="handleSymptomClick(symptom.label)"
+              @click="handleSymptomClick(symptom)"
               class="card h-100 border-1 shadow-sm hover-effect cursor-pointer text-center py-4"
               style="border-color: #e5e7eb; border-radius: 1rem"
             >
