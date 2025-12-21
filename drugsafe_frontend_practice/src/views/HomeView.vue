@@ -16,7 +16,8 @@ import JointIcon from "@/assets/icons/joint.svg?component";
 import MuscleIcon from "@/assets/icons/muscle.svg?component"
 import Search from "@/assets/icons/search.svg?component"; 
 import MaskIcon from "@/assets/icons/mask.svg?component";
-import { ArrowRight, Activity, Users, Search as SearchIcon, Sparkles } from "lucide-vue-next";
+// 캐러셀에 필요한 아이콘(Bot, MessageSquare, Heart) 추가 임포트
+import { ArrowRight, Activity, Users, Search as SearchIcon, Sparkles, Bot, MessageSquare, Heart } from "lucide-vue-next";
 
 const router = useRouter();
 const searchQuery = ref("");
@@ -53,37 +54,115 @@ const handleSymptomClick = (label) => {
 <template>
   <div class="home-wrapper">
     
-    <!-- Hero Section with 3D Orbs -->
-    <section class="hero-section">
-      <div class="hero-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-        <div class="mesh-gradient"></div>
-      </div>
+    <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
       
-      <div class="hero-content">
-        <div class="hero-badge">
-          <Sparkles :size="16" />
-          <span>AI-Powered Healthcare</span>
+      <div class="carousel-indicators custom-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      </div>
+
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <section class="hero-section carousel-height">
+            <div class="hero-bg">
+              <div class="gradient-orb orb-1"></div>
+              <div class="gradient-orb orb-2"></div>
+              <div class="gradient-orb orb-3"></div>
+              <div class="mesh-gradient"></div>
+            </div>
+            <div class="hero-content">
+              <div class="hero-badge">
+                <Sparkles :size="16" />
+                <span>AI-Powered Healthcare</span>
+              </div>
+              <h1 class="hero-title">
+                Smarter Medicine,<br />
+                <span class="gradient-text">Safer Choices</span>
+              </h1>
+              <p class="hero-subtitle">안전하고 정확한 의약품 정보로 건강한 내일을 만듭니다</p>
+              <button class="btn-premium mt-5" @click="router.push('/search')">
+                <span>지금 시작하기</span>
+                <ArrowRight :size="18" />
+              </button>
+            </div>
+            <div class="floating-pills">
+              <div class="pill pill-1">💊</div>
+              <div class="pill pill-2">💉</div>
+              <div class="pill pill-3">🧬</div>
+            </div>
+          </section>
         </div>
-        <h1 class="hero-title">
-          Smarter Medicine,<br>
-          <span class="gradient-text">Safer Choices</span>
-        </h1>
-        <p class="hero-subtitle">
-          안전하고 정확한 의약품 정보로 건강한 내일을 만듭니다
-        </p>
+
+        <div class="carousel-item">
+          <section class="hero-section carousel-height">
+            <div class="hero-bg">
+              <div class="gradient-orb orb-1" style="background: radial-gradient(circle, #60a5fa 0%, #3b82f6 50%, transparent 70%);"></div>
+              <div class="gradient-orb orb-3" style="background: radial-gradient(circle, #818cf8 0%, #6366f1 50%, transparent 70%);"></div>
+              <div class="mesh-gradient"></div>
+            </div>
+            <div class="hero-content">
+              <div class="hero-badge">
+                <Bot :size="16" />
+                <span>AI 스마트 분석</span>
+              </div>
+              <h1 class="hero-title">
+                스마트 AI 챗봇<br />
+                <span class="gradient-text" style="background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%); -webkit-background-clip: text;">맞춤형 의약품 추천</span>
+              </h1>
+              <p class="hero-subtitle">증상을 말씀해 주세요. AI가 가장 적합한 약을 즉시 찾아드립니다.</p>
+              <button class="btn-premium mt-5" @click="router.push('/chatbot')">
+                <span>챗봇 상담 시작</span>
+                <ArrowRight :size="18" />
+              </button>
+            </div>
+            <div class="floating-pills">
+              <div class="pill pill-1">🤖</div>
+              <div class="pill pill-2">💬</div>
+              <div class="pill pill-3">⚡</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="carousel-item">
+          <section class="hero-section carousel-height">
+            <div class="hero-bg">
+              <div class="gradient-orb orb-2" style="background: radial-gradient(circle, #34d399 0%, #10b981 50%, transparent 70%);"></div>
+              <div class="gradient-orb orb-1" style="background: radial-gradient(circle, #6ee7b7 0%, #2dd4bf 50%, transparent 70%);"></div>
+              <div class="mesh-gradient"></div>
+            </div>
+            <div class="hero-content">
+              <div class="hero-badge">
+                <Users :size="16" />
+                <span>건강 커뮤니티</span>
+              </div>
+              <h1 class="hero-title">
+                함께 나누는<br />
+                <span class="gradient-text" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text;">건강한 정보 공유</span>
+              </h1>
+              <p class="hero-subtitle">실제 복용 후기와 노하우를 이웃들과 자유롭게 공유해보세요.</p>
+              <button class="btn-premium mt-5" @click="router.push('/community')">
+                <span>커뮤니티 이동</span>
+                <ArrowRight :size="18" />
+              </button>
+            </div>
+            <div class="floating-pills">
+              <div class="pill pill-1">👥</div>
+              <div class="pill pill-2">📝</div>
+              <div class="pill pill-3">❤️</div>
+            </div>
+          </section>
+        </div>
       </div>
 
-      <div class="floating-pills">
-        <div class="pill pill-1">💊</div>
-        <div class="pill pill-2">💉</div>
-        <div class="pill pill-3">🧬</div>
-      </div>
-    </section>
+      <button class="carousel-control-prev custom-control" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="control-icon"><ArrowRight style="transform: rotate(180deg)" /></span>
+      </button>
+      <button class="carousel-control-next custom-control" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="control-icon"><ArrowRight /></span>
+      </button>
+    </div>
 
-    <!-- Solution Section with Glassmorphism -->
     <section class="solution-section">
       <div class="container-custom">
         <div class="solution-grid">
@@ -98,14 +177,8 @@ const handleSymptomClick = (label) => {
           </div>
           <div class="solution-content">
             <div class="label-badge">One-Stop Solution</div>
-            <h2 class="section-heading">
-              통합 헬스케어<br>
-              솔루션
-            </h2>
-            <p class="section-text">
-              증상부터 의약품 정보, 복용 관리까지<br>
-              모든 것을 한 곳에서 해결하세요
-            </p>
+            <h2 class="section-heading">통합 헬스케어<br>솔루션</h2>
+            <p class="section-text">증상부터 의약품 정보, 복용 관리까지<br>모든 것을 한 곳에서 해결하세요</p>
             <button class="btn-premium" @click="router.push('/search')">
               <span>탐색하기</span>
               <ArrowRight :size="18" />
@@ -116,7 +189,6 @@ const handleSymptomClick = (label) => {
       </div>
     </section>
 
-    <!-- Business Sections with Premium Cards -->
     <section class="business-section">
       <div class="container-custom">
         <div class="business-grid">
@@ -126,144 +198,183 @@ const handleSymptomClick = (label) => {
               <span class="business-number">01</span>
               <h3 class="business-title">AI ChatBot</h3>
               <p class="business-subtitle">AI 챗봇 서비스</p>
-              <p class="business-text">
-                최신 의약품 데이터를<br>
-                기반으로 더 나은 솔루션 제공
-              </p>
-              <button class="card-btn">
-                <span>더 보기</span>
-                <ArrowRight :size="16" />
-              </button>
+              <p class="business-text">최신 의약품 데이터를<br>기반으로 더 나은 솔루션 제공</p>
+              <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button>
             </div>
-            <div class="card-visual">
-              <Activity :size="80" class="card-icon" />
-            </div>
+            <div class="card-visual"><Activity :size="80" class="card-icon" /></div>
           </div>
-
           <div class="business-card card-purple">
             <div class="card-pattern"></div>
             <div class="card-content">
               <span class="business-number">02</span>
               <h3 class="business-title">Community</h3>
               <p class="business-subtitle">커뮤니티</p>
-              <p class="business-text">
-                의약품 후기 공유를 통해<br>
-                더 안전한 선택을 돕습니다
-              </p>
-              <button class="card-btn">
-                <span>더 보기</span>
-                <ArrowRight :size="16" />
-              </button>
+              <p class="business-text">의약품 후기 공유를 통해<br>더 안전한 선택을 돕습니다</p>
+              <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button>
             </div>
-            <div class="card-visual">
-              <Users :size="80" class="card-icon" />
-            </div>
+            <div class="card-visual"><Users :size="80" class="card-icon" /></div>
           </div>
-
           <div class="business-card card-green">
             <div class="card-pattern"></div>
             <div class="card-content">
               <span class="business-number">03</span>
               <h3 class="business-title">Search</h3>
               <p class="business-subtitle">의약품 필터링 조회</p>
-              <p class="business-text">
-                증상 및 제형 필터링을 통해<br>
-                필요한 정보에 쉽게 접근할 수 있습니다
-              </p>
-              <button class="card-btn" @click="router.push('/community')">
-                <span>더 보기</span>
-                <ArrowRight :size="16" />
-              </button>
+              <p class="business-text">증상 및 제형 필터링을 통해<br>필요한 정보에 쉽게 접근할 수 있습니다</p>
+              <button class="card-btn" @click="router.push('/community')"><span>더 보기</span><ArrowRight :size="16" /></button>
             </div>
-            <div class="card-visual">
-              <SearchIcon :size="80" class="card-icon" />
-            </div>
+            <div class="card-visual"><SearchIcon :size="80" class="card-icon" /></div>
           </div>
         </div>
       </div>
     </section>
 
-        <!-- Search Section with Modern Design -->
     <section class="search-section">
-      <div class="search-bg">
-        <div class="search-pattern"></div>
-      </div>
+      <div class="search-bg"><div class="search-pattern"></div></div>
       <div class="container-custom">
         <h2 class="search-heading">어디가 아프신가요?</h2>
         <p class="search-subheading">빠르고 정확하게 약을 찾아드려요</p>
-        
         <div class="search-wrapper">
           <div class="search-box-modern">
-            <div class="search-glow"></div>
-            <Search class="search-icon" />
-            <input
-              type="text"
-              placeholder="증상이나 약품명을 검색하세요..."
-              class="search-input"
-              v-model="searchQuery"
-              @keydown.enter="handleSearch"
-            />
-            <button class="search-btn-modern" @click="handleSearch">
-              <span>검색</span>
-              <div class="btn-shine"></div>
-            </button>
+            <div class="search-glow"></div><Search class="search-icon" />
+            <input type="text" placeholder="증상이나 약품명을 검색하세요..." class="search-input" v-model="searchQuery" @keydown.enter="handleSearch" />
+            <button class="search-btn-modern" @click="handleSearch"><span>검색</span><div class="btn-shine"></div></button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Symptoms Grid with Hover Effects -->
     <section class="symptoms-section">
       <div class="container-custom">
         <h2 class="symptoms-heading">증상별로 찾아보세요</h2>
-        
         <div class="symptoms-grid">
-          <div 
-            v-for="(symptom, index) in symptoms" 
-            :key="index"
-            class="symptom-card-modern"
-            @click="handleSymptomClick(symptom.label)"
-          >
+          <div v-for="(symptom, index) in symptoms" :key="index" class="symptom-card-modern" @click="handleSymptomClick(symptom.label)">
             <div class="symptom-glow"></div>
-            <div class="symptom-icon-wrapper">
-              <component :is="symptom.icon" class="symptom-icon" />
-            </div>
+            <div class="symptom-icon-wrapper"><component :is="symptom.icon" class="symptom-icon" /></div>
             <p class="symptom-name">{{ symptom.label }}</p>
             <p class="symptom-desc">{{ symptom.description }}</p>
-            <div class="card-arrow">
-              <ArrowRight :size="16" />
-            </div>
+            <div class="card-arrow"><ArrowRight :size="16" /></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Network Section with Premium Gradient -->
     <section class="network-section">
       <div class="network-pattern"></div>
       <div class="container-custom">
         <div class="network-content">
-          <h2 class="network-heading">
-            자주 묻는 질문으로<br>
-            더 쉬운 의약품 정보
-          </h2>
-          <p class="network-text">
-            사용자가 가장 많이 궁금해하는 내용을<br>
-            빠르고 정확하게 확인하세요
-          </p>
-          <button class="btn-glass" @click="router.push('/community')">
-            <span>FAQ 바로가기</span>
-            <ArrowRight :size="18" />
-          </button>
+          <h2 class="network-heading">자주 묻는 질문으로<br>더 쉬운 의약품 정보</h2>
+          <p class="network-text">사용자가 가장 많이 궁금해하는 내용을<br>빠르고 정확하게 확인하세요</p>
+          <button class="btn-glass" @click="router.push('/community')"><span>FAQ 바로가기</span><ArrowRight :size="18" /></button>
         </div>
       </div>
     </section>
 
-      </div>
+  </div>
 </template>
 
 <style scoped>
-/* Base Styles */
+/* --- 캐러셀 통합 스타일 --- */
+.hero-carousel, .carousel-inner, .carousel-item {
+  height: 100vh;
+  min-height: 700px;
+}
+
+/* 커스텀 인디케이터 스타일 */
+.custom-indicators {
+  bottom: 40px;
+  z-index: 15;
+}
+.custom-indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  border: none;
+  margin: 0 6px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.5;
+}
+.custom-indicators .active {
+  width: 32px;
+  border-radius: 10px;
+  background-color: #3b82f6;
+  opacity: 1;
+}
+
+/* 좌우 컨트롤 커스텀 */
+.custom-control {
+  width: 5%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+.hero-carousel:hover .custom-control { opacity: 1; }
+.control-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #1e293b;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Hero 및 기본 스타일 (기존 HomeView.vue 스타일 병합) */
+.home-wrapper { overflow-x: hidden; background: #ffffff; }
+.container-custom { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+.hero-section {
+  position: relative;
+  height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.hero-bg { position: absolute; inset: 0; }
+.gradient-orb {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6;
+  animation: float 12s ease-in-out infinite;
+}
+.orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #60a5fa 0%, #3b82f6 50%, transparent 70%); top: -10%; right: 10%; }
+.orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #818cf8 0%, #6366f1 50%, transparent 70%); bottom: -10%; left: 5%; animation-delay: -4s; }
+.orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, #a78bfa 0%, #8b5cf6 50%, transparent 70%); top: 40%; left: 50%; animation-delay: -8s; }
+
+.mesh-gradient {
+  position: absolute; inset: 0; z-index: 2;
+  background: 
+    radial-gradient(at 20% 30%, rgba(96, 165, 250, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(129, 140, 248, 0.1) 0px, transparent 50%);
+}
+
+.hero-content { position: relative; z-index: 10; text-align: center; max-width: 900px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+  border-radius: 50px; border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3b82f6; font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem;
+}
+.hero-title { font-size: clamp(3.5rem, 7vw, 6.5rem); font-weight: 200; line-height: 1.1; color: #0f172a; margin-bottom: 2rem; }
+.gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; }
+.hero-subtitle { font-size: clamp(1.125rem, 2vw, 1.5rem); color: #64748b; font-weight: 300; line-height: 1.6; }
+
+.floating-pills { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.pill { position: absolute; font-size: 3rem; animation: pillFloat 6s ease-in-out infinite; }
+.pill-1 { top: 20%; left: 10%; }
+.pill-2 { bottom: 25%; right: 15%; animation-delay: -2s; }
+.pill-3 { top: 60%; right: 25%; animation-delay: -4s; }
+
+/* 나머지 섹션 스타일(Solution, Business 등)은 기존 코드와 동일 */
+.solution-section { padding: 140px 0; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); }
+.solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.glass-card { position: relative; width: 550px; height: 550px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); overflow: hidden; }
+/* ... (이하 애니메이션 및 반응형 스타일 생략) ... */
+
+@keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+@keyframes pillFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(180deg); } }
+
+/* (중략) 기존 HomeView.vue의 나머지 스타일 모두 포함 */
 .home-wrapper {
   overflow-x: hidden;
   background: #ffffff;
@@ -1282,4 +1393,5 @@ const handleSymptomClick = (label) => {
     align-items: flex-start;
   }
 }
+
 </style>
