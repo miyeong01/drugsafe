@@ -7,6 +7,7 @@ import ProfileView from '@/views/ProfileView.vue'
 import ProfileDetailView from '@/views/ProfileDetailView.vue'
 import SearchResultView from '@/views/SearchResultView.vue'
 import DrugDetailView from '@/views/DrugDetailView.vue'
+import AIChatView from '@/views/AIChatView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +16,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+    },
+    {
+      path: '/chatbot',
+      name: 'chatbot',
+      component: AIChatView,
     },
     {
       path: '/auth',

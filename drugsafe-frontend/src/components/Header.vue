@@ -34,6 +34,14 @@ const goAuth = (mode) => {
           >
             Home
           </RouterLink>
+
+          <RouterLink 
+            to="/chatbot" 
+            class="text-decoration-none fw-medium"
+            :class="isActive('chatbot') ? 'text-primary' : 'text-dark'"
+          >
+            ChatBot
+          </RouterLink>
           
           <RouterLink 
             to="/community" 
@@ -53,10 +61,6 @@ const goAuth = (mode) => {
         </nav>
 
         <div class="d-flex align-items-center gap-2">
-          
-          <button class="btn p-2 border-0 text-dark">
-            <Heart :size="20" />
-          </button>
 
           <button 
             class="btn p-2 border-0 text-dark"

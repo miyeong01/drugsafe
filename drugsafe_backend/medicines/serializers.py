@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Drug, Review, Comment
 
 class DrugListSerializer(serializers.ModelSerializer):
+    form_name = serializers.CharField(source='form.name', read_only=True)
+
     class Meta:
         model = Drug
         fields = '__all__'
