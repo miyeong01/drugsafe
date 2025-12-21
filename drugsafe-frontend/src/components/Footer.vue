@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <footer class="bg-white border-top mt-auto">
+  <footer style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)">
     <div class="container py-5">
       
       <div class="row g-4">

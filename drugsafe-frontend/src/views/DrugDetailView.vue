@@ -51,7 +51,6 @@ const mockReviews = ref([
 // 리뷰 작성하러 커뮤니티로 이동
 const goCommunityWrite = () => {
   router.push('/community') // 나중에 글쓰기 페이지로 연결
-  alert('리뷰 작성 페이지로 이동합니다.')
 }
 </script>
 

@@ -1,7 +1,7 @@
 <script setup>
   import { RouterView, useRoute } from 'vue-router'
-  import Header from './components/Header.vue' 
-  import Footer from './components/Footer.vue'
+  import Header from './components/Header.vue';
+  import Footer from './components/Footer.vue';
   import AIChat from './components/AIChat.vue';
 
   const route = useRoute()

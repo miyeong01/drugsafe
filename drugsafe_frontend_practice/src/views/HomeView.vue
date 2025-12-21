@@ -161,7 +161,7 @@ const handleSymptomClick = (label) => {
 
             <button
               @click="handleSearch"
-              class="btn btn-primary rounded-pill px-5 fw-medium"
+              class="btn btn-primary rounded-pill px-3 fw-medium flex-shrink-0 text-nowrap" style="height: 2.8rem; margin: auto 4px;"
             >
               검색
             </button>
