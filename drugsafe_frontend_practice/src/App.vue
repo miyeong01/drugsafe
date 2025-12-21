@@ -2,7 +2,6 @@
   import { RouterView, useRoute } from 'vue-router'
   import Header from './components/Header.vue';
   import Footer from './components/Footer.vue';
-  import AIChat from './components/AIChat.vue';
 
   const route = useRoute()
 </script>
@@ -17,9 +16,6 @@
     </main>
 
     <Footer v-if="!route.meta.hideFooter" /> 
-
-    <AIChat v-if="!route.meta.hideHeader" />
-    
   </div>
 </template>
 

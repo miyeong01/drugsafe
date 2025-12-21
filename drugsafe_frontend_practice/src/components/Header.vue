@@ -34,6 +34,14 @@ const goAuth = (mode) => {
           >
             Home
           </RouterLink>
+
+          <RouterLink 
+            to="/chatbot" 
+            class="text-decoration-none fw-medium"
+            :class="isActive('chatbot') ? 'text-primary' : 'text-dark'"
+          >
+            ChatBot
+          </RouterLink>
           
           <RouterLink 
             to="/community" 

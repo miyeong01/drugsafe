@@ -1,7 +1,6 @@
 <script setup>
-import { ref, h } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-// 기존 사용자 아이콘 임포트 유지
 import HeadacheIcon from "@/assets/icons/headache.svg?component";
 import ToothIcon from "@/assets/icons/tooth.svg?component";
 import FeverIcon from "@/assets/icons/fever.svg?component";
@@ -16,35 +15,28 @@ import TiredIcon from "@/assets/icons/tired.svg?component";
 import JointIcon from "@/assets/icons/joint.svg?component";
 import MuscleIcon from "@/assets/icons/muscle.svg?component"
 import Search from "@/assets/icons/search.svg?component"; 
-import Heart from "@/assets/icons/heart.svg?component"; 
-import Pill from "@/assets/icons/pill.svg?component";
 import MaskIcon from "@/assets/icons/mask.svg?component";
-
-// Carousel용 추가 아이콘 (lucide-vue-next 활용)
-import { Bot, MessageSquare, Users, ArrowRight } from "lucide-vue-next";
+import { ArrowRight, Activity, Users, Search as SearchIcon, Sparkles } from "lucide-vue-next";
 
 const router = useRouter();
 const searchQuery = ref("");
 
-const commonColorClass = "bg-primary bg-opacity-10 text-primary";
-
-// 15개 증상 리스트 유지
 const symptoms = [
-  { id: 1, icon: HeadacheIcon, label: "두통", description: "머리가 아플 때", color: commonColorClass },
-  { id: 2, icon: ToothIcon, label: "치통", description: "이가 아플 때", color: commonColorClass },
-  { id: 3, icon: FeverIcon, label: "발열", description: "열이 날 때", color: commonColorClass },
-  { id: 4, icon: StomachIcon, label: "복통", description: "배가 아플 때", color: commonColorClass },
-  { id: 5, icon: BellyIcon, label: "생리통", description: "생리 시 통증", color: commonColorClass },
-  { id: 6, icon: DigestiveIcon, label: "위장약", description: "위장이 불편할 때", color: commonColorClass },
-  { id: 7, icon: FluIcon, label: "종합감기", description: "감기 증상 전반", color: commonColorClass },
-  { id: 8, icon: NoseIcon, label: "코감기", description: "콧물·코막힘", color: commonColorClass },
-  { id: 9, icon: MaskIcon, label: "기침", description: "기침이 날 때", color: commonColorClass },
-  { id: 10, icon: CoughIcon, label: "재채기", description: "재채기가 날 때", color: commonColorClass },
-  { id: 11, icon: DigestiveIcon, label: "소화불량", description: "소화가 안 될 때", color: commonColorClass },
-  { id: 12, icon: AllergyIcon, label: "알레르기", description: "알레르기 반응", color: commonColorClass },
-  { id: 13, icon: TiredIcon, label: "육체피로", description: "피로·권태감", color: commonColorClass },
-  { id: 14, icon: JointIcon, label: "관절통", description: "관절이 아플 때", color: commonColorClass },
-  { id: 15, icon: MuscleIcon, label: "근육통", description: "근육이 아플 때", color: commonColorClass },
+  { icon: HeadacheIcon, label: "두통", description: "머리가 아플 때" },
+  { icon: ToothIcon, label: "치통", description: "이가 아플 때" },
+  { icon: FeverIcon, label: "발열", description: "열이 날 때" },
+  { icon: StomachIcon, label: "복통", description: "배가 아플 때" },
+  { icon: BellyIcon, label: "생리통", description: "생리 시 통증" },
+  { icon: DigestiveIcon, label: "위장약", description: "위장이 불편할 때" },
+  { icon: FluIcon, label: "종합감기", description: "감기 증상 전반" },
+  { icon: NoseIcon, label: "코감기", description: "콧물·코막힘" },
+  { icon: MaskIcon, label: "기침", description: "기침이 날 때" },
+  { icon: CoughIcon, label: "재채기", description: "재채기가 날 때" },
+  { icon: DigestiveIcon, label: "소화불량", description: "소화가 안 될 때" },
+  { icon: AllergyIcon, label: "알레르기", description: "알레르기 반응" },
+  { icon: TiredIcon, label: "육체피로", description: "피로·권태감" },
+  { icon: JointIcon, label: "관절통", description: "관절이 아플 때" },
+  { icon: MuscleIcon, label: "근육통", description: "근육이 아플 때" },
 ];
 
 const handleSearch = () => {
@@ -53,208 +45,1241 @@ const handleSearch = () => {
   }
 };
 
-const handleSymptomClick = (symptom) => {
-  router.push({ 
-    name: "search", 
-    query: { 
-      q: symptom.label, 
-      symptom: symptom.id
-    } 
-  });
+const handleSymptomClick = (label) => {
+  router.push({ name: "search", query: { q: label } });
 };
 </script>
 
 <template>
-  <div class="min-vh-100">
-    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-      <div class="carousel-indicators">
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+  <div class="home-wrapper">
+    
+    <!-- Hero Section with 3D Orbs -->
+    <section class="hero-section">
+      <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="mesh-gradient"></div>
       </div>
       
-      <div class="carousel-inner">
-        <div class="carousel-item active" data-bs-interval="3000">
-          <div class="promo-banner chatbot-bg d-flex align-items-center">
-            <div class="container text-white">
-              <div class="row align-items-center">
-                <div class="col-lg-7 text-center text-lg-start">
-                  <span class="badge bg-light text-primary mb-3">AI 스마트 분석</span>
-                  <h2 class="display-5 fw-bold mb-3">스마트 AI 챗봇으로<br/>맞춤형 의약품 추천</h2>
-                  <p class="lead mb-4 text-white-50">증상을 말씀해 주세요. AI가 가장 적합한 약을 즉시 찾아드립니다.</p>
-                  <button class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-primary">챗봇 상담 시작</button>
-                </div>
-                <div class="col-lg-5 d-none d-lg-block">
-                  <div class="mockup-chat shadow-lg p-3 bg-white rounded-4 text-dark">
-                    <div class="d-flex align-items-center mb-3 text-primary border-bottom pb-2">
-                      <Bot class="me-2" /> <span class="fw-bold small">DrugSafe AI Assistant</span>
-                    </div>
-                    <div class="chat-bubble user mb-2 small p-2 bg-light rounded-3 ms-auto w-75">머리가 너무 지끈거려요.</div>
-                    <div class="chat-bubble bot mb-2 small p-2 bg-primary text-white rounded-3 w-75">해열진통제를 추천해 드릴게요!</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <Sparkles :size="16" />
+          <span>AI-Powered Healthcare</span>
         </div>
-
-        <div class="carousel-item" data-bs-interval="3000">
-          <div class="promo-banner search-bg d-flex align-items-center text-white text-center">
-            <div class="container">
-              <div class="icon-circle mb-4 mx-auto bg-white text-primary shadow-sm">
-                <Search style="width: 48px; height: 48px;" />
-              </div>
-              <h2 class="display-5 fw-bold mb-3">빠르고 정확한 스마트 검색</h2>
-              <p class="lead text-white-50">성분부터 주의사항까지, 궁금한 약 정보를 한 번에 확인하세요.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="carousel-item" data-bs-interval="3000">
-          <div class="promo-banner community-bg d-flex align-items-center">
-            <div class="container text-center text-lg-start">
-              <div class="row align-items-center">
-                <div class="col-lg-6">
-                  <h2 class="display-5 fw-bold text-dark mb-3">함께 나누는 <span class="text-primary">건강 커뮤니티</span></h2>
-                  <p class="lead text-secondary mb-4">실제 복용 후기와 건강 관리 노하우를<br/>이웃들과 자유롭게 공유해보세요.</p>
-                  <button class="btn btn-primary btn-lg rounded-pill px-4">커뮤니티 구경하기</button>
-                </div>
-                <div class="col-lg-6 d-none d-lg-flex justify-content-center">
-                  <div class="community-visual">
-                    <div class="comm-card p-3 shadow-sm bg-white rounded-3 mb-3 animate-up">
-                      <div class="d-flex gap-2 align-items-center small"><b>💊 복용 꿀팁 공유해요!</b></div>
-                    </div>
-                    <div class="comm-card p-3 shadow-sm bg-white rounded-3 animate-down" style="margin-left: 50px; top: 70px;">
-                      <div class="d-flex gap-2 align-items-center small"><b>💬 이 약 효과 정말 좋네요.</b></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <h1 class="hero-title">
+          Smarter Medicine,<br>
+          <span class="gradient-text">Safer Choices</span>
+        </h1>
+        <p class="hero-subtitle">
+          안전하고 정확한 의약품 정보로 건강한 내일을 만듭니다
+        </p>
       </div>
-    </div>
 
-    <section
-      class="py-5 bg-white">
-      <div class="container py-5 text-center">
-        <h1 class="mb-3 text-primary fw-bold display-4">어디가 아프신가요?</h1>
-        <p class="mb-5 text-secondary lead">빠르고 정확하게 약을 찾아드려요</p>
+      <div class="floating-pills">
+        <div class="pill pill-1">💊</div>
+        <div class="pill pill-2">💉</div>
+        <div class="pill pill-3">🧬</div>
+      </div>
+    </section>
 
-        <div class="mx-auto" style="max-width: 42rem">
-          <div
-            class="d-flex bg-white rounded-pill shadow-lg p-2 position-relative"
-          >
-            <Search
-              class="position-absolute text-secondary"
-              style="
-                left: 1.5rem;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 1.25rem;
-              "
-            />
-
-            <input
-              type="text"
-              placeholder="증상이나 약품명을 검색하세요..."
-              class="form-control border-0 shadow-none bg-transparent rounded-pill"
-              style="padding-left: 3.5rem; height: 3.5rem; font-size: 1rem"
-              v-model="searchQuery"
-              @keydown.enter="handleSearch"
-            />
-
-            <button
-              @click="handleSearch"
-              class="btn btn-primary rounded-pill px-3 fw-medium flex-shrink-0 text-nowrap" style="height: 2.8rem; margin: auto 4px;"
-            >
-              검색
+    <!-- Solution Section with Glassmorphism -->
+    <section class="solution-section">
+      <div class="container-custom">
+        <div class="solution-grid">
+          <div class="solution-visual">
+            <div class="glass-card">
+              <div class="card-shine"></div>
+              <div class="floating-icon icon-1">🔬</div>
+              <div class="floating-icon icon-2">💊</div>
+              <div class="floating-icon icon-3">📊</div>
+              <div class="center-orb"></div>
+            </div>
+          </div>
+          <div class="solution-content">
+            <div class="label-badge">One-Stop Solution</div>
+            <h2 class="section-heading">
+              통합 헬스케어<br>
+              솔루션
+            </h2>
+            <p class="section-text">
+              증상부터 의약품 정보, 복용 관리까지<br>
+              모든 것을 한 곳에서 해결하세요
+            </p>
+            <button class="btn-premium" @click="router.push('/search')">
+              <span>탐색하기</span>
+              <ArrowRight :size="18" />
+              <div class="btn-glow"></div>
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="py-5 container">
-      <div style="max-width: 72rem; margin: 0 auto">
-        <h2 class="mb-5 text-center fw-bold text-dark">증상별로 찾아보세요</h2>
+    <!-- Business Sections with Premium Cards -->
+    <section class="business-section">
+      <div class="container-custom">
+        <div class="business-grid">
+          <div class="business-card card-blue">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">01</span>
+              <h3 class="business-title">AI ChatBot</h3>
+              <p class="business-subtitle">AI 챗봇 서비스</p>
+              <p class="business-text">
+                최신 의약품 데이터를<br>
+                기반으로 더 나은 솔루션 제공
+              </p>
+              <button class="card-btn">
+                <span>더 보기</span>
+                <ArrowRight :size="16" />
+              </button>
+            </div>
+            <div class="card-visual">
+              <Activity :size="80" class="card-icon" />
+            </div>
+          </div>
 
-        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4">
-          <div v-for="(symptom, index) in symptoms" :key="index" class="col">
-            <div
-              @click="handleSymptomClick(symptom)"
-              class="card h-100 border-1 shadow-sm hover-effect cursor-pointer text-center py-4"
-              style="border-color: #e5e7eb; border-radius: 1rem"
-            >
-              <div
-                class="card-body d-flex flex-column align-items-center gap-3 p-0"
-              >
-                <div
-                  class="rounded-circle d-flex align-items-center justify-content-center mb-2"
-                  :class="symptom.color"
-                  style="width: 3rem; height: 3rem"
-                >
-                  <component
-                    :is="symptom.icon"
-                    style="width: 1.5rem; height: 1.5rem"
-                  />
-                </div>
+          <div class="business-card card-purple">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">02</span>
+              <h3 class="business-title">Community</h3>
+              <p class="business-subtitle">커뮤니티</p>
+              <p class="business-text">
+                의약품 후기 공유를 통해<br>
+                더 안전한 선택을 돕습니다
+              </p>
+              <button class="card-btn">
+                <span>더 보기</span>
+                <ArrowRight :size="16" />
+              </button>
+            </div>
+            <div class="card-visual">
+              <Users :size="80" class="card-icon" />
+            </div>
+          </div>
 
-                <div>
-                  <p class="mb-1 fw-bold text-dark small">
-                    {{ symptom.label }}
-                  </p>
-                  <p class="mb-0 text-secondary x-small">
-                    {{ symptom.description }}
-                  </p>
-                </div>
-              </div>
+          <div class="business-card card-green">
+            <div class="card-pattern"></div>
+            <div class="card-content">
+              <span class="business-number">03</span>
+              <h3 class="business-title">Search</h3>
+              <p class="business-subtitle">의약품 필터링 조회</p>
+              <p class="business-text">
+                증상 및 제형 필터링을 통해<br>
+                필요한 정보에 쉽게 접근할 수 있습니다
+              </p>
+              <button class="card-btn" @click="router.push('/community')">
+                <span>더 보기</span>
+                <ArrowRight :size="16" />
+              </button>
+            </div>
+            <div class="card-visual">
+              <SearchIcon :size="80" class="card-icon" />
             </div>
           </div>
         </div>
       </div>
     </section>
-  </div>
+
+        <!-- Search Section with Modern Design -->
+    <section class="search-section">
+      <div class="search-bg">
+        <div class="search-pattern"></div>
+      </div>
+      <div class="container-custom">
+        <h2 class="search-heading">어디가 아프신가요?</h2>
+        <p class="search-subheading">빠르고 정확하게 약을 찾아드려요</p>
+        
+        <div class="search-wrapper">
+          <div class="search-box-modern">
+            <div class="search-glow"></div>
+            <Search class="search-icon" />
+            <input
+              type="text"
+              placeholder="증상이나 약품명을 검색하세요..."
+              class="search-input"
+              v-model="searchQuery"
+              @keydown.enter="handleSearch"
+            />
+            <button class="search-btn-modern" @click="handleSearch">
+              <span>검색</span>
+              <div class="btn-shine"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Symptoms Grid with Hover Effects -->
+    <section class="symptoms-section">
+      <div class="container-custom">
+        <h2 class="symptoms-heading">증상별로 찾아보세요</h2>
+        
+        <div class="symptoms-grid">
+          <div 
+            v-for="(symptom, index) in symptoms" 
+            :key="index"
+            class="symptom-card-modern"
+            @click="handleSymptomClick(symptom.label)"
+          >
+            <div class="symptom-glow"></div>
+            <div class="symptom-icon-wrapper">
+              <component :is="symptom.icon" class="symptom-icon" />
+            </div>
+            <p class="symptom-name">{{ symptom.label }}</p>
+            <p class="symptom-desc">{{ symptom.description }}</p>
+            <div class="card-arrow">
+              <ArrowRight :size="16" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network Section with Premium Gradient -->
+    <section class="network-section">
+      <div class="network-pattern"></div>
+      <div class="container-custom">
+        <div class="network-content">
+          <h2 class="network-heading">
+            자주 묻는 질문으로<br>
+            더 쉬운 의약품 정보
+          </h2>
+          <p class="network-text">
+            사용자가 가장 많이 궁금해하는 내용을<br>
+            빠르고 정확하게 확인하세요
+          </p>
+          <button class="btn-glass" @click="router.push('/community')">
+            <span>FAQ 바로가기</span>
+            <ArrowRight :size="18" />
+          </button>
+        </div>
+      </div>
+    </section>
+
+      </div>
 </template>
 
 <style scoped>
-/* Carousel 관련 스타일 추가 */
-.promo-banner { height: 400px; overflow: hidden; }
-.chatbot-bg { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
-.search-bg { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.community-bg { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-
-.mockup-chat { width: 280px; transform: rotate(-3deg); border-left: 5px solid #60a5fa; }
-.icon-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.community-visual { position: relative; width: 100%; height: 200px; }
-.comm-card { width: 240px; border-left: 5px solid #3b82f6; position: absolute; }
-
-.animate-up { animation: floatUp 4s infinite ease-in-out; }
-.animate-down { animation: floatDown 4s infinite ease-in-out; }
-@keyframes floatUp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-@keyframes floatDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(12px); } }
-
-/* 기존 사용자 스타일 유지 */
-.x-small {
-  font-size: 0.75rem;
+/* Base Styles */
+.home-wrapper {
+  overflow-x: hidden;
+  background: #ffffff;
 }
-.hover-effect {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+.container-custom {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
-.hover-effect:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
+
+/* Hero Section - Premium 3D */
+.hero-section {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.cursor-pointer {
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: float 12s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #60a5fa 0%, #3b82f6 50%, transparent 70%);
+  top: -10%;
+  right: 10%;
+}
+
+.orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #818cf8 0%, #6366f1 50%, transparent 70%);
+  bottom: -10%;
+  left: 5%;
+  animation-delay: -4s;
+}
+
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #a78bfa 0%, #8b5cf6 50%, transparent 70%);
+  top: 40%;
+  left: 50%;
+  animation-delay: -8s;
+}
+
+.mesh-gradient {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(at 20% 30%, rgba(96, 165, 250, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(129, 140, 248, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(167, 139, 250, 0.05) 0px, transparent 50%);
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 900px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+}
+
+.hero-title {
+  font-size: clamp(3.5rem, 7vw, 6.5rem);
+  font-weight: 200;
+  line-height: 1.1;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 400;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  color: #64748b;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.floating-pills {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pill {
+  position: absolute;
+  font-size: 3rem;
+  animation: pillFloat 6s ease-in-out infinite;
+}
+
+.pill-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.pill-2 {
+  bottom: 25%;
+  right: 15%;
+  animation-delay: -2s;
+}
+
+.pill-3 {
+  top: 60%;
+  right: 25%;
+  animation-delay: -4s;
+}
+
+@keyframes pillFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+  }
+}
+
+/* Solution Section - Glassmorphism */
+.solution-section {
+  padding: 140px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.solution-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.glass-card {
+  position: relative;
+  width: 550px;
+  height: 550px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+}
+
+.card-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  animation: shine 8s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%, 100% {
+    transform: translate(-100%, -100%);
+  }
+  50% {
+    transform: translate(100%, 100%);
+  }
+}
+
+.floating-icon {
+  position: absolute;
+  font-size: 3rem;
+  animation: iconFloat 4s ease-in-out infinite;
+}
+
+.icon-1 {
+  top: 15%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.icon-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: -1.3s;
+}
+
+.icon-3 {
+  bottom: 20%;
+  left: 20%;
+  animation-delay: -2.6s;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.center-orb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #dbeafe 0%, #bfdbfe 100%);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.label-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #3b82f6;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 50px;
+  margin-bottom: 1.5rem;
+}
+
+.section-heading {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.section-text {
+  font-size: 1.125rem;
+  color: #64748b;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+
+.btn-premium {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
 }
 
-/* Carousel 인디케이터 스타일 */
-:deep(.carousel-indicators [data-bs-target]) {
-  width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255,255,255,0.4); border: none;
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
 }
-:deep(.carousel-indicators .active) { background-color: #ffffff; }
-.community-bg :deep(.carousel-indicators [data-bs-target]) { background-color: rgba(0,0,0,0.1); }
-.community-bg :deep(.carousel-indicators .active) { background-color: #3b82f6; }
+
+.btn-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+}
+
+/* Business Cards - Premium Design */
+.business-section {
+  padding: 140px 0;
+  background: #ffffff;
+}
+
+.business-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+}
+
+.business-card {
+  position: relative;
+  padding: 50px;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.business-card:hover {
+  transform: translateY(-12px);
+}
+
+.card-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+}
+
+.card-blue:hover {
+  box-shadow: 0 30px 80px rgba(59, 130, 246, 0.4);
+}
+
+.card-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+}
+
+.card-purple:hover {
+  box-shadow: 0 30px 80px rgba(139, 92, 246, 0.4);
+}
+
+.card-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+}
+
+.card-green:hover {
+  box-shadow: 0 30px 80px rgba(16, 185, 129, 0.4);
+}
+
+.card-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  background-image: 
+    radial-gradient(circle at 20% 30%, white 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, white 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  flex: 1;
+}
+
+.business-number {
+  display: block;
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.business-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.business-subtitle {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.business-text {
+  font-size: 1rem;
+  line-height: 1.8;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(4px);
+}
+
+.card-visual {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  opacity: 0.15;
+}
+
+.card-icon {
+  width: 120px;
+  height: 120px;
+}
+
+/* Search Section - Modern */
+.search-section {
+  position: relative;
+  padding: 140px 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  overflow: hidden;
+}
+
+.search-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.search-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(30deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
+    linear-gradient(150deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
+    linear-gradient(30deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03)),
+    linear-gradient(150deg, rgba(59, 130, 246, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(59, 130, 246, 0.03) 87.5%, rgba(59, 130, 246, 0.03));
+  background-size: 80px 140px;
+}
+
+.search-heading {
+  position: relative;
+  z-index: 2;
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.search-subheading {
+  position: relative;
+  z-index: 2;
+  font-size: 1.375rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 4rem;
+  font-weight: 300;
+}
+
+.search-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.search-box-modern {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.search-box-modern:focus-within {
+  box-shadow: 
+    0 25px 70px rgba(59, 130, 246, 0.15),
+    0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.search-glow {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 16px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.search-box-modern:focus-within .search-glow {
+  opacity: 0.15;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  color: #94a3b8;
+  margin-right: 16px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1.125rem;
+  color: #0f172a;
+}
+
+.search-input::placeholder {
+  color: #cbd5e1;
+}
+
+.search-btn-modern {
+  position: relative;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.search-btn-modern:hover {
+  transform: scale(1.05);
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: btnShine 2s infinite;
+}
+
+@keyframes btnShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Symptoms Grid - Modern Cards */
+.symptoms-section {
+  padding: 140px 0;
+  background: #ffffff;
+}
+
+.symptoms-heading {
+  font-size: 2.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: #0f172a;
+  margin-bottom: 4rem;
+}
+
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+}
+
+.symptom-card-modern {
+  position: relative;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.symptom-glow {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 16px;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+}
+
+.symptom-card-modern:hover .symptom-glow {
+  opacity: 1;
+}
+
+.symptom-card-modern:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: transparent;
+}
+
+.symptom-icon-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+
+.symptom-card-modern:hover .symptom-icon-wrapper {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.symptom-icon {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  color: #3b82f6;
+  transition: all 0.4s ease;
+}
+
+.symptom-card-modern:hover .symptom-icon {
+  color: white;
+  transform: scale(1.1);
+}
+
+.symptom-name {
+  position: relative;
+  z-index: 1;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 8px;
+  transition: color 0.4s ease;
+}
+
+.symptom-card-modern:hover .symptom-name {
+  color: white;
+}
+
+.symptom-desc {
+  position: relative;
+  z-index: 1;
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 12px 0;
+  transition: color 0.4s ease;
+}
+
+.symptom-card-modern:hover .symptom-desc {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.card-arrow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  color: #3b82f6;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+
+.symptom-card-modern:hover .card-arrow {
+  opacity: 1;
+  transform: translateY(0);
+  color: white;
+}
+
+/* Network Section - Premium Gradient */
+.network-section {
+  position: relative;
+  padding: 160px 0;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%);
+  overflow: hidden;
+}
+
+.network-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  animation: patternMove 20s ease-in-out infinite;
+}
+
+@keyframes patternMove {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(20px, 20px);
+  }
+}
+
+.network-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+}
+
+.network-heading {
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 2rem;
+}
+
+.network-text {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 36px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Magazine Section - 3D Card */
+.magazine-section {
+  padding: 140px 0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.magazine-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.magazine-heading {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-link:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.magazine-card-3d {
+  perspective: 1000px;
+}
+
+.card-3d-wrapper {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 60px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  transition: all 0.5s ease;
+}
+
+.card-3d-wrapper:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+}
+
+.magazine-image-3d {
+  height: 450px;
+  overflow: hidden;
+}
+
+.image-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease;
+}
+
+.card-3d-wrapper:hover .image-gradient {
+  transform: scale(1.05);
+}
+
+.magazine-icon {
+  color: #3b82f6;
+  opacity: 0.3;
+}
+
+.magazine-content-3d {
+  padding: 60px 60px 60px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.magazine-volume {
+  font-size: 0.875rem;
+  color: #10b981;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+}
+
+.magazine-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.magazine-excerpt {
+  font-size: 1.125rem;
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.3s ease;
+}
+
+.read-more:hover {
+  transform: translateX(4px);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .solution-grid,
+  .card-3d-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .glass-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .magazine-content-3d {
+    padding: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-custom {
+    padding: 0 24px;
+  }
+  
+  .hero-section {
+    height: 80vh;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .solution-section,
+  .business-section,
+  .search-section,
+  .symptoms-section,
+  .network-section,
+  .magazine-section {
+    padding: 80px 0;
+  }
+  
+  .business-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .business-card {
+    min-height: 400px;
+  }
+  
+  .business-title {
+    font-size: 2.5rem;
+  }
+  
+  .symptoms-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-badge {
+    font-size: 0.75rem;
+    padding: 8px 16px;
+  }
+  
+  .search-heading {
+    font-size: 2.5rem;
+  }
+  
+  .magazine-header {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+}
 </style>
