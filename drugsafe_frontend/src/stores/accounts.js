@@ -34,27 +34,27 @@ export const useAccountStore = defineStore("accounts", () => {
     const { username, password, confirmPassword, name, birthdate, phone, carrier, email } = payload
 
     axios({
-        method: 'post',
-        url: `${API_URL}/accounts/signup/`,
-        data: {
-            username,
-            password1: password,
-            password2: confirmPassword,
-            name,
-            birthdate,
-            phone,
-            carrier,
-            email
-        }
+      method: 'post',
+      url: `${API_URL}/accounts/signup/`,
+      data: {
+        username,
+        password1: password,
+        password2: confirmPassword,
+        name,
+        birthdate,
+        phone,
+        carrier,
+        email
+      }
     })
-        .then(res => {
-            alert('회원가입이 완료되었습니다! 로그인해 주세요.')
-            router.replace({ query: {mode: 'login' } })
-        })
-        .catch(err => {
-            console.error('회원가입 에러:', err.response?.data)
-            alert('회원가입에 실패했습니다. 정보를 다시 확인해주세요.')
-        })
+      .then(res => {
+        alert('회원가입이 완료되었습니다! 로그인해 주세요.')
+        router.replace({ query: { mode: 'login' } })
+      })
+      .catch(err => {
+        console.error('회원가입 에러:', err.response?.data)
+        alert('회원가입에 실패했습니다. 정보를 다시 확인해주세요.')
+      })
   }
 
   const login = function (payload) {
@@ -68,10 +68,10 @@ export const useAccountStore = defineStore("accounts", () => {
       .then(res => {
         token.value = res.data.key;
         localStorage.setItem('token', res.data.key);
-        
+
         // ✅ 로그인 직후 유저 정보를 바로 가져옵니다.
-        getUserInfo(); 
-        
+        getUserInfo();
+
         alert('반갑습니다! 로그인이 완료되었습니다.');
         router.push('/');
       })
@@ -94,13 +94,22 @@ export const useAccountStore = defineStore("accounts", () => {
       }
     })
       .then(() => {
-        token.value = null;
-        userInfo.value = null; // 로그아웃 시 유저 정보 초기화
-        localStorage.removeItem('token');
-        router.push({ name: 'home' });
+        console.log('서버 로그아웃 성공')
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error('서버 로그아웃 실패(이미 만료되었을 수 있음):', err)
+      })
+      .finally(() => {
+        token.value = null
+        userInfo.value = null
+        localStorage.removeItem('token')
+        router.push({ name: 'home' })
+      })
   };
+
+  if (token.value && !userInfo.value) {
+    getUserInfo();
+  }
 
   return { signup, login, token, userInfo, getUserInfo, isLogin, logOut }
 });
