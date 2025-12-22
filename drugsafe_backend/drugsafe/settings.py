@@ -139,6 +139,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 헤더의 'Authorization: Token <토큰>'을 읽기 위해 필수 설정
+        'rest_framework.authentication.TokenAuthentication',
+        # (선택) 브라우저 로그인을 통한 테스트를 위해 유지
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 기본적으로 인증된 사용자만 쓰기(POST 등)가 가능하게 설정
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
+
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 CORS_ALLOWED_ORIGINS = [

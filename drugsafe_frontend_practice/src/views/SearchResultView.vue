@@ -102,8 +102,8 @@ function resetFilters() {
 }
 
 // 상세 페이지 이동
-function goDetail(id) {
-  router.push({ name: 'drug-detail', params: { id: id } })
+function goDetail(drugId) {
+  router.push({ name: 'drug-detail', params: { drugId: drugId } })
 }
 
 // 검색 실행

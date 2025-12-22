@@ -3,59 +3,67 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useDrugStore } from "@/stores/drug";
+import { useAccountStore } from "@/stores/accounts";
 import {
   Star,
   Heart,
-  Share2,
   MessageSquare,
-  Pill,
   ArrowLeft,
+  AlertTriangle, // 주의사항 아이콘 누락 방지
+  Info, // 주의사항 아이콘 누락 방지
 } from "lucide-vue-next";
 
 const router = useRouter();
 const route = useRoute();
 const drugStore = useDrugStore();
+const accountStore = useAccountStore();
 
-// 스토어에서 selectedDrug 상태를 반응형으로 가져옴.
-const { selectedDrug } = storeToRefs(drugStore);
+const { selectedDrug, reviews } = storeToRefs(drugStore);
 
-// 현재 탭 상태
 const activeTab = ref("info");
 
-// 뒤로가기
 const goBack = () => {
   router.back();
 };
 
-// 컴포넌트가 마운트될 때 API 호출
 onMounted(() => {
-  const drugId = route.params.id;
+  const drugId = route.params.drugId;
   drugStore.getDrugDetail(drugId);
+  drugStore.getReviews(drugId);
 });
 
-const mockReviews = ref([
-  {
-    id: "1",
-    author: "김**",
-    rating: 5,
-    date: "2025.01.15",
-    content: "두통에 정말 효과가 좋았어요. 속쓰림도 없고 깔끔합니다.",
-    helpful: 24,
-  },
-  {
-    id: "2",
-    author: "이**",
-    rating: 4,
-    date: "2025.01.10",
-    content:
-      "효과는 좋은데 식후 복용 추천합니다. 빈속에는 조금 부담될 수 있어요.",
-    helpful: 18,
-  },
-]);
+const goReviewWrite = () => {
+  if (!accountStore.isLogin) {
+    if (
+      confirm(
+        "리뷰 작성을 위해 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+      )
+    ) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
+    return;
+  }
 
-// 리뷰 작성하러 커뮤니티로 이동
-const goCommunityWrite = () => {
-  router.push("/community"); // 나중에 글쓰기 페이지로 연결
+  router.push({
+    name: "ReviewWrite",
+    params: { drugId: selectedDrug.value.id },
+  });
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
+
+const goReviewDetail = (reviewId) => {
+  router.push({
+    name: "ReviewDetail", // router/index.js에 정의된 상세 페이지 route 이름
+    params: { 
+      drugId: selectedDrug.value.id, // 약 ID
+      reviewId: reviewId            // 리뷰 ID
+    },
+  });
 };
 </script>
 
@@ -82,7 +90,6 @@ const goCommunityWrite = () => {
             </div>
           </div>
         </div>
-
         <div class="col-md-7">
           <div class="h-100 d-flex flex-column justify-content-center">
             <div class="mb-2">
@@ -92,24 +99,8 @@ const goCommunityWrite = () => {
                 {{ selectedDrug.form_name }}
               </span>
             </div>
-
             <h1 class="fw-bold mb-1 display-6">{{ selectedDrug.name }}</h1>
             <p class="text-secondary mb-3 fs-5">{{ selectedDrug.company }}</p>
-
-            <!-- <div class="d-flex align-items-center gap-3 mb-4">
-              <div class="d-flex text-warning">
-                <Star 
-                  v-for="i in 5" 
-                  :key="i" 
-                  :size="20" 
-                  :fill="i <= Math.round(selectedDrug.rating) ? 'currentColor' : 'none'"
-                  :class="i <= Math.round(selectedDrug.rating) ? 'text-warning' : 'text-secondary opacity-25'"
-                />
-              </div>
-              <span class="fw-bold fs-5">{{ selectedDrug.rating || 0 }}</span>
-              <span class="text-secondary small">({{ (selectedDrug.review_count || 0).toLocaleString() }}개의 리뷰)</span>
-            </div> -->
-
             <div class="d-flex gap-2 mb-4">
               <button
                 class="btn btn-outline-danger d-flex align-items-center gap-2 px-3"
@@ -122,58 +113,36 @@ const goCommunityWrite = () => {
       </div>
 
       <ul class="nav nav-pills nav-fill mb-4 bg-white p-1 rounded shadow-sm">
-        <li class="nav-item">
+        <li
+          class="nav-item"
+          v-for="tab in [
+            'info',
+            'usage',
+            'warnings',
+            'side_effect',
+            'store',
+            'reviews',
+          ]"
+          :key="tab"
+        >
           <button
             class="nav-link fw-bold"
-            :class="{ active: activeTab === 'info' }"
-            @click="activeTab = 'info'"
+            :class="{ active: activeTab === tab }"
+            @click="activeTab = tab"
           >
-            상세정보
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link fw-bold"
-            :class="{ active: activeTab === 'usage' }"
-            @click="activeTab = 'usage'"
-          >
-            용법·용량
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link fw-bold"
-            :class="{ active: activeTab === 'warnings' }"
-            @click="activeTab = 'warnings'"
-          >
-            주의사항
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link fw-bold"
-            :class="{ active: activeTab === 'side_effect' }"
-            @click="activeTab = 'side_effect'"
-          >
-            부작용
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link fw-bold"
-            :class="{ active: activeTab === 'store' }"
-            @click="activeTab = 'store'"
-          >
-            보관방법
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link fw-bold"
-            :class="{ active: activeTab === 'reviews' }"
-            @click="activeTab = 'reviews'"
-          >
-            리뷰
+            {{
+              tab === "info"
+                ? "상세정보"
+                : tab === "usage"
+                ? "용법·용량"
+                : tab === "warnings"
+                ? "주의사항"
+                : tab === "side_effect"
+                ? "부작용"
+                : tab === "store"
+                ? "보관방법"
+                : "리뷰"
+            }}
           </button>
         </li>
       </ul>
@@ -196,7 +165,6 @@ const goCommunityWrite = () => {
                 {{ selectedDrug.efficacy || "정보가 없습니다." }}
               </p>
             </div>
-
             <div>
               <h3 class="h5 fw-bold mb-3 d-flex align-items-center">
                 <span
@@ -205,16 +173,13 @@ const goCommunityWrite = () => {
                 ></span>
                 주성분
               </h3>
-              <p
-                class="text-secondary lh-lg mb-0"
-                style="white-space: pre-wrap"
-              >
+              <p class="text-secondary lh-lg mb-0">
                 {{ selectedDrug.basis || "정보가 없습니다." }}
               </p>
             </div>
           </div>
 
-          <div v-if="activeTab === 'usage'">
+          <div v-else-if="activeTab === 'usage'">
             <h3 class="h5 fw-bold mb-3">용법 · 용량</h3>
             <p class="text-secondary lh-lg mb-0" style="white-space: pre-wrap">
               {{ selectedDrug.use || "정보가 없습니다." }}
@@ -251,65 +216,65 @@ const goCommunityWrite = () => {
             </div>
           </div>
 
-          <div v-if="activeTab === 'side_effect'">
+          <div v-else-if="activeTab === 'side_effect'">
             <h3 class="h5 fw-bold mb-3">부작용</h3>
             <p class="text-secondary lh-lg mb-0" style="white-space: pre-wrap">
               {{ selectedDrug.side_effect || "정보가 없습니다." }}
             </p>
           </div>
 
-          <div v-if="activeTab === 'store'">
+          <div v-else-if="activeTab === 'store'">
             <h3 class="h5 fw-bold mb-3">보관방법</h3>
             <p class="text-secondary lh-lg mb-0" style="white-space: pre-wrap">
               {{ selectedDrug.store || "정보가 없습니다." }}
             </p>
           </div>
 
-          <div v-if="activeTab === 'reviews'">
+          <div v-else-if="activeTab === 'reviews'">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h3 class="h5 fw-bold mb-0">리뷰</h3>
+              <h3 class="h5 fw-bold mb-0">리뷰 ({{ reviews?.length || 0 }})</h3>
               <button
-                class="btn btn-primary btn-sm d-flex align-items-center gap-2"
-                @click="goCommunityWrite"
+                class="btn btn-primary btn-sm text-white"
+                @click="goReviewWrite"
               >
                 <MessageSquare :size="16" /> 리뷰 작성
               </button>
             </div>
 
-            <div class="d-flex flex-column gap-3">
+            <div v-if="reviews?.length > 0" class="d-flex flex-column gap-3">
               <div
-                v-for="review in mockReviews"
+                v-for="review in reviews"
                 :key="review.id"
-                class="border rounded p-3"
+                class="border rounded p-4 bg-white shadow-sm"
+                @click="goReviewDetail(review.id)"
               >
                 <div class="d-flex justify-content-between mb-2">
-                  <span class="fw-bold">{{ review.author }}</span>
+                  <span class="fw-bold">{{ review.username }}님</span>
                   <div class="text-warning small">
                     <Star
                       v-for="i in 5"
                       :key="i"
-                      :size="14"
-                      :fill="i <= review.rating ? 'currentColor' : 'none'"
+                      :size="16"
+                      :fill="i <= review.score ? '#FFC107' : 'none'"
                       :class="
-                        i <= review.rating
+                        i <= review.score
                           ? 'text-warning'
                           : 'text-secondary opacity-25'
                       "
-                      class="d-inline-block"
                     />
                   </div>
                 </div>
-                <p class="text-secondary small mb-2">{{ review.date }}</p>
-                <p class="text-dark mb-3">{{ review.content }}</p>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-light btn-sm text-secondary small">
-                    도움이 돼요 {{ review.helpful }}
-                  </button>
-                  <button class="btn btn-light btn-sm text-secondary small">
-                    댓글
-                  </button>
-                </div>
+                <p class="text-secondary small mb-2">
+                  {{ formatDate(review.created_at) }}
+                </p>
+                <h5 class="h6 fw-bold mb-2">{{ review.title }}</h5>
+                <p class="text-dark mb-3 lh-base" style="white-space: pre-wrap">
+                  {{ review.content }}
+                </p>
               </div>
+            </div>
+            <div v-else class="text-center py-5 text-secondary">
+              아직 작성된 리뷰가 없습니다.
             </div>
           </div>
         </div>
@@ -321,7 +286,7 @@ const goCommunityWrite = () => {
     v-else
     class="min-vh-100 d-flex flex-column justify-content-center align-items-center"
   >
-    <div class="spinner-border text-primary mb-3" role="status"></div>
+    <div class="spinner-border text-primary mb-3"></div>
     <p class="text-secondary">약 정보를 불러오는 중입니다...</p>
   </div>
 </template>
@@ -335,5 +300,16 @@ const goCommunityWrite = () => {
 }
 .nav-pills .nav-link {
   color: #6c757d;
+}
+.review-card {
+  cursor: pointer; /* 마우스 커서를 손가락 모양으로 변경 */
+  transition: all 0.2s ease-in-out; /* 부드러운 애니메이션 효과 */
+}
+
+.review-card:hover {
+  background-color: #fdfdfd !important; /* 배경색 아주 살짝 변경 */
+  transform: translateY(-3px); /* 위로 살짝 떠오름 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; /* 그림자 강조 */
+  border-color: #0d6efd !important; /* 테두리 강조 */
 }
 </style>
