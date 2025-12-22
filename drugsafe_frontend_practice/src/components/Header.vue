@@ -62,6 +62,14 @@ const handleLogout = () => {
           </RouterLink>
 
           <RouterLink
+            to="/search"
+            class="text-decoration-none fw-medium"
+            :class="isActive('search') ? 'text-primary' : 'text-dark'"
+          >
+            Search
+          </RouterLink>
+
+          <RouterLink
             to="/community"
             class="text-decoration-none fw-medium"
             :class="isActive('community') ? 'text-primary' : 'text-dark'"
