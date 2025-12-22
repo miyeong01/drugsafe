@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { Send, Sparkles, Bot } from 'lucide-vue-next';
+import axios from 'axios';
+
 
 // Props 정의
 const props = defineProps({
@@ -18,6 +20,8 @@ const messages = ref([
     text: '안녕하세요! DrugSafe AI 도우미입니다.\n증상에 대해 말씀해주시면 적합한 의약품을 추천해드리겠습니다.'
   }
 ]);
+const loading = ref(false);
+
 
 // DOM 참조 (Ref)
 const messagesEndRef = ref(null);
@@ -39,19 +43,36 @@ onMounted(() => {
 });
 
 // 메시지 전송 로직
-const handleSend = () => {
-  if (message.value.trim()) {
-    messages.value.push({ role: 'user', text: message.value });
-    message.value = '';
+const handleSend = async () => {
+  if (!message.value.trim()) return;
 
-    setTimeout(() => {
-      messages.value.push({
-        role: 'ai',
-        text: '증상에 대해 더 자세히 알려주시면 적합한 의약품을 추천해드리겠습니다.\n예를 들어, 두통이 있으시다면 타이레놀이나 게보린 같은 진통제를 추천드릴 수 있습니다.'
-      });
-    }, 1000);
+  const userMessage = message.value;
+
+  // 사용자 메시지 추가
+  messages.value.push({ role: 'user', text: userMessage });
+  message.value = '';
+  loading.value = true;
+
+  try {
+    const res = await axios.post(
+      'http://localhost:8000/api/medicines/chatbot/',
+      { message: userMessage }
+    );
+
+    messages.value.push({
+      role: 'ai',
+      text: res.data.answer,
+    });
+  } catch (err) {
+    messages.value.push({
+      role: 'ai',
+      text: '⚠️ 현재 상담 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    });
+  } finally {
+    loading.value = false;
   }
 };
+
 
 const handleKeyPress = (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -60,16 +81,16 @@ const handleKeyPress = (e) => {
   }
 };
 
-const quickQuestions = [
-  '두통에 좋은 약 추천해주세요',
-  '감기약 어떤 게 좋나요?',
-  '소화제 추천해주세요',
-  '해열제가 필요해요'
-];
+// const quickQuestions = [
+//   '두통에 좋은 약 추천해주세요',
+//   '감기약 어떤 게 좋나요?',
+//   '소화제 추천해주세요',
+//   '해열제가 필요해요'
+// ];
 
-const handleQuickQuestion = (question) => {
-  message.value = question;
-};
+// const handleQuickQuestion = (question) => {
+//   message.value = question;
+// };
 </script>
 
 <template>
@@ -113,7 +134,7 @@ const handleQuickQuestion = (question) => {
           <div ref="messagesEndRef"></div>
         </div>
 
-        <div class="quick-questions-area">
+        <!-- <div class="quick-questions-area">
           <p class="quick-questions-title">자주 묻는 질문:</p>
           <div class="quick-questions-buttons">
             <button
@@ -125,7 +146,7 @@ const handleQuickQuestion = (question) => {
               {{ question }}
             </button>
           </div>
-        </div>
+        </div> -->
 
         <div class="input-area">
           <div class="input-wrapper">
