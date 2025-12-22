@@ -8,6 +8,8 @@ import asyncio
 
 from .models import Drug, Review, Comment
 from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
+from django.db.models import Avg, Count
+from django.db.models.functions import Coalesce
 
 # Create your views here.
 @api_view(['GET'])
@@ -135,14 +137,24 @@ def comment_detail(request, review_pk, comment_pk):
 def recommend_drug(parsed, user_message):
     symptom = parsed.get('symptom')
     form = parsed.get('form')
+    sort = parsed.get('sort', 'relevance')
 
-    qs = Drug.objects.all()
+    qs = Drug.objects.annotate(
+        avg_rating = Coalesce(Avg('drugs__score'), 0.0),
+        review_cnt = Coalesce(Count('drugs'), 0)
+    )
     if symptom:
         qs = qs.filter(symptom__name__icontains=symptom)
     if form:
         qs = qs.filter(form__name__icontains=form)
 
-    qs = qs[:5]
+    if sort == 'rating':
+        qs = qs.order_by('-avg_rating', '-review_cnt')
+    elif sort == 'review':
+        qs = qs.order_by('-review_cnt', '-avg_rating')
+
+    qs = qs[:3]
+
     if not qs.exists():
         return Response({
             'answer': '해당 조건에 맞는 의약품 정보가 없습니다.'
@@ -151,9 +163,9 @@ def recommend_drug(parsed, user_message):
     for d in qs:
         context += f"""
 - 약명: {d.name}
+- 평균 별점: {d.avg_rating or 0:.1f}
+- 리뷰 수: {d.review_cnt}
 - 효능: {d.efficacy}
-- 제형: {d.form}
-- 주의사항: {d.caution}
 """
     answer = asyncio.run(
         explain(context, user_message)
