@@ -40,10 +40,10 @@ async def parse_user_input(user_message: str) -> dict:
 
 출력 형식:
 {{
-  "intent": "recommend | interaction",
+  "intent": "recommend | drug_info | unknown",
   "symptom": "증상 또는 null",
   "form": "제형 또는 null",
-  "sort": "rating | review | relevance",
+  "sort": "rating | review | relevance | null",
 }}
 
 문장:
