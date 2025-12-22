@@ -58,6 +58,16 @@ const router = createRouter({
       component: DrugDetailView,
     }
   ],
+
+  scrollBehavior(to, from, savedPosition) {
+    // 사용자가 '뒤로 가기'를 했을 때 (savedPosition이 있을 때)
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      // 새로운 페이지로 이동했을 때는 무조건 맨 위로!
+      return { top: 0 }
+    }
+  },
 })
 
 export default router

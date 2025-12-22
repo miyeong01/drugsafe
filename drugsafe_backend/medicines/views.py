@@ -28,6 +28,13 @@ def drug_list(request):
     serializer = DrugListSerializer(drugs, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def drug_detail(request, drug_pk):
+    drug = get_object_or_404(Drug, pk=drug_pk)
+    serializer = DrugListSerializer(drug)
+    return Response(serializer.data)
+    
+
 # @api_view(['GET','POST'])
 # def review_list(request, drug_pk):
 #     drug = get_object_or_404(Drug, pk=drug_pk)

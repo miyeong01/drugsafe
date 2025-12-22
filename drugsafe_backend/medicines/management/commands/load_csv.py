@@ -6,7 +6,7 @@ class Command(BaseCommand):
     help = 'CSV 데이터를 DB에 적재합니다.'
 
     def handle(self, *args, **kwargs):
-        file_path = 'DrugSafe.csv' 
+        file_path = 'drugsafe_data.csv' 
 
         print(f"[{file_path}] 데이터 적재를 시작합니다...")
 
