@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAccountStore } from '@/stores/accounts'
 
 const router = useRouter()
 const route = useRoute()
+const accountStore = useAccountStore()
 
 // 1. 초기 탭 설정 (주소창에 ?mode=signup 있으면 회원가입 탭 열기)
 const activeTab = ref(route.query.mode === 'signup' ? 'signup' : 'login')
@@ -33,21 +35,28 @@ const signupData = ref({
   email: '',
   password: '',
   confirmPassword: '',
+  agreeTerms: false,
 })
 
 // --- 핸들러 ---
-const handleLogin = () => {
-  alert(`로그인 시도: ${loginData.value.username}`)
-  router.push('/') 
+const handleLogin = async () => {
+  // 1. 입력값 확인
+  if (!loginData.value.username || !loginData.value.password) {
+    alert('아이디와 비밀번호를 모두 입력해주세요.')
+    return
+  }
+  // 2. 스토어의 로그인 액션 호출
+  await accountStore.login(loginData.value)
 }
 
 const handleSignup = () => {
   if (signupData.value.password !== signupData.value.confirmPassword) {
-    alert('비밀번호가 일치하지 않습니다.')
-    return
+    alert('비밀번호가 일치하지 않습니다.');
+    return;
   }
-  alert(`회원가입 완료!\n이름: ${signupData.value.name}`)
-  router.push('/')
+  
+  // 스토어 액션 호출
+  accountStore.signup(signupData.value);
 }
 </script>
 
@@ -156,7 +165,7 @@ const handleSignup = () => {
 
 
               <div class="mb-4 form-check">
-                <input type="checkbox" class="form-check-input" id="terms" required />
+                <input type="checkbox" class="form-check-input" id="terms" required v-model="signupData.agreeTerms" />
                 <label class="form-check-label text-secondary small" for="terms">이용약관 및 개인정보처리방침에 동의합니다.</label>
               </div>
 
