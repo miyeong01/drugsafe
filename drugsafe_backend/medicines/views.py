@@ -8,7 +8,7 @@ import asyncio, re
 
 from .models import Drug, Review, Comment
 from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Max
 from django.db.models.functions import Coalesce
 
 # Create your views here.
@@ -218,7 +218,9 @@ def find_drug_candidates(keyword: str):
     return (
         Drug.objects
         .filter(name__icontains=keyword)
+        .values('name')
         .annotate(
+            drug_id = Max('id'),
             avg_rating = Coalesce(Avg('drugs__score'), 0.0),
             review_cnt = Coalesce(Count('drugs'), 0)
         )
@@ -258,16 +260,17 @@ def explain_drug_by_name(keyword: str):
 
     # 여러 개면 선택지
     candidates = qs[:3]
+
     return Response({
         "type": "multiple",
         "candidates": [
-            {"id": d.id, "name": d.name}
+            {
+                "id": d["drug_id"],
+                "name": d["name"]
+            }
             for d in candidates
         ],
-        "answer": (
-            "다음 중 어떤 의약품을 말씀하시는 건가요?\n" +
-            "\n".join([f"- {d.name}" for d in candidates])
-        )
+        "answer": "다음 중 어떤 의약품을 말씀하시는 건가요?"
     })
 
 def format_drug_info(drug: Drug) -> str:
@@ -305,28 +308,38 @@ def normalize_kwd(raw):
 @permission_classes([AllowAny])
 def chatbot_view(request):
     user_message = request.data.get('message', '')
+    selected_drug_id = request.data.get('selected_drug_id')
 
+    # 1. 카드 클릭으로 들어온 경우 (최우선)
+    if selected_drug_id:
+        drug = (
+            Drug.objects
+            .filter(id=selected_drug_id)
+            .annotate(
+                avg_rating=Coalesce(Avg('drugs__score'), 0.0),
+                review_cnt=Coalesce(Count('drugs'), 0)
+            )
+            .first()
+        )
+        if drug:
+            return Response({
+                "type": "single",
+                "drug_id": drug.id,
+                "answer": format_drug_info(drug)
+            })
+
+    # 2. 일반 자연어 처리
     parsed = asyncio.run(parse_user_input(user_message))
     intent = parsed.get('intent')
 
     if intent == 'recommend':
         return recommend_drug(parsed, user_message)
-    print("RAW parsed:", parsed)
-    print("RAW keyword before normalize:", parsed.get('drug_name') or user_message)
 
-    # 약 이름 포함 여부로 DB 먼저 탐색
-    keyword = parsed.get('drug_name') or user_message
-    keyword = normalize_kwd(keyword)
+    keyword = normalize_kwd(parsed.get('drug_name') or user_message)
 
-    print("NORMALIZED keyword:", repr(keyword))
-    
-    qs = Drug.objects.filter(name__icontains=keyword)
-
-    if qs.exists():
+    if keyword:
         return explain_drug_by_name(keyword)
 
-    # elif intent == 'interaction':
-    #     return check_interaction(parsed, user_message)
     return Response({
         'answer': '어떤 도움을 드릴까요? 증상이나 궁금한 약 이름을 말씀해주세요'
     })

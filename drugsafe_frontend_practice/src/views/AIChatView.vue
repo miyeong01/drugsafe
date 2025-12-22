@@ -23,14 +23,16 @@ const messages = ref([
 const loading = ref(false);
 
 
-// DOM 참조 (Ref)
-const messagesEndRef = ref(null);
+const messageAreaRef = ref(null);
 
 // 스크롤 하단 이동 함수
 const scrollToBottom = async () => {
   await nextTick();
-  if (messagesEndRef.value) {
-    messagesEndRef.value.scrollIntoView({ behavior: 'smooth' });
+  if (messageAreaRef.value) {
+    messageAreaRef.value.scrollTo({
+      top: messageAreaRef.value.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 };
 
@@ -100,7 +102,7 @@ const handleKeyPress = (e) => {
 
       <main class="chat-main-card">
 
-        <div class="message-area">
+        <div class="message-area" ref="messageAreaRef">
           <div v-for="(msg, index) in messages" :key="index" class="message-row"
             :class="msg.role === 'user' ? 'message-end' : 'message-start'">
             <template v-if="msg.role === 'ai'">
@@ -149,7 +151,7 @@ const handleKeyPress = (e) => {
 
         <div class="input-area">
           <div class="input-wrapper">
-            <input type="text" v-model="message" @keydown="handleKeyPress" placeholder="증상이나 질문을 입력하세요..."
+            <input type="text" v-model="message" @keydown="handleKeyPress" placeholder="증상이나 궁금하신 의약품 이름을 입력하세요..."
               class="chat-input" />
             <button @click="handleSend" :disabled="!message.trim()" class="send-btn">
               <Send class="send-icon" />
