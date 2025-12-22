@@ -176,17 +176,27 @@ function handleSearch() {
           </div>
 
           <div class="d-flex flex-column gap-3">
-            <div v-for="drug in filteredDrugs" :key="drug.id" class="card border-0 shadow-sm hover-shadow cursor-pointer"
-              @click="goDetail(drug.id)">
+            <div v-for="drug in filteredDrugs" :key="drug.id"
+              class="card border-0 shadow-sm hover-shadow cursor-pointer" @click="goDetail(drug.id)">
               <div class="card-body p-4">
                 <div class="d-flex gap-4 align-items-center">
 
-                  <div class="bg-light rounded d-flex align-items-center justify-content-center flex-shrink-0"
+                  <div
+                    class="bg-light rounded d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
                     style="width: 80px; height: 80px;">
-                    <div class="bg-white rounded-circle p-2 shadow-sm">
+                    <!-- 이미지 있을 때 -->
+                    <img v-if="drug.image_url" :src="drug.image_url" alt="의약품 이미지" style="
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    " />
+
+                    <!-- 이미지 없을 때 -->
+                    <div v-else class="bg-white rounded-circle p-2 shadow-sm">
                       <Pill class="text-primary" :size="24" />
                     </div>
                   </div>
+
 
                   <div class="flex-grow-1">
                     <div class="d-flex justify-content-between align-items-start mb-1">
@@ -249,23 +259,32 @@ function handleSearch() {
 
 /* 즐겨찾기 버튼 (크기와 위치를 강력하게 고정) */
 .fav-btn {
-  width: 105px !important;    /* 너비를 명확하게 고정 */
-  height: 34px !important;    /* 높이 고정 */
-  flex-shrink: 0 !important;  /* 중요: 제목이 길어져도 버튼이 절대 찌그러지지 않음 */
-  display: flex;              /* 내부 아이콘과 텍스트 정렬을 위해 추가 */
+  width: 105px !important;
+  /* 너비를 명확하게 고정 */
+  height: 34px !important;
+  /* 높이 고정 */
+  flex-shrink: 0 !important;
+  /* 중요: 제목이 길어져도 버튼이 절대 찌그러지지 않음 */
+  display: flex;
+  /* 내부 아이콘과 텍스트 정렬을 위해 추가 */
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
-  white-space: nowrap;        /* 버튼 안의 글자는 줄바꿈 방지 */
-  margin-top: 2px;            /* 제목 첫 줄과 높이를 맞춤 */
+  white-space: nowrap;
+  /* 버튼 안의 글자는 줄바꿈 방지 */
+  margin-top: 2px;
+  /* 제목 첫 줄과 높이를 맞춤 */
 }
 
 /* 약 이름 전용 스타일 (줄바꿈 허용) */
 .drug-name {
-  white-space: normal !important; /* 줄바꿈 허용 */
-  word-break: keep-all;          /* 한글 단어가 어색하게 잘리지 않게 함 */
+  white-space: normal !important;
+  /* 줄바꿈 허용 */
+  word-break: keep-all;
+  /* 한글 단어가 어색하게 잘리지 않게 함 */
   line-height: 1.4;
-  display: block;                /* 영역을 확실히 차지하게 함 */
+  display: block;
+  /* 영역을 확실히 차지하게 함 */
 }
 
 /* 제조사 이름 등을 위한 기존 말줄임표 스타일 */
