@@ -52,9 +52,9 @@ const goAuth = (mode) => {
           </RouterLink>
           
           <RouterLink 
-            to="/faq" 
+            to="/FAQ" 
             class="text-decoration-none fw-medium"
-            :class="isActive('faq') ? 'text-primary' : 'text-dark'"
+            :class="isActive('FAQ') ? 'text-primary' : 'text-dark'"
           >
             FAQ
           </RouterLink>
