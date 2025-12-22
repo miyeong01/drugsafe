@@ -159,6 +159,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+REST_AUTH = {
+    'USER_DETAILS_SERIALIZER': 'accounts.serializers.UserSerializer',
+    'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
+}
 
 from dotenv import load_dotenv
 import os

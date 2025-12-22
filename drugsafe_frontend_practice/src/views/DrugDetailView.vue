@@ -65,6 +65,18 @@ const goReviewDetail = (reviewId) => {
     },
   });
 };
+
+// 즐겨찾기 버튼 클릭 핸들러
+const handleToggleFavorite = () => {
+  if (!accountStore.isLogin) {
+    if (confirm("즐겨찾기 기능은 로그인이 필요합니다. 로그인하시겠습니까?")) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
+    return;
+  }
+  // ✅ 스토어의 토글 함수 호출
+  drugStore.toggleFavorite(selectedDrug.value.id);
+};
 </script>
 
 <template>
@@ -108,8 +120,10 @@ const goReviewDetail = (reviewId) => {
             <h1 class="fw-bold mb-1 display-6">{{ selectedDrug.name }}</h1>
             <p class="text-secondary mb-3 fs-5">{{ selectedDrug.company }}</p>
             <div class="d-flex gap-2 mb-4">
-              <button class="btn btn-outline-danger d-flex align-items-center gap-2 px-3">
-                <Heart :size="18" /> 즐겨찾기
+              <button @click="handleToggleFavorite" class="btn d-flex align-items-center gap-2 px-3"
+                :class="selectedDrug.is_favorite ? 'btn-danger' : 'btn-outline-danger'">
+                <Heart :size="18" :fill="selectedDrug.is_favorite ? 'currentColor' : 'none'" />
+                {{ selectedDrug.is_favorite ? '즐겨찾기 취소' : '즐겨찾기' }}
               </button>
             </div>
           </div>
