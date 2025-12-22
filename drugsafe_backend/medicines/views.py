@@ -2,12 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from .ai.gms_client import parse_user_input, explain
-import asyncio
+import asyncio, re
 
 from .models import Drug, Review, Comment
 from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
+from django.db.models import Avg, Count
+from django.db.models.functions import Coalesce
 
 # Create your views here.
 @api_view(['GET'])
@@ -32,7 +34,17 @@ def drug_list(request):
 
 @api_view(['GET'])
 def drug_detail(request, drug_pk):
-    drug = get_object_or_404(Drug, pk=drug_pk)
+    drug = (
+        Drug.objects.filter(pk=drug_pk)
+        .annotate(
+            avg_rating=Coalesce(Avg('drugs__score'), 0.0),
+            review_cnt=Coalesce(Count('drugs'), 0)
+        )
+        .first()
+    )
+    if not drug:
+        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
     serializer = DrugListSerializer(drug)
     return Response(serializer.data)
 
@@ -136,14 +148,25 @@ def comment_detail(request, review_pk, comment_pk):
 def recommend_drug(parsed, user_message):
     symptom = parsed.get('symptom')
     form = parsed.get('form')
+    sort = parsed.get('sort', 'relevance')
 
-    qs = Drug.objects.all()
+    qs = Drug.objects.annotate(
+        avg_rating = Coalesce(Avg('drugs__score'), 0.0),
+        review_cnt = Coalesce(Count('drugs'), 0)
+    )
+
     if symptom:
         qs = qs.filter(symptom__name__icontains=symptom)
     if form:
         qs = qs.filter(form__name__icontains=form)
 
-    qs = qs[:5]
+    if sort == 'rating':
+        qs = qs.order_by('-avg_rating', '-review_cnt')
+    elif sort == 'review':
+        qs = qs.order_by('-review_cnt', '-avg_rating')
+
+    qs = qs[:3]
+
     if not qs.exists():
         return Response({
             'answer': '해당 조건에 맞는 의약품 정보가 없습니다.'
@@ -152,9 +175,9 @@ def recommend_drug(parsed, user_message):
     for d in qs:
         context += f"""
 - 약명: {d.name}
+- 평균 별점: {d.avg_rating or 0:.1f}
+- 리뷰 수: {d.review_cnt}
 - 효능: {d.efficacy}
-- 제형: {d.form}
-- 주의사항: {d.caution}
 """
     answer = asyncio.run(
         explain(context, user_message)
@@ -191,17 +214,119 @@ def recommend_drug(parsed, user_message):
 
 #     return Response({"answer": answer})
 
+def find_drug_candidates(keyword: str):
+    return (
+        Drug.objects
+        .filter(name__icontains=keyword)
+        .annotate(
+            avg_rating = Coalesce(Avg('drugs__score'), 0.0),
+            review_cnt = Coalesce(Count('drugs'), 0)
+        )
+        .order_by('-review_cnt', '-avg_rating')
+    )
+
+def explain_drug_by_name(keyword: str):
+    exact = Drug.objects.filter(name=keyword).annotate(
+        avg_rating = Coalesce(Avg('drugs__score'), 0.0),
+        review_cnt = Coalesce(Count('drugs'),0)
+    ).first()
+
+    if exact:
+        return Response({
+            'type': 'single',
+            'drug_id': exact.id,
+            'answer': format_drug_info(exact)
+        })
+
+    qs = find_drug_candidates(keyword)
+    cnt = qs.count()
+
+    if cnt == 0:
+        return Response({
+            "type": "not_found",
+            "answer": "해당 이름의 의약품을 찾을 수 없습니다."
+        })
+
+    # 1개면 바로 설명
+    if cnt == 1:
+        drug = qs.first()
+        return Response({
+            "type": "single",
+            "drug_id": drug.id,
+            "answer": format_drug_info(drug)
+        })
+
+    # 여러 개면 선택지
+    candidates = qs[:3]
+    return Response({
+        "type": "multiple",
+        "candidates": [
+            {"id": d.id, "name": d.name}
+            for d in candidates
+        ],
+        "answer": (
+            "다음 중 어떤 의약품을 말씀하시는 건가요?\n" +
+            "\n".join([f"- {d.name}" for d in candidates])
+        )
+    })
+
+def format_drug_info(drug: Drug) -> str:
+    return f"""💊 약품명: {drug.name}
+
+🏭 제조사: {drug.company}
+
+🩺 효능: {drug.efficacy}
+
+⚠️ 주의사항: {drug.caution}
+
+⭐ 평균 별점: {drug.avg_rating:.1f}
+
+📝 리뷰 수: {drug.review_cnt}개
+"""
+
+def normalize_kwd(raw):
+    if not raw:
+        return ""
+
+    if isinstance(raw, list):
+        raw = raw[0]
+
+    if not isinstance(raw, str):
+        return ""
+
+    raw = raw.strip()
+    raw = re.sub(r'(무슨|어떤)\s*약.*$', '', raw)
+    raw = re.sub(r'(은|는|이|가|을|를)\s*$', '', raw)
+
+    return raw
+
+
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def chatbot_view(request):
-    user_message = request.data.get('message','')
+    user_message = request.data.get('message', '')
 
     parsed = asyncio.run(parse_user_input(user_message))
     intent = parsed.get('intent')
 
     if intent == 'recommend':
         return recommend_drug(parsed, user_message)
+    print("RAW parsed:", parsed)
+    print("RAW keyword before normalize:", parsed.get('drug_name') or user_message)
+
+    # 약 이름 포함 여부로 DB 먼저 탐색
+    keyword = parsed.get('drug_name') or user_message
+    keyword = normalize_kwd(keyword)
+
+    print("NORMALIZED keyword:", repr(keyword))
+    
+    qs = Drug.objects.filter(name__icontains=keyword)
+
+    if qs.exists():
+        return explain_drug_by_name(keyword)
+
     # elif intent == 'interaction':
     #     return check_interaction(parsed, user_message)
     return Response({
-        'answer': '어떤 도움을 드릴까요? 증상이나 교차복용이 가능한 지 궁금하신 약 이름을 말씀해주세요'
+        'answer': '어떤 도움을 드릴까요? 증상이나 궁금한 약 이름을 말씀해주세요'
     })
