@@ -179,7 +179,7 @@ const handleSymptomClick = (symptom) => {
         <div class="search-wrapper">
           <div class="search-box-modern">
             <div class="search-glow"></div><Search class="search-icon" />
-            <input type="text" placeholder="증상이나 약품명을 검색하세요..." class="search-input" v-model="searchQuery" @keydown.enter="handleSearch" />
+            <input type="text" placeholder="약품명을 검색하세요..." class="search-input" v-model="searchQuery" @keydown.enter="handleSearch" />
             <button class="search-btn-modern" @click="handleSearch"><span>검색</span><div class="btn-shine"></div></button>
           </div>
         </div>

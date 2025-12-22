@@ -6,10 +6,28 @@ import { useRouter } from "vue-router";
 export const useAccountStore = defineStore("accounts", () => {
   const router = useRouter();
   const token = ref(localStorage.getItem('token') || null);
-  const userData = ref(null);
+  const userInfo = ref(null);
 
   // API 서버 주소 (Django)
   const API_URL = "http://127.0.0.1:8000";
+
+  const getUserInfo = function () {
+    if (!token.value) return;
+
+    axios({
+      method: 'get',
+      url: `${API_URL}/accounts/user/`, // dj-rest-auth의 기본 유저 정보 경로
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
+    })
+      .then(res => {
+        userInfo.value = res.data; // 서버에서 받은 유저 정보(pk, username 등) 저장
+      })
+      .catch(err => {
+        console.error('유저 정보 로드 실패:', err);
+      });
+  };
 
   // 회원가입 액션
   const signup = function (payload) {
@@ -40,45 +58,49 @@ export const useAccountStore = defineStore("accounts", () => {
   }
 
   const login = function (payload) {
-    const { username, password } = payload
+    const { username, password } = payload;
 
     axios({
-        method: 'post',
-        url: `${API_URL}/accounts/login/`,
-        data: {
-            username, password
-        }
+      method: 'post',
+      url: `${API_URL}/accounts/login/`,
+      data: { username, password }
     })
-        .then(res => {
-            token.value = res.data.key
-            localStorage.setItem('token', res.data.key)
-            alert('반갑습니다! 로그인이 완료되었습니다.')
-            router.push('/')
-        })
-        .catch(err => {
-            console.log(err)
-            alert('아이디 또는 비밀번호를 확인해주세요.')
-        })
-  }
+      .then(res => {
+        token.value = res.data.key;
+        localStorage.setItem('token', res.data.key);
+        
+        // ✅ 로그인 직후 유저 정보를 바로 가져옵니다.
+        getUserInfo(); 
+        
+        alert('반갑습니다! 로그인이 완료되었습니다.');
+        router.push('/');
+      })
+      .catch(err => {
+        console.log(err);
+        alert('아이디 또는 비밀번호를 확인해주세요.');
+      });
+  };
 
   const isLogin = computed(() => {
     return token.value ? true : false
   })
 
   const logOut = function () {
-    token.value = null
-    localStorage.removeItem('token')
-
     axios({
-        method: 'post',
-        url: `${API_URL}/accounts/logout/`
+      method: 'post',
+      url: `${API_URL}/accounts/logout/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
     })
-        .then((res) => {
-            token.value = null
-            router.push({ name: 'home' })
-        })
-        .catch((err) => console.log(err))
-  }
+      .then(() => {
+        token.value = null;
+        userInfo.value = null; // 로그아웃 시 유저 정보 초기화
+        localStorage.removeItem('token');
+        router.push({ name: 'home' });
+      })
+      .catch((err) => console.log(err));
+  };
 
-  return { signup, login, token, userData, isLogin, logOut }
+  return { signup, login, token, userInfo, getUserInfo, isLogin, logOut }
 });

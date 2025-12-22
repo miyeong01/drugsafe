@@ -9,6 +9,7 @@ class DrugListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
         model = Review
         fields = '__all__'
@@ -28,14 +29,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         }
 
 class CommentSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
         model = Comment
         fields = '__all__'
-        read_only_fields = ('user', 'form', 'created_at', 'updated_at',)
+        read_only_fields = ('user', 'review', 'form', 'created_at', 'updated_at',)
 
 class ReviewDetailSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
         model = Review
-        fields = ('user', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments')
+        fields = ('user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments')
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
