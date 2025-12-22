@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .ai.gms_client import parse_user_input, explain
+import asyncio
 
 from .models import Drug, Review, Comment
 from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
@@ -27,13 +29,6 @@ def drug_list(request):
         print(f"이름 검색 적용됨. 결과: {drugs.count()}건")
     serializer = DrugListSerializer(drugs, many=True)
     return Response(serializer.data)
-
-@api_view(['GET'])
-def drug_detail(request, drug_pk):
-    drug = get_object_or_404(Drug, pk=drug_pk)
-    serializer = DrugListSerializer(drug)
-    return Response(serializer.data)
-    
 
 # @api_view(['GET','POST'])
 # def review_list(request, drug_pk):
@@ -130,3 +125,76 @@ def comment_detail(request, review_pk, comment_pk):
             return Response({'error': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+def recommend_drug(parsed, user_message):
+    symptom = parsed.get('symptom')
+    form = parsed.get('form')
+
+    qs = Drug.objects.all()
+    if symptom:
+        qs = qs.filter(symptom__name__icontains=symptom)
+    if form:
+        qs = qs.filter(form__name__icontains=form)
+
+    qs = qs[:5]
+    if not qs.exists():
+        return Response({
+            'answer': '해당 조건에 맞는 의약품 정보가 없습니다.'
+        })
+    context = ''
+    for d in qs:
+        context += f"""
+- 약명: {d.name}
+- 효능: {d.efficacy}
+- 제형: {d.form}
+- 주의사항: {d.caution}
+"""
+    answer = asyncio.run(
+        explain(context, user_message)
+    )
+
+    return Response({'answer': answer})
+
+# def check_interaction(parsed, user_message):
+#     drugs = parsed.get("drugs")
+
+#     if not drugs or len(drugs) < 2:
+#         return Response({
+#             "answer": "비교할 약품 이름을 두 개 이상 입력해주세요."
+#         })
+
+#     qs = Drug.objects.filter(name__in=drugs)[:2]
+
+#     if qs.count() < 2:
+#         return Response({
+#             "answer": "입력한 약 중 일부의 정보가 없습니다."
+#         })
+
+#     context = ""
+#     for d in qs:
+#         context += f"""
+# - 약명: {d.name}
+# - 성분/효능: {d.efficacy}
+# - 주의사항: {d.caution}
+# """
+
+#     answer = asyncio.run(
+#         explain(context, user_message)
+#     )
+
+#     return Response({"answer": answer})
+
+@api_view(['POST'])
+def chatbot_view(request):
+    user_message = request.data.get('message','')
+
+    parsed = asyncio.run(parse_user_input(user_message))
+    intent = parsed.get('intent')
+
+    if intent == 'recommend':
+        return recommend_drug(parsed, user_message)
+    # elif intent == 'interaction':
+    #     return check_interaction(parsed, user_message)
+    return Response({
+        'answer': '어떤 도움을 드릴까요? 증상이나 교차복용이 가능한 지 궁금하신 약 이름을 말씀해주세요'
+    })
