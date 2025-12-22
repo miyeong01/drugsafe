@@ -43,12 +43,10 @@ onMounted(() => {
 });
 
 // 메시지 전송 로직
-const handleSend = async () => {
-  if (!message.value.trim()) return;
+const handleSend = async (manualMessage = null) => {
+  const userMessage = manualMessage || message.value;
+  if (!userMessage.trim()) return;
 
-  const userMessage = message.value;
-
-  // 사용자 메시지 추가
   messages.value.push({ role: 'user', text: userMessage });
   message.value = '';
   loading.value = true;
@@ -58,21 +56,25 @@ const handleSend = async () => {
       'http://localhost:8000/api/medicines/chatbot/',
       { message: userMessage }
     );
-
     messages.value.push({
       role: 'ai',
       text: res.data.answer,
-    });
+      type: res.data.type,
+      candidates: res.data.candidates || [] // 후보 리스트
+    })
   } catch (err) {
     messages.value.push({
       role: 'ai',
       text: '⚠️ 현재 상담 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
-    });
+    })
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
+const handleCandidateClick = (candidateName) => {
+  handleSend(candidateName)
+}
 
 const handleKeyPress = (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -80,23 +82,12 @@ const handleKeyPress = (e) => {
     handleSend();
   }
 };
-
-// const quickQuestions = [
-//   '두통에 좋은 약 추천해주세요',
-//   '감기약 어떤 게 좋나요?',
-//   '소화제 추천해주세요',
-//   '해열제가 필요해요'
-// ];
-
-// const handleQuickQuestion = (question) => {
-//   message.value = question;
-// };
 </script>
 
 <template>
   <div class="chat-page-container">
     <div class="content-wrapper">
-      
+
       <header class="chat-header">
         <div class="bot-icon-wrapper main-icon">
           <Bot class="bot-icon" />
@@ -108,20 +99,27 @@ const handleKeyPress = (e) => {
       </header>
 
       <main class="chat-main-card">
-        
+
         <div class="message-area">
-          <div
-            v-for="(msg, index) in messages"
-            :key="index"
-            class="message-row"
-            :class="msg.role === 'user' ? 'message-end' : 'message-start'"
-          >
+          <div v-for="(msg, index) in messages" :key="index" class="message-row"
+            :class="msg.role === 'user' ? 'message-end' : 'message-start'">
             <template v-if="msg.role === 'ai'">
               <div class="bot-avatar">
                 <Bot class="small-bot-icon" />
               </div>
-              <div class="message-bubble ai-bubble">
-                <p>{{ msg.text }}</p>
+
+              <div class="ai-container">
+                <div class="message-bubble ai-bubble">
+                  <p>{{ msg.text }}</p>
+                </div>
+
+                <div v-if="msg.type === 'multiple'" class="candidate-wrapper">
+                  <div v-for="drug in msg.candidates" :key="drug.id" class="candidate-card"
+                    @click="handleCandidateClick(drug.name)">
+                    <span class="drug-name">{{ drug.name }}</span>
+                    <span class="click-hint">클릭하여 선택</span>
+                  </div>
+                </div>
               </div>
             </template>
 
@@ -148,20 +146,12 @@ const handleKeyPress = (e) => {
           </div>
         </div> -->
 
+
         <div class="input-area">
           <div class="input-wrapper">
-            <input
-              type="text"
-              v-model="message"
-              @keydown="handleKeyPress"
-              placeholder="증상이나 질문을 입력하세요..."
-              class="chat-input"
-            />
-            <button
-              @click="handleSend"
-              :disabled="!message.trim()"
-              class="send-btn"
-            >
+            <input type="text" v-model="message" @keydown="handleKeyPress" placeholder="증상이나 질문을 입력하세요..."
+              class="chat-input" />
+            <button @click="handleSend" :disabled="!message.trim()" class="send-btn">
               <Send class="send-icon" />
             </button>
           </div>
@@ -176,7 +166,7 @@ const handleKeyPress = (e) => {
           </div>
           <p>증상을 자세히 설명하면 더 정확한 의약품을 추천받을 수 있습니다</p>
         </div>
-        
+
         <div class="info-card">
           <div class="info-card-header">
             <Sparkles class="sparkle-icon" />
@@ -212,13 +202,15 @@ const handleKeyPress = (e) => {
 /* 전체 레이아웃 */
 .chat-page-container {
   min-height: 100vh;
-  background-color: var(--pastel-bg, #F0F7FF); /* 파스텔톤 하늘색 배경 */
+  background-color: var(--pastel-bg, #F0F7FF);
+  /* 파스텔톤 하늘색 배경 */
   padding: 2.5rem 1rem;
   box-sizing: border-box;
 }
 
 .content-wrapper {
-  max-width: 56rem; /* max-w-4xl */
+  max-width: 56rem;
+  /* max-w-4xl */
   margin: 0 auto;
 }
 
@@ -391,7 +383,8 @@ const handleKeyPress = (e) => {
 .chat-input {
   width: 100%;
   padding: 1.25rem 1.5rem;
-  padding-right: 5rem; /* 버튼 공간 확보 */
+  padding-right: 5rem;
+  /* 버튼 공간 확보 */
   border: 2px solid var(--light-border, #E5F0FF);
   border-radius: 9999px;
   outline: none;
@@ -457,7 +450,8 @@ const handleKeyPress = (e) => {
 
 .info-card {
   padding: 1.5rem;
-  background-color: var(--pastel-bg, #F0F7FF); /* 카드도 파스텔톤 배경 */
+  background-color: var(--pastel-bg, #F0F7FF);
+  /* 카드도 파스텔톤 배경 */
   border-radius: 1rem;
 }
 
@@ -486,5 +480,61 @@ const handleKeyPress = (e) => {
   color: var(--text-gray, #718096);
   line-height: 1.625;
   margin: 0;
+}
+
+/* 💡 AI 컨테이너 (말풍선과 카드를 묶음) */
+.ai-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 100%;
+}
+
+/* 💡 후보 카드 영역 */
+.candidate-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.candidate-card {
+  background-color: white;
+  border: 2px solid var(--primary-blue);
+  border-radius: 1rem;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(77, 159, 255, 0.1);
+}
+
+.candidate-card:hover {
+  background-color: var(--primary-blue);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(77, 159, 255, 0.3);
+}
+
+.drug-name {
+  font-weight: 700;
+  color: var(--primary-blue);
+  font-size: 0.95rem;
+}
+
+.candidate-card:hover .drug-name {
+  color: white;
+}
+
+.click-hint {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  margin-top: 2px;
+}
+
+.candidate-card:hover .click-hint {
+  color: rgba(255, 255, 255, 0.8);
 }
 </style>
