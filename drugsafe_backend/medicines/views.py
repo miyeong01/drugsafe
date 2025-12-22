@@ -2,11 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from .ai.gms_client import parse_user_input, explain
 import asyncio, re
 
-from .models import Drug, Review, Comment
+from .models import Drug, Review, Comment, Favorite
 from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
 from django.db.models import Avg, Count, Max
 from django.db.models.functions import Coalesce
@@ -14,22 +14,20 @@ from django.db.models.functions import Coalesce
 # Create your views here.
 @api_view(['GET'])
 def drug_list(request):
-    drugs = Drug.objects.all()
+    drugs = Drug.objects.annotate(
+        avg_rating=Coalesce(Avg('drugs__score'), 0.0),
+        review_cnt=Coalesce(Count('drugs'), 0)
+    )
+    
     symptom_id = request.GET.get('symptom')
     search_query = request.GET.get('search')
 
-    print(f"--- 요청 들어옴 ---")
-    print(f"받은 증상 ID: {symptom_id}")
-    print(f"받은 검색어: {search_query}")
-
     if symptom_id:
         drugs = drugs.filter(symptom_id=symptom_id)
-        print(f"증상 필터링 적용됨. 결과: {drugs.count()}건")
-    
     elif search_query:
         drugs = drugs.filter(name__icontains=search_query)
-        print(f"이름 검색 적용됨. 결과: {drugs.count()}건")
-    serializer = DrugListSerializer(drugs, many=True)
+
+    serializer = DrugListSerializer(drugs, many=True, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -45,7 +43,7 @@ def drug_detail(request, drug_pk):
     if not drug:
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = DrugListSerializer(drug)
+    serializer = DrugListSerializer(drug, context={'request': request})
     return Response(serializer.data)
 
 # @api_view(['GET','POST'])
@@ -144,6 +142,57 @@ def comment_detail(request, review_pk, comment_pk):
             return Response({'error': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_reviews(request):
+    # 최신순 정렬 및 request 정보 전달
+    reviews = Review.objects.filter(user=request.user).order_by('-created_at')
+    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_comments(request):
+    # 최신순 정렬 및 request 정보 전달
+    comments = Comment.objects.filter(user=request.user).order_by('-created_at')
+    serializer = CommentSerializer(comments, many=True, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_favorites(request):
+    # 1. 내가 찜한 약의 ID 목록을 먼저 가져옵니다.
+    favorite_ids = Favorite.objects.filter(user=request.user).values_list('drug_id', flat=True)
+    
+    # 2. 해당 약들을 가져오면서 별점과 리뷰 수를 계산(annotate)합니다.
+    drugs = (
+        Drug.objects.filter(id__in=favorite_ids)
+        .annotate(
+            avg_rating=Coalesce(Avg('drugs__score'), 0.0),
+            review_cnt=Coalesce(Count('drugs'), 0)
+        )
+    )
+    
+    # 3. context에 request를 담아 즐겨찾기 여부 로직이 에러 나지 않게 합니다.
+    serializer = DrugListSerializer(drugs, many=True, context={'request': request})
+    return Response(serializer.data)
+
+# 약 상세 페이지에서 즐겨찾기를 누를 때 호출할 함수
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_favorite(request, drug_pk):
+    drug = get_object_or_404(Drug, pk=drug_pk)
+    user = request.user
+    
+    favorite = Favorite.objects.filter(user=user, drug=drug)
+    
+    if favorite.exists():
+        favorite.delete()
+        return Response({'message': '즐겨찾기에서 제거되었습니다.'}, status=status.HTTP_204_NO_CONTENT)
+    else:
+        Favorite.objects.create(user=user, drug=drug)
+        return Response({'message': '즐겨찾기에 추가되었습니다.'}, status=status.HTTP_201_CREATED)
     
 def recommend_drug(parsed, user_message):
     symptom = parsed.get('symptom')
