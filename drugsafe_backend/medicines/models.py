@@ -22,6 +22,7 @@ class Drug(models.Model):
   caution_intake = models.TextField()
   side_effect = models.TextField()
   store = models.TextField()
+  image_url = models.URLField(blank=True, null=True)
 
 class Review(models.Model):
   user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
