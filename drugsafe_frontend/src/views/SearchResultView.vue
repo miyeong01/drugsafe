@@ -1,8 +1,13 @@
 <script setup>
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Search, SlidersHorizontal, Star, Heart, Pill } from "lucide-vue-next";
+import { Search, SlidersHorizontal, Star, Heart, Pill, Droplet, SprayCan, Bandage } from "lucide-vue-next";
 import { useDrugStore } from "@/stores/drug";
+import film from "@/assets/icons/film.svg?component";
+import lotion from "@/assets/icons/lotion.svg?component";
+import cream from "@/assets/icons/cream.svg?component";
+import ointment from "@/assets/icons/ointment.svg?component";
+import powder from "@/assets/icons/powder.svg?component";
 
 const router = useRouter();
 const route = useRoute();
@@ -11,35 +16,28 @@ const drugStore = useDrugStore();
 // URL의 쿼리(?q=...)를 가져와서 검색어 초기화
 const keyword = ref(route.query.q || "");
 
-// filteredDrugs 계산된 속성 내부의 정렬 로직 수정
+// 필터와 정렬이 적용된 가공된 데이터 리스트
 const filteredDrugs = computed(() => {
-  let list = [...drugStore.drugs];
+  let list = [...drugStore.drugs]; // 원본 데이터 복사
 
-  // 1. 제형 필터링 (기존 로직 유지)
+  // 1. 제형 필터링 로직
+  // 체크된 필터 키들만 추출 (예: ['tablet', 'syrup'])
   const activeFilterKeys = Object.keys(filters).filter((key) => filters[key]);
+
   if (activeFilterKeys.length > 0) {
     list = list.filter((drug) => {
+      // 데이터의 form_name(예: '알약')이 선택된 필터의 한글 라벨과 일치하는지 확인
       return activeFilterKeys.some((key) => drug.form_name === formLabels[key]);
     });
   }
 
-  // 2. ✨ 정렬 로직 강화 (내림차순 정렬)
+  // 2. 정렬 로직
   if (sortBy.value === "rating") {
-    // 평점 높은 순: b - a (내림차순)
-    list.sort((a, b) => {
-      const ratingA = Number(a.rating || 0);
-      const ratingB = Number(b.rating || 0);
-      return ratingB - ratingA;
-    });
+    list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   } else if (sortBy.value === "reviews") {
-    // 리뷰 많은 순: b - a (내림차순)
-    list.sort((a, b) => {
-      const countA = Number(a.review_count || 0);
-      const countB = Number(b.review_count || 0);
-      return countB - countA;
-    });
+    list.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
   }
-  // 'relevance'일 경우 서버에서 온 기본 순서를 유지함
+  // 'relevance'(관련도순)는 기본 서버 응답 순서를 유지합니다.
 
   return list;
 });
@@ -127,6 +125,22 @@ function goDetail(drugId) {
 // 검색 실행
 function handleSearch() {
   router.push({ query: { q: keyword.value } });
+}
+
+const getFormIcon = (form) => {
+  const map = {
+    1: Pill,
+    2: powder,
+    3: Droplet,
+    4: Droplet,
+    5: SprayCan,
+    6: film,
+    7: cream,
+    8: ointment,
+    9: Bandage,
+    10: lotion,
+  };
+  return map[form] || Pill;
 }
 </script>
 
@@ -234,16 +248,21 @@ function handleSearch() {
                     style="width: 80px; height: 80px"
                   >
                     <!-- 이미지 있을 때 -->
-                    <img
-                      v-if="drug.image_url"
-                      :src="drug.image_url"
-                      alt="의약품 이미지"
-                      style="width: 100%; height: 100%; object-fit: contain"
-                    />
+                    <div v-if="drug.image_url">
+                      <img
+                        :src="drug.image_url"
+                        alt="의약품 이미지"
+                        style="width: 100%; height: 100%; object-fit: contain"
+                      />
+                    </div>
 
                     <!-- 이미지 없을 때 -->
                     <div v-else class="bg-white rounded-circle p-2 shadow-sm">
-                      <Pill class="text-primary" :size="24" />
+                      <component
+                        :is="getFormIcon(drug.form)"
+                        class="text-primary drug-icon"
+                      />
+                      
                     </div>
                   </div>
 
@@ -381,5 +400,10 @@ function handleSearch() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.drug-icon {
+  width: 24px;
+  height: 24px;
 }
 </style>
