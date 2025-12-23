@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router';
+
 // Footer는 표시할 데이터나 로직이 없어서 script 부분이 비어있어도 됩니다.
 </script>
 
@@ -18,16 +20,32 @@
         <div class="col-12 col-md-3">
           <h6 class="mb-4 fw-bold">서비스</h6>
           <ul class="list-unstyled text-secondary small">
-            <li class="mb-2">약품 검색</li>
-            <li class="mb-2">증상별 추천</li>
-            <li class="mb-2">리뷰 커뮤니티</li>
+            <li class="mb-2">
+              <RouterLink to="/search" class="footer-link">
+                약품 검색
+              </RouterLink>
+            </li>
+            <li class="mb-2">
+              <RouterLink to="/chatbot" class="footer-link">
+                AI 챗봇
+              </RouterLink>
+            </li>
+            <li class="mb-2">
+              <RouterLink to="/community" class="footer-link">
+                커뮤니티
+              </RouterLink>
+            </li>
           </ul>
         </div>
 
         <div class="col-12 col-md-3">
           <h6 class="mb-4 fw-bold">고객지원</h6>
           <ul class="list-unstyled text-secondary small">
-            <li class="mb-2">FAQ</li>
+            <li class="mb-2">
+              <RouterLink to="/FAQ" class="footer-link">
+                FAQ
+              </RouterLink>
+            </li>
           </ul>
         </div>
 
@@ -49,12 +67,12 @@
 </template>
 
 <style scoped>
-/* 커서 포인터 효과가 필요하면 추가 */
-li {
-  cursor: pointer;
+.footer-link {
+  color: gray;
+  text-decoration: none;
 }
-li:hover {
-  color: #0d6efd; /* 부트스트랩 기본 Primary 색상 */
+.footer-link:hover {
+  color: gray;
   text-decoration: underline;
 }
 </style>
