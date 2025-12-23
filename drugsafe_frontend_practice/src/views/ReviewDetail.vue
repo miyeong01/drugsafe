@@ -33,8 +33,8 @@
               <div class="d-flex align-items-center gap-2">
                 <div class="text-warning small">
                   <span v-for="i in 5" :key="i" :class="i <= selectedReview.score
-                      ? 'text-warning'
-                      : 'text-secondary opacity-25'
+                    ? 'text-warning'
+                    : 'text-secondary opacity-25'
                     ">
                     ★
                   </span>
@@ -48,6 +48,18 @@
           <p class="text-dark lh-lg mb-0" style="white-space: pre-wrap">
             {{ selectedReview.content }}
           </p>
+        </div>
+
+        <div class="d-flex justify-content-start border-top pt-4">
+          <button class="btn rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm transition-all border"
+            :class="selectedReview.is_helpful ? 'btn-danger text-white border-danger' : 'btn-light text-muted'"
+            @click="onToggleHelpful(selectedReview.id)">
+            <ThumbsUp :size="18" :fill="selectedReview.is_helpful ? 'white' : 'none'" />
+            <span class="fw-bold">도움이 돼요</span>
+            <span class="badge bg-white text-danger ms-1 px-2" v-if="selectedReview.helpful_count > 0">
+              {{ selectedReview.helpful_count }}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -136,7 +148,8 @@ import {
   Trash2,
   Edit3,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ThumbsUp
 } from "lucide-vue-next";
 
 const route = useRoute();
@@ -254,6 +267,17 @@ watch(() => selectedReview.value?.comments?.length, (newVal) => {
     currentPage.value = Math.max(1, totalPages.value);
   }
 });
+
+const onToggleHelpful = (reviewId) => {
+  if (!accountStore.isLogin) {
+    if (confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?")) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
+    return;
+  }
+  // 스토어의 액션 호출 (서버와 통신 후 selectedReview 상태가 자동으로 업데이트됩니다)
+  drugStore.toggleHelpful(reviewId);
+};
 </script>
 
 <style scoped>

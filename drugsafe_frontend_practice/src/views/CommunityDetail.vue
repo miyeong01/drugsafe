@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useDrugStore } from "@/stores/drug";
+import { useAccountStore } from "@/stores/accounts"; // ✨ 추가: accountStore 임포트 필요
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import {
@@ -16,7 +17,6 @@ import {
   ChevronRight,
 } from "lucide-vue-next";
 
-// Props 정의
 const props = defineProps({
   onNavigate: {
     type: Function,
@@ -25,26 +25,23 @@ const props = defineProps({
 });
 
 const drugStore = useDrugStore();
+const accountStore = useAccountStore(); // ✨ 추가: 토큰 확인을 위해 필요
 const { reviews } = storeToRefs(drugStore);
 const router = useRouter();
 
-// 상태 관리
 const searchQuery = ref("");
 const sortBy = ref("latest");
 const activeTab = ref("all");
 
-// 페이지 로드 시 전체 리뷰 데이터를 가져옴.
 onMounted(() => {
-  // drugId 없이 호출하면 전체 리뷰를 가져오도록 스토어 액션 구성
   drugStore.getReviews();
 });
 
-// 계산된 속성: 필터링 및 정렬된 리뷰
+// ✨ [통합된 필터링/정렬 로직] 중복 선언을 피하기 위해 하나로 합쳤습니다.
 const filteredReviews = computed(() => {
-  // reviews가 null일 경우를 대비해 빈 배열로 시작합니다.
   let list = reviews.value ? [...reviews.value] : [];
 
-  // 검색 필터링 (제목, 약품명 기준)
+  // 1. 검색 필터링 (제목, 약품명, 내용)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     list = list.filter(
@@ -55,47 +52,41 @@ const filteredReviews = computed(() => {
     );
   }
 
-  // 정렬 로직
-  if (activeTab.value === "popular" || sortBy.value === "comments") {
-    // 댓글 많은 순 정렬
+  // 2. 정렬 로직 (인기순/댓글순/최신순 통합)
+  if (activeTab.value === "popular" || sortBy.value === "helpful") {
+    list.sort((a, b) => (b.helpful_count || 0) - (a.helpful_count || 0));
+  } else if (sortBy.value === "comments") {
+    // 댓글 많은 순
     list.sort((a, b) => (b.comment_count || 0) - (a.comment_count || 0));
   } else if (sortBy.value === "latest") {
-    // 최신순 정렬
+    // 최신순
     list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
   return list;
 });
 
-// 전체 통계 계산
 const totalComments = computed(() => {
   return reviews.value
     ? reviews.value.reduce((sum, r) => sum + (r.comment_count || 0), 0)
     : 0;
 });
 
-// 리뷰 상세 페이지 이동 함수 추가
 const goReviewDetail = (drugId, reviewId) => {
   router.push({
-    name: "ReviewDetail", // 1. router/index.js에 설정한 이름을 확인하세요!
-    params: {
-      drugId: drugId,
-      reviewId: reviewId,
-    },
+    name: "ReviewDetail",
+    params: { drugId: drugId, reviewId: reviewId },
   });
 };
 
-// 페이지네이션 관련 상태 추가
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-// 전체 페이지 수 계산 보완
 const totalPages = computed(() => {
   const count = filteredReviews.value ? filteredReviews.value.length : 0;
-  return Math.ceil(count / itemsPerPage) || 1; // 최소 1페이지 보장
+  return Math.ceil(count / itemsPerPage) || 1;
 });
 
-// paginatedReviews 계산 로직 보완
 const paginatedReviews = computed(() => {
   const list = filteredReviews.value || [];
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -103,15 +94,24 @@ const paginatedReviews = computed(() => {
   return list.slice(start, end);
 });
 
-// 검색어나 탭 변경 시 1페이지로 리셋
 watch([searchQuery, sortBy, activeTab], () => {
   currentPage.value = 1;
 });
 
-// 페이지 변경 함수
 const changePage = (page) => {
   currentPage.value = page;
   window.scrollTo(0, 0);
+};
+
+// 도움이 돼요 클릭 핸들러 (accountStore 사용)
+const onToggleHelpful = (reviewId) => {
+  if (!accountStore.isLogin) {
+    if (confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?")) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
+    return;
+  }
+  drugStore.toggleHelpful(reviewId);
 };
 </script>
 
@@ -130,23 +130,17 @@ const changePage = (page) => {
           <div class="col-md-8">
             <div class="search-input-group">
               <Search class="search-icon" :size="20" />
-              <input
-                type="text"
-                class="form-control ps-5 py-3 border-0 bg-light rounded-3"
-                placeholder="리뷰 검색 (제목, 내용, 약품명)"
-                v-model="searchQuery"
-              />
+              <input type="text" class="form-control ps-5 py-3 border-0 bg-light rounded-3"
+                placeholder="리뷰 검색 (제목, 내용, 약품명)" v-model="searchQuery" />
             </div>
           </div>
           <div class="col-md-4">
             <div class="d-flex align-items-center gap-2 h-100">
               <Filter class="text-secondary" :size="20" />
-              <select
-                class="form-select border-0 bg-light py-3 rounded-3"
-                v-model="sortBy"
-              >
+              <select class="form-select border-0 bg-light py-3 rounded-3" v-model="sortBy">
                 <option value="latest">최신순</option>
                 <option value="comments">댓글순</option>
+                <option value="helpful">도움순</option>
               </select>
             </div>
           </div>
@@ -155,20 +149,14 @@ const changePage = (page) => {
 
       <ul class="nav nav-pills mb-4 gap-2">
         <li class="nav-item">
-          <button
-            class="nav-link rounded-pill px-4 py-2"
-            :class="{ active: activeTab === 'all' }"
-            @click="activeTab = 'all'"
-          >
+          <button class="nav-link rounded-pill px-4 py-2" :class="{ active: activeTab === 'all' }"
+            @click="activeTab = 'all'">
             <ClipboardList class="me-2" :size="16" />전체 리뷰
           </button>
         </li>
         <li class="nav-item">
-          <button
-            class="nav-link rounded-pill px-4 py-2"
-            :class="{ active: activeTab === 'popular' }"
-            @click="activeTab = 'popular'"
-          >
+          <button class="nav-link rounded-pill px-4 py-2" :class="{ active: activeTab === 'popular' }"
+            @click="activeTab = 'popular'">
             <TrendingUp class="me-2" :size="16" />인기 리뷰
           </button>
         </li>
@@ -176,12 +164,9 @@ const changePage = (page) => {
 
       <div class="review-list d-flex flex-column gap-4 mb-5">
         <template v-if="filteredReviews.length > 0">
-          <div
-            v-for="review in paginatedReviews"
-            :key="review.id"
+          <div v-for="review in paginatedReviews" :key="review.id"
             class="card border-0 shadow-sm p-4 rounded-4 review-card mb-3"
-            @click="goReviewDetail(review.drug, review.id)"
-          >
+            @click="goReviewDetail(review.drug, review.id)">
             <div class="d-flex align-items-center gap-2 mb-2">
               <span class="small fw-bold text-dark">
                 {{ review.drug_name }}
@@ -192,16 +177,21 @@ const changePage = (page) => {
               {{ review.title || "제목 없는 리뷰" }}
             </h5>
 
-            <p
-              class="text-secondary small mb-3 text-truncate-2"
-              style="white-space: pre-wrap"
-            >
+            <p class="text-secondary small mb-3 text-truncate-2" style="white-space: pre-wrap">
               {{ review.content }}
             </p>
 
-            <div
-              class="d-flex align-items-center gap-4 pt-3 border-top text-muted small"
-            >
+            <div class="d-flex align-items-center gap-3 pt-3 border-top text-muted small">
+              <button class="btn btn-sm rounded-pill px-3 border d-flex align-items-center gap-1 transition-all"
+                :class="review.is_helpful ? 'btn-danger text-white border-danger' : 'btn-light text-muted'"
+                @click.stop="onToggleHelpful(review.id)">
+                <ThumbsUp :size="14" :fill="review.is_helpful ? 'white' : 'none'" />
+
+                <span class="ms-1 small">도움이 돼요</span>
+
+                <span class="fw-bold ms-1">{{ review.helpful_count || 0 }}</span>
+              </button>
+
               <span class="d-flex align-items-center gap-1">
                 <MessageCircle :size="14" /> 댓글
                 {{ review.comment_count || 0 }}
@@ -219,26 +209,11 @@ const changePage = (page) => {
           <p class="text-muted mb-0">검색 결과가 없습니다.</p>
         </div>
       </div>
-
-      <button
-        class="btn btn-primary fab-button shadow-lg d-flex align-items-center gap-2 px-4 py-3 rounded-pill"
-        @click="onNavigate('write-review')"
-      >
-        <Plus :size="24" />
-        <span class="fw-bold">리뷰 작성하기</span>
-      </button>
     </div>
 
-    <nav
-      v-if="totalPages > 1"
-      class="custom-position-nav d-flex justify-content-center"
-    >
+    <nav v-if="totalPages > 1" class="custom-position-nav d-flex justify-content-center">
       <div class="minimal-pagination d-flex align-items-center gap-3">
-        <button
-          class="btn-arrow"
-          :disabled="currentPage === 1"
-          @click="changePage(currentPage - 1)"
-        >
+        <button class="btn-arrow" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
           <ChevronLeft :size="20" />
         </button>
 
@@ -248,11 +223,7 @@ const changePage = (page) => {
           <span class="text-secondary small">{{ totalPages }}</span>
         </div>
 
-        <button
-          class="btn-arrow"
-          :disabled="currentPage === totalPages"
-          @click="changePage(currentPage + 1)"
-        >
+        <button class="btn-arrow" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
           <ChevronRight :size="20" />
         </button>
       </div>
@@ -270,6 +241,7 @@ const changePage = (page) => {
 .search-input-group {
   position: relative;
 }
+
 .search-icon {
   position: absolute;
   left: 1rem;
@@ -283,6 +255,7 @@ const changePage = (page) => {
   background: white;
   transition: transform 0.2s;
 }
+
 .stat-card:hover {
   transform: translateY(-5px);
 }
@@ -294,6 +267,7 @@ const changePage = (page) => {
   border: 1px solid #dee2e6;
   font-weight: 500;
 }
+
 .nav-pills .nav-link.active {
   background-color: #4d9fff;
   border-color: #4d9fff;
@@ -306,6 +280,7 @@ const changePage = (page) => {
   transition: all 0.2s;
   border: 1px solid #e5f0ff !important;
 }
+
 .review-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
@@ -337,6 +312,7 @@ const changePage = (page) => {
   background-color: #4d9fff;
   border: none;
 }
+
 .fab-button:hover {
   background-color: #3a8fef;
 }
@@ -349,7 +325,8 @@ const changePage = (page) => {
 /* 페이지네이션 컨테이너 (위치 조정 포함) */
 .custom-position-nav {
   position: relative;
-  transform: translateY(-20px); /* 목록과 적절한 간격 유지 */
+  transform: translateY(-20px);
+  /* 목록과 적절한 간격 유지 */
   margin-bottom: 2rem;
 }
 

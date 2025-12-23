@@ -78,7 +78,7 @@ def review_list(request, drug_pk):
 
     if request.method == 'GET':
         reviews = Review.objects.filter(drug=drug)
-        serializer = ReviewSerializer(reviews, many=True)
+        serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
 
     elif request.method == 'POST':
@@ -97,7 +97,7 @@ def review_detail(request, drug_pk, review_pk):
         drug_id=drug_pk
     )
     if request.method == 'GET':
-        serializer = ReviewDetailSerializer(review)
+        serializer = ReviewDetailSerializer(review, context={'request': request})
         return Response(serializer.data)
     elif request.method == 'PUT':
         if review.user != request.user:
@@ -206,6 +206,26 @@ def toggle_favorite(request, drug_pk):
     else:
         Favorite.objects.create(user=user, drug=drug)
         return Response({'message': '즐겨찾기에 추가되었습니다.'}, status=status.HTTP_201_CREATED)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_helpful(request, review_pk):
+    review = get_object_or_404(Review, pk=review_pk)
+    user = request.user
+
+    if review.helpful_users.filter(pk=user.pk).exists():
+        # 이미 눌렀다면 취소
+        review.helpful_users.remove(user)
+        is_helpful = False
+    else:
+        # 처음 누르는 것이라면 추가
+        review.helpful_users.add(user)
+        is_helpful = True
+
+    return Response({
+        'is_helpful': is_helpful,
+        'helpful_count': review.helpful_users.count()
+    })
     
 def recommend_drug(parsed, user_message):
     symptom = parsed.get('symptom')
