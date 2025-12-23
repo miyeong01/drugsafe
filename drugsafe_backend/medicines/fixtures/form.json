@@ -1,0 +1,72 @@
+[
+{
+    "model": "medicines.form",
+    "pk": 1,
+    "fields": {
+        "name": "알약"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 2,
+    "fields": {
+        "name": "가루"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 3,
+    "fields": {
+        "name": "시럽"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 4,
+    "fields": {
+        "name": "액상"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 5,
+    "fields": {
+        "name": "스프레이"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 6,
+    "fields": {
+        "name": "필름"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 7,
+    "fields": {
+        "name": "크림"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 8,
+    "fields": {
+        "name": "연고"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 9,
+    "fields": {
+        "name": "부착형"
+    }
+},
+{
+    "model": "medicines.form",
+    "pk": 10,
+    "fields": {
+        "name": "로션"
+    }
+}
+]
