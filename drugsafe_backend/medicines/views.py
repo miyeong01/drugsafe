@@ -365,11 +365,40 @@ def normalize_kwd(raw):
 
     return raw
 
+SMALL_TALK_PATTERNS = [
+    r'안녕',
+    r'하이',
+    r'hello',
+    r'뭐해',
+    r'고마워',
+    r'감사',
+    r'잘 지내',
+    r'반가워',
+    r'ㅎ+',
+    r'ㅋㅋ+',
+    r'^^'
+]
+
+def is_small_talk(text: str) -> bool:
+    return any(re.search(p, text) for p in SMALL_TALK_PATTERNS)
+
+SMALL_TALK_RESPONSES = [
+    "안녕하세요 😊 어떤 증상이나 궁금한 약이 있으신가요?",
+    "반가워요! 증상이나 약 이름을 알려주시면 도와드릴게요.",
+    "네 😊 어떤 의약품이 궁금하신가요?",
+    "괜찮아요! 필요하실 때 언제든 질문해주세요."
+]
+
+import random
+
+def get_small_talk_response(_):
+    return random.choice(SMALL_TALK_RESPONSES)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def chatbot_view(request):
-    user_message = request.data.get('message', '')
+    user_message = request.data.get('message', '').strip()
     selected_drug_id = request.data.get('selected_drug_id')
 
     # 1. 카드 클릭으로 들어온 경우 (최우선)
@@ -389,6 +418,7 @@ def chatbot_view(request):
                 "drug_id": drug.id,
                 "answer": format_drug_info(drug)
             })
+        
 
     # 2. 일반 자연어 처리
     parsed = asyncio.run(parse_user_input(user_message))
@@ -396,12 +426,26 @@ def chatbot_view(request):
 
     if intent == 'recommend':
         return recommend_drug(parsed, user_message)
+    
+    if intent == 'drug_info':
+        keyword = normalize_kwd(parsed.get('drug_name') or user_message)
 
-    keyword = normalize_kwd(parsed.get('drug_name') or user_message)
+        if keyword:
+            return explain_drug_by_name(keyword)
+        
+        return Response({
+            'type': 'fallback',
+            'answer': '궁금한 약 이름을 조금 더 정확히 입력해 주세요 😊'
+        })
 
-    if keyword:
-        return explain_drug_by_name(keyword)
+    if is_small_talk(user_message):
+        return Response({
+            'type': 'smalltalk',
+            'answer': get_small_talk_response(user_message)
+        })
+
 
     return Response({
-        'answer': '어떤 도움을 드릴까요? 증상이나 궁금한 약 이름을 말씀해주세요'
+        'type': 'fallback',
+        'answer': '증상이나 궁금한 약 이름을 말씀해주시면 도와드릴게요 😊'
     })
