@@ -173,7 +173,7 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
                       <p class="text-secondary small mb-0">{{ drug.company }}</p>
                     </div>
                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                      @click="router.push({ name: 'DrugDetail', params: { drugId: drug.id } })">
+                      @click="router.push({ name: 'drug-detail', params: { drugId: drug.id } })">
                       상세보기
                     </button>
                   </div>

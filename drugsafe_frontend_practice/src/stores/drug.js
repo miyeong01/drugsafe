@@ -36,15 +36,18 @@ export const useDrugStore = defineStore(
 
     // 2. 특정 약 상세 정보 가져오기
     const getDrugDetail = function (id) {
-      // 페이지 이동 시 이전 데이터가 잠깐 보이는 것을 방지하기 위해 초기화
       selectedDrug.value = null;
+
+      // ✅ 로컬 스토리지에서 현재 로그인한 유저의 토큰을 가져옵니다.
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Token ${token}` } : {};
 
       axios({
         method: "get",
         url: `${API_URL}/medicines/drugs/${id}/`,
+        headers: headers, // ✅ 반드시 헤더를 포함해야 장고가 '나'를 인식합니다.
       })
         .then((res) => {
-          console.log("서버 응답 데이터:", res.data);
           selectedDrug.value = res.data;
         })
         .catch((err) => {
@@ -135,66 +138,66 @@ export const useDrugStore = defineStore(
     // 10. 내가 작성한 리뷰 조회
     const getMyReviews = function () {
       axios({
-        method: 'get',
+        method: "get",
         url: `http://127.0.0.1:8000/medicines/user-reviews/`,
         headers: {
-          Authorization: `Token ${localStorage.getItem('token')}` // 내 토큰 동봉
-        }
+          Authorization: `Token ${localStorage.getItem("token")}`, // 내 토큰 동봉
+        },
       })
-        .then(res => {
-          myReviews.value = res.data // 서버에서 받은 데이터 저장
-          console.log('스토어에 저장된 데이터:', myReviews.value)
+        .then((res) => {
+          myReviews.value = res.data; // 서버에서 받은 데이터 저장
+          console.log("스토어에 저장된 데이터:", myReviews.value);
         })
-        .catch(err => console.error('내 리뷰 로드 실패:', err))
-    }
+        .catch((err) => console.error("내 리뷰 로드 실패:", err));
+    };
 
     // 11. 내가 작성한 댓글 조회
     const getMyComments = function () {
       axios({
-        method: 'get',
+        method: "get",
         url: `http://127.0.0.1:8000/medicines/user-comments/`,
         headers: {
-          Authorization: `Token ${localStorage.getItem('token')}`
-        }
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
       })
-        .then(res => {
-          myComments.value = res.data
+        .then((res) => {
+          myComments.value = res.data;
         })
-        .catch(err => console.error('댓글 로드 실패:', err))
-    }
+        .catch((err) => console.error("댓글 로드 실패:", err));
+    };
 
     // 12. 즐겨찾기 토글 함수
     const toggleFavorite = function (drugId) {
       axios({
-        method: 'post',
+        method: "post",
         url: `http://127.0.0.1:8000/medicines/drugs/${drugId}/favorite/`,
         headers: {
-          Authorization: `Token ${localStorage.getItem('token')}`
-        }
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
       })
-        .then(res => {
+        .then((res) => {
           // 성공 시 프론트엔드 상태 실시간 업데이트
           if (selectedDrug.value && selectedDrug.value.id === drugId) {
-            selectedDrug.value.is_favorite = !selectedDrug.value.is_favorite
+            selectedDrug.value.is_favorite = !selectedDrug.value.is_favorite;
           }
         })
-        .catch(err => console.error(err))
-    }
+        .catch((err) => console.error(err));
+    };
 
     // 13. 즐겨찾기 목록 가져오기 함수
     const getFavorites = function () {
       axios({
-        method: 'get',
+        method: "get",
         url: `http://127.0.0.1:8000/medicines/user-favorites/`,
         headers: {
-          Authorization: `Token ${localStorage.getItem('token')}`
-        }
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
       })
-        .then(res => {
-          myFavorites.value = res.data
+        .then((res) => {
+          myFavorites.value = res.data;
         })
-        .catch(err => console.error('즐겨찾기 로드 실패:', err))
-    }
+        .catch((err) => console.error("즐겨찾기 로드 실패:", err));
+    };
 
     return {
       drugs,
@@ -217,7 +220,7 @@ export const useDrugStore = defineStore(
       getMyComments,
       toggleFavorite,
       myFavorites,
-      getFavorites
+      getFavorites,
     };
   },
   { persist: true }

@@ -10,10 +10,12 @@ class DrugListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_is_favorite(self, obj):
-        user = self.context.get('request').user
-        if user.is_authenticated:
-            # ✅ Favorite 모델에서 현재 유저와 이 약의 연결 고리가 있는지 확인
-            return obj.favorites.filter(user=user).exists()
+        request = self.context.get('request')
+        user = request.user if request else None
+        
+        if user and user.is_authenticated:
+            result = obj.favorites.filter(user=user).exists()
+            return result
         return False
 
 class ReviewSerializer(serializers.ModelSerializer):
