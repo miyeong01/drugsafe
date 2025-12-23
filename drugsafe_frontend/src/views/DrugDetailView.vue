@@ -77,6 +77,22 @@ const handleToggleFavorite = () => {
   // ✅ 스토어의 토글 함수 호출
   drugStore.toggleFavorite(selectedDrug.value.id);
 };
+
+const getFormEmoji = (form) => {
+  const map = {
+    1:"💊",
+    2:"🍚",
+    3:"🧉",
+    4:"💧",
+    5:"💨",
+    6:"⿻",
+    7:"🧴",
+    8:"🧴",
+    9:"🩹",
+    10:"🧴",
+  };
+  return map[form];
+}
 </script>
 
 <template>
@@ -103,7 +119,7 @@ const handleToggleFavorite = () => {
             <div v-else class="d-flex align-items-center justify-content-center py-5">
               <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
                 style="width: 150px; height: 150px">
-                <span style="font-size: 4rem">💊</span>
+                <span style="font-size: 4rem">{{ getFormEmoji(selectedDrug.form) }}</span>
               </div>
             </div>
           </div>
