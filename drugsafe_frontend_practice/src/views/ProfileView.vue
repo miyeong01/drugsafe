@@ -210,7 +210,7 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
                     <span class="text-secondary small">{{ formatDate(review.created_at) }}</span>
                   </div>
                 </div>
-                <button class="btn btn-outline-secondary btn-sm" @click="goReviewDetail(review.drug, review.id)">
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" @click="goReviewDetail(review.drug, review.id)">
                   상세보기
                 </button>
               </div>
@@ -235,7 +235,7 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
                   <h4 class="h6 fw-bold mb-1">{{ comment.drug_name || '작성한 댓글' }}</h4>
                   <span class="text-secondary small">{{ formatDate(comment.created_at) }}</span>
                 </div>
-                <button class="btn btn-outline-secondary btn-sm"
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
                   @click="goReviewDetail(comment.drug_id, comment.review, comment.id)">
                   상세보기
                 </button>

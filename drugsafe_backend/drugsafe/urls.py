@@ -16,11 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from accounts.views import PasswordChangeView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('medicines/', include('medicines.urls')),
     path("api/medicines/", include("medicines.urls")),
+    path('accounts/password/change/', PasswordChangeView.as_view(), name='password_change'),
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
 ]

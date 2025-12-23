@@ -18,6 +18,10 @@ export const useDrugStore = defineStore(
     // 1. 약 목록 가져오기
     const getDrugs = function (searchKeyword = "", symptomId = null) {
       console.log("스토어 호출됨 - keyword:", searchKeyword, "ID:", symptomId);
+
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Token ${token}` } : {};
+
       axios({
         method: "get",
         url: `${API_URL}/medicines/drugs/`,
@@ -25,10 +29,10 @@ export const useDrugStore = defineStore(
           search: searchKeyword,
           symptom: symptomId,
         },
+        headers: headers,
       })
         .then((res) => {
-          console.log(res);
-          console.log(res.data);
+          console.log("검색 결과:", res.data);
           drugs.value = res.data;
         })
         .catch((err) => console.log(err));
@@ -168,27 +172,36 @@ export const useDrugStore = defineStore(
 
     // 12. 즐겨찾기 토글 함수
     const toggleFavorite = function (drugId) {
-      axios({
+      // ✅ 반드시 return을 추가해야 컴포넌트에서 await가 작동합니다.
+      return axios({
         method: "post",
-        url: `http://127.0.0.1:8000/medicines/drugs/${drugId}/favorite/`,
+        url: `${API_URL}/medicines/drugs/${drugId}/favorite/`,
         headers: {
+          // accountStore의 토큰을 사용하거나 직접 가져옵니다.
           Authorization: `Token ${localStorage.getItem("token")}`,
         },
       })
         .then((res) => {
-          // 성공 시 프론트엔드 상태 실시간 업데이트
+          // 상세 정보 및 목록의 상태 업데이트
           if (selectedDrug.value && selectedDrug.value.id === drugId) {
             selectedDrug.value.is_favorite = !selectedDrug.value.is_favorite;
           }
+          const drugInList = drugs.value.find((d) => d.id === drugId);
+          if (drugInList) {
+            drugInList.is_favorite = !drugInList.is_favorite;
+          }
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error("즐겨찾기 토글 실패:", err);
+          throw err; // 에러를 상위(컴포넌트)로 전달
+        });
     };
 
     // 13. 즐겨찾기 목록 가져오기 함수
     const getFavorites = function () {
-      axios({
+      return axios({
         method: "get",
-        url: `http://127.0.0.1:8000/medicines/user-favorites/`,
+        url: `${API_URL}/medicines/user-favorites/`,
         headers: {
           Authorization: `Token ${localStorage.getItem("token")}`,
         },
@@ -196,7 +209,10 @@ export const useDrugStore = defineStore(
         .then((res) => {
           myFavorites.value = res.data;
         })
-        .catch((err) => console.error("즐겨찾기 로드 실패:", err));
+        .catch((err) => {
+          console.error("즐겨찾기 로드 실패:", err);
+          throw err;
+        });
     };
 
     return {
