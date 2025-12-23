@@ -61,19 +61,20 @@ export const useDrugStore = defineStore(
 
     // 3. 해당 약의 리뷰 목록 가져오기
     const getReviews = function (drugId = null) {
-  // ✨ drugId가 있으면 특정 약의 리뷰를, 없으면 전체 리뷰(커뮤니티용)를 가져옵니다.
-      let url = `${API_URL}/medicines/reviews/`; 
-      
+      // ✨ drugId가 있으면 특정 약의 리뷰를, 없으면 전체 리뷰(커뮤니티용)를 가져옵니다.
+      let url = `${API_URL}/medicines/reviews/`;
+
       if (drugId && drugId !== 'undefined') {
         url = `${API_URL}/medicines/drugs/${drugId}/reviews/`;
       }
 
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Token ${token}` } : {};
+
       axios({
         method: "get",
         url: url,
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
+        headers: headers,
       })
         .then((res) => {
           reviews.value = res.data;
@@ -81,7 +82,7 @@ export const useDrugStore = defineStore(
         .catch((err) => {
           console.error("리뷰 로드 실패:", err);
         });
-      }
+    }
 
     // 4. 리뷰 등록하기
     const createReview = function (id, reviewData) {
@@ -102,15 +103,33 @@ export const useDrugStore = defineStore(
 
     // 5. 특정 리뷰 상세 정보(댓글 포함) 가져오기
     const getReviewDetail = function (drugId, reviewId) {
-      selectedReview.value = null; // 초기화
+      selectedReview.value = null;
+
+      // 1. 전달받은 인자가 유효한지 확인
+      if (!drugId || !reviewId) {
+        console.error("ID가 누락되었습니다. drugId:", drugId, "reviewId:", reviewId);
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const url = `${API_URL}/medicines/drugs/${drugId}/reviews/${reviewId}/`;
+
+      // 2. 실제 요청 주소를 콘솔에서 클릭해 보세요.
+      console.log("요청 URL:", url);
+
       axios({
         method: "get",
-        url: `${API_URL}/medicines/drugs/${drugId}/reviews/${reviewId}/`,
+        url: url,
+        headers: token ? { Authorization: `Token ${token}` } : {},
       })
         .then((res) => {
           selectedReview.value = res.data;
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          // 3. 서버가 보내주는 정확한 에러 코드를 확인합니다.
+          console.error(`에러 발생! 상태 코드: ${err.response?.status}`);
+          console.dir(err);
+        });
     };
 
     // 6. 댓글 등록하기

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useDrugStore } from "@/stores/drug";
@@ -11,9 +11,9 @@ import {
   ArrowLeft,
   AlertTriangle, // 주의사항 아이콘 누락 방지
   Info,
-  Pill, 
-  Droplet, 
-  SprayCan, 
+  Pill,
+  Droplet,
+  SprayCan,
   Bandage
 } from "lucide-vue-next";
 
@@ -103,6 +103,36 @@ const getFormIcon = (form) => {
   };
   return map[form] || Pill;
 }
+
+// 리뷰 평점 통계 계산 로직
+const averageRating = computed(() => {
+  if (!reviews.value?.length) return 0;
+  const sum = reviews.value.reduce((acc, r) => acc + r.score, 0);
+  return (sum / reviews.value.length).toFixed(1);
+});
+
+const ratingDistribution = computed(() => {
+  const dist = [
+    { stars: 5, count: 0, percentage: 0 },
+    { stars: 4, count: 0, percentage: 0 },
+    { stars: 3, count: 0, percentage: 0 },
+    { stars: 2, count: 0, percentage: 0 },
+    { stars: 1, count: 0, percentage: 0 },
+  ];
+
+  if (!reviews.value?.length) return dist;
+
+  reviews.value.forEach(r => {
+    const starObj = dist.find(d => d.stars === Math.floor(r.score));
+    if (starObj) starObj.count++;
+  });
+
+  dist.forEach(d => {
+    d.percentage = (d.count / reviews.value.length) * 100;
+  });
+
+  return dist;
+});
 </script>
 
 <template>
@@ -129,10 +159,7 @@ const getFormIcon = (form) => {
             <div v-else class="d-flex align-items-center justify-content-center py-5">
               <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
                 style="width: 150px; height: 150px">
-                <component
-                  :is="getFormIcon(selectedDrug.form)"
-                  class="text-primary drug-icon"
-                />
+                <component :is="getFormIcon(selectedDrug.form)" class="text-primary drug-icon" />
               </div>
             </div>
           </div>
@@ -251,36 +278,64 @@ const getFormIcon = (form) => {
           </div>
 
           <div v-else-if="activeTab === 'reviews'">
+            <div class="row g-4 mb-5">
+              <div class="col-lg-4">
+                <div
+                  class="card border-0 bg-light rounded-4 p-4 text-center h-100 d-flex flex-column justify-content-center">
+                  <div class="display-3 fw-bold mb-2 text-dark">{{ averageRating }}</div>
+                  <div class="d-flex justify-content-center gap-1 mb-2">
+                    <Star v-for="i in 5" :key="i" :size="24" :fill="i <= Math.round(averageRating) ? '#FFC107' : 'none'"
+                      :class="i <= Math.round(averageRating) ? 'text-warning' : 'text-secondary opacity-25'" />
+                  </div>
+                  <p class="text-secondary mb-0">{{ reviews?.length || 0 }}개의 리뷰</p>
+                </div>
+              </div>
+
+              <div class="col-lg-8">
+                <div class="card border-0 bg-white shadow-sm rounded-4 p-4 h-100">
+                  <h3 class="h6 fw-bold mb-4">평점 분포</h3>
+                  <div class="d-flex flex-column gap-3">
+                    <div v-for="item in ratingDistribution" :key="item.stars" class="d-flex align-items-center gap-3">
+                      <div class="d-flex align-items-center gap-1" style="width: 60px">
+                        <Star class="text-warning" :fill="'#FFC107'" :size="14" />
+                        <span class="small fw-bold">{{ item.stars }}</span>
+                      </div>
+                      <div class="progress flex-grow-1" style="height: 8px">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                          :style="{ width: item.percentage + '%' }" :aria-valuenow="item.percentage" aria-valuemin="0"
+                          aria-valuemax="100"></div>
+                      </div>
+                      <span class="small text-muted" style="width: 45px; text-align: right;">{{ item.count }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h3 class="h5 fw-bold mb-0">리뷰 ({{ reviews?.length || 0 }})</h3>
-              <button class="btn btn-primary btn-sm text-white" @click="goReviewWrite">
-                <MessageSquare :size="16" /> 리뷰 작성
+              <h3 class="h5 fw-bold mb-0">리뷰 목록</h3>
+              <button class="btn btn-primary btn-sm text-white px-3 py-2 rounded-3 shadow-sm" @click="goReviewWrite">
+                <MessageSquare :size="16" class="me-1" /> 리뷰 작성
               </button>
             </div>
 
             <div v-if="reviews?.length > 0" class="d-flex flex-column gap-3">
-              <div v-for="review in reviews" :key="review.id" class="border rounded p-4 bg-white shadow-sm"
-                @click="goReviewDetail(review.id)">
+              <div v-for="review in reviews" :key="review.id"
+                class="card border-0 rounded-4 p-4 bg-white shadow-sm review-card" @click="goReviewDetail(review.id)">
                 <div class="d-flex justify-content-between mb-2">
                   <span class="fw-bold">{{ review.username }}님</span>
                   <div class="text-warning small">
-                    <Star v-for="i in 5" :key="i" :size="16" :fill="i <= review.score ? '#FFC107' : 'none'" :class="i <= review.score
-                      ? 'text-warning'
-                      : 'text-secondary opacity-25'
-                      " />
+                    <Star v-for="i in 5" :key="i" :size="16" :fill="i <= review.score ? '#FFC107' : 'none'"
+                      :class="i <= review.score ? 'text-warning' : 'text-secondary opacity-25'" />
                   </div>
                 </div>
-                <p class="text-secondary small mb-2">
-                  {{ formatDate(review.created_at) }}
-                </p>
+                <p class="text-secondary small mb-2">{{ formatDate(review.created_at) }}</p>
                 <h5 class="h6 fw-bold mb-2">{{ review.title }}</h5>
-                <p class="text-dark mb-3 lh-base" style="white-space: pre-wrap">
-                  {{ review.content }}
-                </p>
+                <p class="text-dark mb-0 lh-base text-truncate-2">{{ review.content }}</p>
               </div>
             </div>
-            <div v-else class="text-center py-5 text-secondary">
-              아직 작성된 리뷰가 없습니다.
+            <div v-else class="text-center py-5 text-secondary border rounded-4 bg-white">
+              아직 작성된 리뷰가 없습니다. 첫 리뷰를 남겨보세요!
             </div>
           </div>
         </div>
