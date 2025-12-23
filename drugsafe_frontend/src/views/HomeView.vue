@@ -84,11 +84,11 @@ const handleSymptomClick = (symptom) => {
                 <Sparkles :size="16" />
                 <span>AI-Powered Healthcare</span>
               </div>
-              <h1 class="hero-title">
+              <h1 class="hero-title fw-bold" style="line-height: 1.3;">
                 Smarter Medicine,<br />
-                <span class="gradient-text">Safer Choices</span>
+                <span class="gradient-text fw-bold">Safer Choices</span>
               </h1>
-              <p class="hero-subtitle">안전하고 정확한 의약품 정보로 건강한 내일을 만듭니다</p>
+              <p class="hero-subtitle fw-medium">안전하고 정확한 의약품 정보로 건강한 내일을 만듭니다</p>
               <button class="btn-premium mt-5" @click="router.push('/search')">
                 <span>지금 시작하기</span>
                 <ArrowRight :size="18" />
@@ -114,11 +114,11 @@ const handleSymptomClick = (symptom) => {
                 <Bot :size="16" />
                 <span>AI 스마트 분석</span>
               </div>
-              <h1 class="hero-title">
+              <h1 class="hero-title fw-bold" style="line-height: 1.3;">
                 스마트 AI 챗봇<br />
-                <span class="gradient-text" style="background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%); -webkit-background-clip: text;">맞춤형 의약품 추천</span>
+                <span class="gradient-text fw-bold" style="background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%); -webkit-background-clip: text;">맞춤형 의약품 추천</span>
               </h1>
-              <p class="hero-subtitle">증상을 말씀해 주세요. AI가 가장 적합한 약을 즉시 찾아드립니다.</p>
+              <p class="hero-subtitle fw-medium">증상을 말씀해 주세요. AI가 가장 적합한 약을 즉시 찾아드립니다.</p>
               <button class="btn-premium mt-5" @click="router.push('/chatbot')">
                 <span>챗봇 상담 시작</span>
                 <ArrowRight :size="18" />
@@ -144,11 +144,11 @@ const handleSymptomClick = (symptom) => {
                 <Users :size="16" />
                 <span>건강 커뮤니티</span>
               </div>
-              <h1 class="hero-title">
+              <h1 class="hero-title fw-bold" style="line-height: 1.3;">
                 함께 나누는<br />
-                <span class="gradient-text" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text;">건강한 정보 공유</span>
+                <span class="gradient-text fw-bold" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text;">건강한 정보 공유</span>
               </h1>
-              <p class="hero-subtitle">검증된 복용 후기로 더 안전한 선택을 도와드립니다.</p>
+              <p class="hero-subtitle fw-medium">검증된 복용 후기로 더 안전한 선택을 도와드립니다.</p>
               <button class="btn-premium mt-5" @click="router.push('/community')">
                 <span>커뮤니티 이동</span>
                 <ArrowRight :size="18" />
@@ -216,7 +216,7 @@ const handleSymptomClick = (symptom) => {
             <div class="card-content">
               <span class="business-number">01</span>
               <h3 class="business-title">AI ChatBot</h3>
-              <p class="business-subtitle">AI 챗봇 서비스</p>
+              <p class="business-subtitle fw-medium">AI 챗봇 서비스</p>
               <p class="business-text">최신 의약품 데이터를<br>기반으로 더 나은 솔루션 제공</p>
               <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
@@ -227,7 +227,7 @@ const handleSymptomClick = (symptom) => {
             <div class="card-content">
               <span class="business-number">02</span>
               <h3 class="business-title">Community</h3>
-              <p class="business-subtitle">커뮤니티</p>
+              <p class="business-subtitle fw-medium">커뮤니티</p>
               <p class="business-text">의약품 후기 공유를 통해<br>더 안전한 선택을 돕습니다</p>
               <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
@@ -238,7 +238,7 @@ const handleSymptomClick = (symptom) => {
             <div class="card-content">
               <span class="business-number">03</span>
               <h3 class="business-title">Search</h3>
-              <p class="business-subtitle">의약품 필터링 조회</p>
+              <p class="business-subtitle fw-medium">의약품 필터링 조회</p>
               <p class="business-text">증상 및 제형 필터링을 통해<br>필요한 정보에 쉽게 접근할 수 있습니다</p>
               <!-- <button class="card-btn" @click="router.push('/community')"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
@@ -345,7 +345,7 @@ const handleSymptomClick = (symptom) => {
   color: #3b82f6; font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem;
 }
 .hero-title { font-size: clamp(3.5rem, 7vw, 6.5rem); font-weight: 200; line-height: 1.1; color: #0f172a; margin-bottom: 2rem; }
-.gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; }
+.gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .hero-subtitle { font-size: clamp(1.125rem, 2vw, 1.5rem); color: #64748b; font-weight: 300; line-height: 1.6; }
 
 .floating-pills { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
@@ -483,7 +483,6 @@ const handleSymptomClick = (symptom) => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 400;
 }
 
 .hero-subtitle {
