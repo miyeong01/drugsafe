@@ -38,6 +38,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     drug_name = serializers.ReadOnlyField(source='drug.name')
     comment_count = serializers.SerializerMethodField()
+    helpful_count = serializers.IntegerField(source='helpful_users.count', read_only=True)
+    is_helpful = serializers.SerializerMethodField()
+
     class Meta:
         model = Review
         fields = '__all__'
@@ -57,6 +60,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         }
     def get_comment_count(self, obj):
         return obj.comments.count()
+    
+    def get_is_helpful(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return obj.helpful_users.filter(pk=user.pk).exists()
+        return False
 
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -71,9 +80,12 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     comment_count = serializers.SerializerMethodField()
+    helpful_count = serializers.IntegerField(source='helpful_users.count', read_only=True)
+    is_helpful = serializers.SerializerMethodField()
+
     class Meta:
         model = Review
-        fields = ('id', 'user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments', 'comment_count',)
+        fields = ('id', 'user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments', 'comment_count', 'helpful_count', 'is_helpful',)
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
         
     def get_comment_count(self, obj):
@@ -81,3 +93,9 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
             return obj.comments.count()
         except:
             return obj.comment_set.count()
+        
+    def get_is_helpful(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.helpful_users.filter(pk=request.user.pk).exists()
+        return False

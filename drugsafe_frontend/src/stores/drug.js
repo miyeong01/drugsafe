@@ -248,6 +248,33 @@ export const useDrugStore = defineStore(
         });
     };
 
+    // 14. 리뷰 '도움이 돼요' 토글 함수 추가
+    const toggleHelpful = function (reviewId) {
+      const token = localStorage.getItem("token");
+      if (!token) return Promise.reject("로그인이 필요합니다.");
+
+      return axios({
+        method: "post",
+        url: `${API_URL}/medicines/reviews/${reviewId}/helpful/`,
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      })
+        .then((res) => {
+          // ✨ 실시간으로 스토어의 reviews 배열 내 데이터를 업데이트합니다.
+          const review = reviews.value.find((r) => r.id === reviewId);
+          if (review) {
+            review.helpful_count = res.data.helpful_count;
+            review.is_helpful = res.data.is_helpful;
+          }
+          return res.data;
+        })
+        .catch((err) => {
+          console.error("도움이 돼요 토글 실패:", err);
+          throw err;
+        });
+    };
+
     return {
       drugs,
       selectedDrug,
@@ -270,6 +297,7 @@ export const useDrugStore = defineStore(
       toggleFavorite,
       myFavorites,
       getFavorites,
+      toggleHelpful
     };
   },
   { persist: true }

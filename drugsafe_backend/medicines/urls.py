@@ -10,6 +10,7 @@ urlpatterns = [
     path('drugs/<int:drug_pk>/reviews/', views.review_list),    # GET(전체), POST
     path('drugs/<int:drug_pk>/reviews/<int:review_pk>/', views.review_detail),  # GET(상세), PUT, DELETE
     path('user-reviews/', views.user_reviews),
+    path('reviews/<int:review_pk>/helpful/', views.toggle_helpful),
     # 댓글 CRUD
     path('reviews/', views.all_review_list),
     path('reviews/<int:review_pk>/comments/', views.comment_list),  # GET, POST

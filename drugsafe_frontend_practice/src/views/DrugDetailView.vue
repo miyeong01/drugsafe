@@ -14,7 +14,8 @@ import {
   Pill,
   Droplet,
   SprayCan,
-  Bandage
+  Bandage,
+  ThumbsUp
 } from "lucide-vue-next";
 
 import film from "@/assets/icons/film.svg?component";
@@ -133,6 +134,17 @@ const ratingDistribution = computed(() => {
 
   return dist;
 });
+
+const onToggleHelpful = (reviewId) => {
+  if (!accountStore.isLogin) {
+    if (confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?")) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
+    return;
+  }
+  // Pinia 스토어의 액션 호출
+  drugStore.toggleHelpful(reviewId);
+};
 </script>
 
 <template>
@@ -332,6 +344,15 @@ const ratingDistribution = computed(() => {
                 <p class="text-secondary small mb-2">{{ formatDate(review.created_at) }}</p>
                 <h5 class="h6 fw-bold mb-2">{{ review.title }}</h5>
                 <p class="text-dark mb-0 lh-base text-truncate-2">{{ review.content }}</p>
+
+                <div class="d-flex gap-2 mt-3">
+                  <button class="btn btn-sm rounded-pill px-3 border d-flex align-items-center gap-1 transition-all"
+                    :class="review.is_helpful ? 'btn-danger text-white border-danger' : 'btn-light text-muted'"
+                    @click.stop="onToggleHelpful(review.id)">
+                    <ThumbsUp :size="14" :fill="review.is_helpful ? 'white' : 'none'" />
+                    도움이 돼요 {{ review.helpful_count || 0 }}
+                  </button>
+                </div>
               </div>
             </div>
             <div v-else class="text-center py-5 text-secondary border rounded-4 bg-white">
