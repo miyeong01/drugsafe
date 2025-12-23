@@ -11,6 +11,9 @@ export const useDrugStore = defineStore(
     const API_URL = "http://127.0.0.1:8000";
     const accountStore = useAccountStore();
     const reviews = ref([]); // 리뷰 목록 저장
+    const myFavorites = ref([]); // 즐겨찾기 목록 담을 변수
+    const myReviews = ref([]); // 실제 리뷰 데이터를 담을 변수
+    const myComments = ref([]); // 댓글 저장용 변수
 
     // 1. 약 목록 가져오기
     const getDrugs = function (searchKeyword = "", symptomId = null) {
@@ -129,6 +132,70 @@ export const useDrugStore = defineStore(
       });
     };
 
+    // 10. 내가 작성한 리뷰 조회
+    const getMyReviews = function () {
+      axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/medicines/user-reviews/`,
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}` // 내 토큰 동봉
+        }
+      })
+        .then(res => {
+          myReviews.value = res.data // 서버에서 받은 데이터 저장
+          console.log('스토어에 저장된 데이터:', myReviews.value)
+        })
+        .catch(err => console.error('내 리뷰 로드 실패:', err))
+    }
+
+    // 11. 내가 작성한 댓글 조회
+    const getMyComments = function () {
+      axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/medicines/user-comments/`,
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => {
+          myComments.value = res.data
+        })
+        .catch(err => console.error('댓글 로드 실패:', err))
+    }
+
+    // 12. 즐겨찾기 토글 함수
+    const toggleFavorite = function (drugId) {
+      axios({
+        method: 'post',
+        url: `http://127.0.0.1:8000/medicines/drugs/${drugId}/favorite/`,
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => {
+          // 성공 시 프론트엔드 상태 실시간 업데이트
+          if (selectedDrug.value && selectedDrug.value.id === drugId) {
+            selectedDrug.value.is_favorite = !selectedDrug.value.is_favorite
+          }
+        })
+        .catch(err => console.error(err))
+    }
+
+    // 13. 즐겨찾기 목록 가져오기 함수
+    const getFavorites = function () {
+      axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/medicines/user-favorites/`,
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => {
+          myFavorites.value = res.data
+        })
+        .catch(err => console.error('즐겨찾기 로드 실패:', err))
+    }
+
     return {
       drugs,
       selectedDrug,
@@ -143,7 +210,14 @@ export const useDrugStore = defineStore(
       createComment,
       deleteReview,
       updateReview,
-      deleteComment
+      deleteComment,
+      myReviews,
+      getMyReviews,
+      myComments,
+      getMyComments,
+      toggleFavorite,
+      myFavorites,
+      getFavorites
     };
   },
   { persist: true }
