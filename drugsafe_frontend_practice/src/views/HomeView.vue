@@ -62,7 +62,7 @@ const handleSymptomClick = (symptom) => {
 <template>
   <div class="home-wrapper">
     
-    <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+    <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
       
       <div class="carousel-indicators custom-indicators">
         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -148,7 +148,7 @@ const handleSymptomClick = (symptom) => {
                 함께 나누는<br />
                 <span class="gradient-text" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text;">건강한 정보 공유</span>
               </h1>
-              <p class="hero-subtitle">실제 복용 후기와 노하우를 이웃들과 자유롭게 공유해보세요.</p>
+              <p class="hero-subtitle">검증된 복용 후기로 더 안전한 선택을 도와드립니다.</p>
               <button class="btn-premium mt-5" @click="router.push('/community')">
                 <span>커뮤니티 이동</span>
                 <ArrowRight :size="18" />
