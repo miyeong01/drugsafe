@@ -10,8 +10,18 @@ import {
   MessageSquare,
   ArrowLeft,
   AlertTriangle, // 주의사항 아이콘 누락 방지
-  Info, // 주의사항 아이콘 누락 방지
+  Info,
+  Pill, 
+  Droplet, 
+  SprayCan, 
+  Bandage
 } from "lucide-vue-next";
+
+import film from "@/assets/icons/film.svg?component";
+import lotion from "@/assets/icons/lotion.svg?component";
+import cream from "@/assets/icons/cream.svg?component";
+import ointment from "@/assets/icons/ointment.svg?component";
+import powder from "@/assets/icons/powder.svg?component";
 
 const router = useRouter();
 const route = useRoute();
@@ -78,20 +88,20 @@ const handleToggleFavorite = () => {
   drugStore.toggleFavorite(selectedDrug.value.id);
 };
 
-const getFormEmoji = (form) => {
+const getFormIcon = (form) => {
   const map = {
-    1:"💊",
-    2:"🧂",
-    3:"💧",
-    4:"💧",
-    5:"💨",
-    6:"⿻",
-    7:"🧴",
-    8:"🧴",
-    9:"🩹",
-    10:"🧴",
+    1: Pill,
+    2: powder,
+    3: Droplet,
+    4: Droplet,
+    5: SprayCan,
+    6: film,
+    7: cream,
+    8: ointment,
+    9: Bandage,
+    10: lotion,
   };
-  return map[form];
+  return map[form] || Pill;
 }
 </script>
 
@@ -119,7 +129,10 @@ const getFormEmoji = (form) => {
             <div v-else class="d-flex align-items-center justify-content-center py-5">
               <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
                 style="width: 150px; height: 150px">
-                <span style="font-size: 4rem">{{ getFormEmoji(selectedDrug.form) }}</span>
+                <component
+                  :is="getFormIcon(selectedDrug.form)"
+                  class="text-primary drug-icon"
+                />
               </div>
             </div>
           </div>
@@ -309,5 +322,10 @@ const getFormEmoji = (form) => {
   /* 그림자 강조 */
   border-color: #0d6efd !important;
   /* 테두리 강조 */
+}
+
+.drug-icon {
+  width: 48px;
+  height: 48px;
 }
 </style>
