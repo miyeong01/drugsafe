@@ -53,52 +53,22 @@ const handleSend = async (manualMessage = null) => {
   message.value = '';
   loading.value = true;
 
-  messages.value.push({
-    role: 'ai',
-    text: '',
-    // type: res.data.type,
-    // candidates: res.data.candidates || [], // 후보 리스트
-    isStreaming: true,
-    status: '입력 중입니다...'
-  })
-  const aiIndex = messages.value.length -1
   try {
     const res = await axios.post(
       'http://localhost:8000/api/medicines/chatbot/',
       { message: userMessage }
     );
-    // messages.value.push({
-    //   role: 'ai',
-    //   text: res.data.answer,
-    //   type: res.data.type,
-    //   candidates: res.data.candidates || [], // 후보 리스트
-    //   isStreaming: true,
-    //   status: '입력 중입니다...'
-    // })
-    // messages.value[aiIndex].text = res.data.answer;
-    const answer = res.data.answer;
-    messages.value[aiIndex].text = '';
-    
-    let i = 0;
-    const interval = setInterval(() => {
-      messages.value[aiIndex].text += answer[i];
-      i++;
-
-      if (i >= answer.length){
-        clearInterval(interval);
-        messages.value[aiIndex].isStreaming = false;
-      }
-    }, 20)
-    messages.value[aiIndex].type = res.data.type;
-    messages.value[aiIndex].candidates = res.data.candidates || [];
-    messages.value[aiIndex].isStreaming = false;
+    messages.value.push({
+      role: 'ai',
+      text: res.data.answer,
+      type: res.data.type,
+      candidates: res.data.candidates || [] // 후보 리스트
+    })
   } catch (err) {
-    messages.value[aiIndex].text = '⚠️ 현재 상담 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
-    messages.value[aiIndex].isStreaming = false
-    // messages.value.push({
-    //   role: 'ai',
-    //   text: '⚠️ 현재 상담 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
-    // })
+    messages.value.push({
+      role: 'ai',
+      text: '⚠️ 현재 상담 서비스에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    })
   } finally {
     loading.value = false
   }
@@ -141,10 +111,6 @@ const handleKeyPress = (e) => {
               </div>
 
               <div class="ai-container">
-                <div v-if="msg.isStreaming" class="ai-status">
-                  <span class="spinner"></span>
-                  {{ msg.status || '답변을 생성 중입니다...' }}
-                </div>
                 <div class="message-bubble ai-bubble">
                   <p>{{ msg.text }}</p>
                 </div>
@@ -549,7 +515,7 @@ const handleKeyPress = (e) => {
 }
 
 .candidate-card:hover {
-  background-color: var(--primary-blue);
+  background-color: var(--primary-blue, #4D9FFF);
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(77, 159, 255, 0.3);
 }
@@ -573,27 +539,4 @@ const handleKeyPress = (e) => {
 .candidate-card:hover .click-hint {
   color: rgba(255, 255, 255, 0.8);
 }
-
-.ai-status {
-  font-size: 0.8rem;
-  color: #6c757d;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.spinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid #ddd;
-  border-top: 2px solid #5b9cff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 </style>
