@@ -35,6 +35,11 @@ async def parse_user_input(user_message: str) -> dict:
     prompt = f"""
 너는 의약품 검색을 위한 자연어 처리기이자 JSON 변환기다.
 사용자의 질문을 분석하여 의도(intent)와 상세 정보를 추출해.
+사용자 입력을 분석해서 intent를 분류해라.
+
+일상적인 인사, 감정 표현, 잡담이면 → smalltalk
+의약품 추천, 증상, 약 이름, 효능이면 → drug_info 또는 recommend
+그 외 판단 불가하면 → unknown
 
 [표준 증상 리스트]
 {symptom_list}
@@ -52,7 +57,7 @@ async def parse_user_input(user_message: str) -> dict:
 
 출력 형식:
 {{
-  "intent": "recommend | drug_info | unknown",
+  "intent": "recommend | drug_info | smalltalk | unknown",
   "symptom": "위 표준 리스트 중 하나 또는 null",
   "drug_name": "추출된 약 이름 또는 null",
   "form": "정제, 액상, 시럽 등 또는 null",
