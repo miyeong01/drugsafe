@@ -22,7 +22,7 @@ const hoverScore = ref(0);
 const title = ref("");
 const content = ref("");
 const hasSideEffect = ref(false);
-const selectedEffects = ref("");
+const selectedEffect = ref("");
 
 onMounted(() => {
   if (drugId) {
@@ -53,7 +53,7 @@ const handleSubmit = async () => {
     alert("리뷰 내용을 입력해주세요.");
     return;
   }
-  if (!selectedEffects.value) {
+  if (!selectedEffect.value) {
     alert("효과를 선택해주세요.");
     return;
   }
@@ -64,7 +64,7 @@ const handleSubmit = async () => {
     content: content.value,
     score: score.value,
     has_side_effect: hasSideEffect.value,
-    effect: selectedEffects.value,
+    effect: selectedEffect.value,
   };
 
   try {
