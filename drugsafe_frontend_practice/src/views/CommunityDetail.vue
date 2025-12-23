@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useDrugStore } from "@/stores/drug";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
@@ -12,6 +12,8 @@ import {
   Filter,
   Plus,
   ClipboardList,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-vue-next";
 
 // Props 정의
@@ -76,11 +78,40 @@ const totalComments = computed(() => {
 const goReviewDetail = (drugId, reviewId) => {
   router.push({
     name: "ReviewDetail", // 1. router/index.js에 설정한 이름을 확인하세요!
-    params: { 
-      drugId: drugId, 
-      reviewId: reviewId 
-    }
+    params: {
+      drugId: drugId,
+      reviewId: reviewId,
+    },
   });
+};
+
+// 페이지네이션 관련 상태 추가
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+// 전체 페이지 수 계산 보완
+const totalPages = computed(() => {
+  const count = filteredReviews.value ? filteredReviews.value.length : 0;
+  return Math.ceil(count / itemsPerPage) || 1; // 최소 1페이지 보장
+});
+
+// paginatedReviews 계산 로직 보완
+const paginatedReviews = computed(() => {
+  const list = filteredReviews.value || [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return list.slice(start, end);
+});
+
+// 검색어나 탭 변경 시 1페이지로 리셋
+watch([searchQuery, sortBy, activeTab], () => {
+  currentPage.value = 1;
+});
+
+// 페이지 변경 함수
+const changePage = (page) => {
+  currentPage.value = page;
+  window.scrollTo(0, 0);
 };
 </script>
 
@@ -146,7 +177,7 @@ const goReviewDetail = (drugId, reviewId) => {
       <div class="review-list d-flex flex-column gap-4 mb-5">
         <template v-if="filteredReviews.length > 0">
           <div
-            v-for="review in filteredReviews"
+            v-for="review in paginatedReviews"
             :key="review.id"
             class="card border-0 shadow-sm p-4 rounded-4 review-card mb-3"
             @click="goReviewDetail(review.drug, review.id)"
@@ -175,10 +206,11 @@ const goReviewDetail = (drugId, reviewId) => {
                 <MessageCircle :size="14" /> 댓글
                 {{ review.comment_count || 0 }}
               </span>
-              <span class="ms-auto"
-                >{{ review.username }}님</span
-              >
-              <span class="vr" style="height: 12px; margin-top: 2px;"></span> <span>{{ new Date(review.created_at).toLocaleDateString() }}</span>
+              <span class="ms-auto">{{ review.username }}님</span>
+              <span class="vr" style="height: 12px; margin-top: 2px"></span>
+              <span>{{
+                new Date(review.created_at).toLocaleDateString()
+              }}</span>
             </div>
           </div>
         </template>
@@ -196,6 +228,35 @@ const goReviewDetail = (drugId, reviewId) => {
         <span class="fw-bold">리뷰 작성하기</span>
       </button>
     </div>
+
+    <nav
+      v-if="totalPages > 1"
+      class="custom-position-nav d-flex justify-content-center"
+    >
+      <div class="minimal-pagination d-flex align-items-center gap-3">
+        <button
+          class="btn-arrow"
+          :disabled="currentPage === 1"
+          @click="changePage(currentPage - 1)"
+        >
+          <ChevronLeft :size="20" />
+        </button>
+
+        <div class="current-page-display shadow-sm">
+          <span class="fw-bold text-primary">{{ currentPage }}</span>
+          <span class="text-muted mx-1">/</span>
+          <span class="text-secondary small">{{ totalPages }}</span>
+        </div>
+
+        <button
+          class="btn-arrow"
+          :disabled="currentPage === totalPages"
+          @click="changePage(currentPage + 1)"
+        >
+          <ChevronRight :size="20" />
+        </button>
+      </div>
+    </nav>
   </div>
 </template>
 
@@ -283,5 +344,54 @@ const goReviewDetail = (drugId, reviewId) => {
 /* 별점 fill 효과 */
 .fill-warning {
   fill: #ffc107;
+}
+
+/* 페이지네이션 컨테이너 (위치 조정 포함) */
+.custom-position-nav {
+  position: relative;
+  transform: translateY(-20px); /* 목록과 적절한 간격 유지 */
+  margin-bottom: 2rem;
+}
+
+.minimal-pagination {
+  background-color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5f0ff;
+}
+
+/* 화살표 버튼 */
+.btn-arrow {
+  border: none;
+  background: none;
+  color: #4d9fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-arrow:hover:not(:disabled) {
+  background-color: #f0f7ff;
+  transform: scale(1.1);
+}
+
+.btn-arrow:disabled {
+  color: #dee2e6;
+  cursor: not-allowed;
+}
+
+/* 중앙 번호 표시 */
+.current-page-display {
+  background-color: #f8f9fa;
+  padding: 6px 18px;
+  border-radius: 20px;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid #edf2f7;
 }
 </style>

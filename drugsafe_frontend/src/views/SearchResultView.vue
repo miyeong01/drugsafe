@@ -1,7 +1,18 @@
 <script setup>
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Search, SlidersHorizontal, Star, Heart, Pill, Droplet, SprayCan, Bandage } from "lucide-vue-next";
+import {
+  Search,
+  SlidersHorizontal,
+  Star,
+  Heart,
+  Pill,
+  Droplet,
+  SprayCan,
+  Bandage,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-vue-next";
 import { useDrugStore } from "@/stores/drug";
 import film from "@/assets/icons/film.svg?component";
 import lotion from "@/assets/icons/lotion.svg?component";
@@ -12,6 +23,8 @@ import powder from "@/assets/icons/powder.svg?component";
 const router = useRouter();
 const route = useRoute();
 const drugStore = useDrugStore();
+const currentPage = ref(1);
+const itemsPerPage = 10;
 
 // URL의 쿼리(?q=...)를 가져와서 검색어 초기화
 const keyword = ref(route.query.q || "");
@@ -141,11 +154,54 @@ const getFormIcon = (form) => {
     10: lotion,
   };
   return map[form] || Pill;
-}
+};
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredDrugs.value.length / itemsPerPage);
+});
+
+// 현재 페이지 주변 5개 버튼만 보여주는 로직
+const displayedPages = computed(() => {
+  const range = 2; // 현재 페이지 앞뒤로 보여줄 개수
+  let start = Math.max(1, currentPage.value - range);
+  let end = Math.min(totalPages.value, currentPage.value + range);
+
+  // 페이지가 너무 적을 때를 위한 보정
+  if (currentPage.value <= range) {
+    end = Math.min(totalPages.value, 5);
+  } else if (currentPage.value + range >= totalPages.value) {
+    start = Math.max(1, totalPages.value - 4);
+  }
+
+  const pages = [];
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  return pages;
+});
+
+const paginatedDrugs = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredDrugs.value.slice(start, end);
+});
+
+watch(
+  [keyword, filters, sortBy],
+  () => {
+    currentPage.value = 1;
+  },
+  { deep: true }
+);
+
+const changePage = (page) => {
+  currentPage.value = page;
+  window.scrollTo(0, 0); // 페이지 이동 시 상단으로 스크롤
+};
 </script>
 
 <template>
-  <div class="min-vh-100 bg-light py-5">
+  <div class="min-vh-100 py-5 bg-light">
     <div class="container">
       <div class="mb-5">
         <div class="d-flex gap-2 mb-3">
@@ -176,7 +232,7 @@ const getFormIcon = (form) => {
 
       <div class="row g-4">
         <aside class="col-lg-3 d-none d-lg-block">
-          <div class="card shadow-sm border-0 sticky-top" style="top: 20px">
+          <div class="card shadow-sm border-0 sticky-top" style="top: 90px">
             <div class="card-body p-4">
               <div class="d-flex align-items-center gap-2 mb-4">
                 <SlidersHorizontal :size="20" />
@@ -236,7 +292,7 @@ const getFormIcon = (form) => {
 
           <div class="d-flex flex-column gap-3">
             <div
-              v-for="drug in filteredDrugs"
+              v-for="drug in paginatedDrugs"
               :key="drug.id"
               class="card border-0 shadow-sm hover-shadow cursor-pointer"
               @click="goDetail(drug.id)"
@@ -262,7 +318,6 @@ const getFormIcon = (form) => {
                         :is="getFormIcon(drug.form)"
                         class="text-primary drug-icon"
                       />
-                      
                     </div>
                   </div>
 
@@ -347,7 +402,36 @@ const getFormIcon = (form) => {
         </div>
       </div>
     </div>
+    <nav
+      v-if="totalPages > 1"
+      class="custom-position-nav mt-5 d-flex justify-content-center"
+    >
+      <div class="minimal-pagination d-flex align-items-center gap-3">
+        <button
+          class="btn-arrow"
+          :disabled="currentPage === 1"
+          @click="changePage(currentPage - 1)"
+        >
+          <ChevronLeft :size="20" />
+        </button>
+  
+        <div class="current-page-display shadow-sm">
+          <span class="fw-bold text-primary">{{ currentPage }}</span>
+          <span class="text-muted mx-1">/</span>
+          <span class="text-secondary small">{{ totalPages }}</span>
+        </div>
+  
+        <button
+          class="btn-arrow"
+          :disabled="currentPage === totalPages"
+          @click="changePage(currentPage + 1)"
+        >
+          <ChevronRight :size="20" />
+        </button>
+      </div>
+    </nav>
   </div>
+
 </template>
 
 <style scoped>
@@ -405,5 +489,59 @@ const getFormIcon = (form) => {
 .drug-icon {
   width: 24px;
   height: 24px;
+}
+
+/* 페이지네이션 컨테이너 */
+.minimal-pagination {
+  background-color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* 화살표 버튼 스타일 */
+.btn-arrow {
+  border: none;
+  background: none;
+  color: #4d9fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-arrow:hover:not(:disabled) {
+  background-color: #f0f7ff;
+  transform: scale(1.1);
+}
+
+.btn-arrow:disabled {
+  color: #dee2e6;
+  cursor: not-allowed;
+}
+
+/* 중앙 페이지 번호 박스 */
+.current-page-display {
+  background-color: #f8f9fa;
+  padding: 6px 18px;
+  border-radius: 20px;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid #edf2f7;
+}
+
+.current-page-display span {
+  font-size: 1rem;
+}
+
+.custom-position-nav {
+  /* 마진 대신 좌표 이동을 사용합니다 */
+  position: relative;
+  transform: translateY(-20px); /* 숫자가 커질수록 위로 더 많이 올라갑니다 */
+  z-index: 10; /* 다른 요소보다 위에 보이도록 설정 */
+  margin-bottom: -40px; /* 이동한 만큼 아래쪽 빈 공간을 제거하여 레이아웃을 맞춤 */
 }
 </style>
