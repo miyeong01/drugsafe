@@ -9,7 +9,7 @@ import {
   Heart,
   MessageSquare,
   ArrowLeft,
-  AlertTriangle, // 주의사항 아이콘 누락 방지
+  AlertTriangle,
   Info,
   Pill, 
   Droplet, 
@@ -36,10 +36,17 @@ const goBack = () => {
   router.back();
 };
 
-onMounted(() => {
+onMounted(async () => {
   const drugId = route.params.drugId;
-  drugStore.getDrugDetail(drugId);
-  drugStore.getReviews(drugId);
+  
+  if (drugId && drugId !== 'undefined') { // ✨ undefined 체크 추가
+    try {
+      await drugStore.getDrugDetail(drugId);
+      await drugStore.getReviews(drugId);
+    } catch (err) {
+      console.error("데이터 로드 중 오류:", err);
+    }
+  }
 });
 
 const goReviewWrite = () => {
@@ -71,7 +78,7 @@ const goReviewDetail = (reviewId) => {
     name: "ReviewDetail", // router/index.js에 정의된 상세 페이지 route 이름
     params: {
       drugId: selectedDrug.value.id, // 약 ID
-      reviewId: reviewId            // 리뷰 ID
+      reviewId: reviewId, // 리뷰 ID
     },
   });
 };
@@ -88,7 +95,7 @@ const handleToggleFavorite = () => {
   drugStore.toggleFavorite(selectedDrug.value.id);
 };
 
-const getFormIcon = (form) => {
+const getFormEmoji = (form) => {
   const map = {
     1: Pill,
     2: powder,
@@ -102,13 +109,16 @@ const getFormIcon = (form) => {
     10: lotion,
   };
   return map[form] || Pill;
-}
+};
 </script>
 
 <template>
   <div v-if="selectedDrug" class="min-vh-100 bg-light py-5">
     <div class="container" style="max-width: 900px">
-      <button class="btn btn-light shadow-sm rounded-circle p-2 mb-4" @click="goBack">
+      <button
+        class="btn btn-light shadow-sm rounded-circle p-2 mb-4"
+        @click="goBack"
+      >
         <ArrowLeft :size="20" class="text-secondary" />
       </button>
 
@@ -116,19 +126,27 @@ const getFormIcon = (form) => {
         <div class="col-md-5">
           <div class="card border-0 shadow-sm h-100">
             <!-- 이미지 있을 때: 카드 전체를 이미지로 -->
-            <div v-if="selectedDrug && selectedDrug.image_url" class="d-flex align-items-center justify-content-center"
-              style="height: 100%;">
-              <img :src="selectedDrug.image_url" alt="의약품 이미지" style="
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      " />
+            <div
+              v-if="selectedDrug && selectedDrug.image_url"
+              class="d-flex align-items-center justify-content-center"
+              style="height: 100%"
+            >
+              <img
+                :src="selectedDrug.image_url"
+                alt="의약품 이미지"
+                style="width: 100%; height: 100%; object-fit: contain"
+              />
             </div>
 
             <!-- 이미지 없을 때: 기존 원형 + 이모지 -->
-            <div v-else class="d-flex align-items-center justify-content-center py-5">
-              <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
-                style="width: 150px; height: 150px">
+            <div
+              v-else
+              class="d-flex align-items-center justify-content-center py-5"
+            >
+              <div
+                class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 150px; height: 150px"
+              >
                 <component
                   :is="getFormIcon(selectedDrug.form)"
                   class="text-primary drug-icon"
@@ -136,23 +154,31 @@ const getFormIcon = (form) => {
               </div>
             </div>
           </div>
-
-
         </div>
         <div class="col-md-7">
           <div class="h-100 d-flex flex-column justify-content-center">
             <div class="mb-2">
-              <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill fw-normal px-3 py-2">
+              <span
+                class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill fw-normal px-3 py-2"
+              >
                 {{ selectedDrug.form_name }}
               </span>
             </div>
             <h1 class="fw-bold mb-1 display-6">{{ selectedDrug.name }}</h1>
             <p class="text-secondary mb-3 fs-5">{{ selectedDrug.company }}</p>
             <div class="d-flex gap-2 mb-4">
-              <button @click="handleToggleFavorite" class="btn d-flex align-items-center gap-2 px-3"
-                :class="selectedDrug.is_favorite ? 'btn-danger' : 'btn-outline-danger'">
-                <Heart :size="18" :fill="selectedDrug.is_favorite ? 'currentColor' : 'none'" />
-                {{ selectedDrug.is_favorite ? '즐겨찾기 취소' : '즐겨찾기' }}
+              <button
+                @click="handleToggleFavorite"
+                class="btn d-flex align-items-center gap-2 px-3"
+                :class="
+                  selectedDrug.is_favorite ? 'btn-danger' : 'btn-outline-danger'
+                "
+              >
+                <Heart
+                  :size="18"
+                  :fill="selectedDrug.is_favorite ? 'currentColor' : 'none'"
+                />
+                {{ selectedDrug.is_favorite ? "즐겨찾기 취소" : "즐겨찾기" }}
               </button>
             </div>
           </div>
@@ -160,27 +186,35 @@ const getFormIcon = (form) => {
       </div>
 
       <ul class="nav nav-pills nav-fill mb-4 bg-white p-1 rounded shadow-sm">
-        <li class="nav-item" v-for="tab in [
-          'info',
-          'usage',
-          'warnings',
-          'side_effect',
-          'store',
-          'reviews',
-        ]" :key="tab">
-          <button class="nav-link fw-bold" :class="{ active: activeTab === tab }" @click="activeTab = tab">
+        <li
+          class="nav-item"
+          v-for="tab in [
+            'info',
+            'usage',
+            'warnings',
+            'side_effect',
+            'store',
+            'reviews',
+          ]"
+          :key="tab"
+        >
+          <button
+            class="nav-link fw-bold"
+            :class="{ active: activeTab === tab }"
+            @click="activeTab = tab"
+          >
             {{
               tab === "info"
                 ? "상세정보"
                 : tab === "usage"
-                  ? "용법·용량"
-                  : tab === "warnings"
-                    ? "주의사항"
-                    : tab === "side_effect"
-                      ? "부작용"
-                      : tab === "store"
-                        ? "보관방법"
-                        : "리뷰"
+                ? "용법·용량"
+                : tab === "warnings"
+                ? "주의사항"
+                : tab === "side_effect"
+                ? "부작용"
+                : tab === "store"
+                ? "보관방법"
+                : "리뷰"
             }}
           </button>
         </li>
@@ -191,16 +225,25 @@ const getFormIcon = (form) => {
           <div v-if="activeTab === 'info'">
             <div class="mb-5">
               <h3 class="h5 fw-bold mb-3 d-flex align-items-center">
-                <span class="badge bg-primary me-2" style="width: 4px; height: 18px; padding: 0"></span>
+                <span
+                  class="badge bg-primary me-2"
+                  style="width: 4px; height: 18px; padding: 0"
+                ></span>
                 효능 · 효과
               </h3>
-              <p class="text-secondary lh-lg mb-0" style="white-space: pre-wrap">
+              <p
+                class="text-secondary lh-lg mb-0"
+                style="white-space: pre-wrap"
+              >
                 {{ selectedDrug.efficacy || "정보가 없습니다." }}
               </p>
             </div>
             <div>
               <h3 class="h5 fw-bold mb-3 d-flex align-items-center">
-                <span class="badge bg-primary me-2" style="width: 4px; height: 18px; padding: 0"></span>
+                <span
+                  class="badge bg-primary me-2"
+                  style="width: 4px; height: 18px; padding: 0"
+                ></span>
                 주성분
               </h3>
               <p class="text-secondary lh-lg mb-0">
@@ -218,19 +261,29 @@ const getFormIcon = (form) => {
 
           <div v-if="activeTab === 'warnings'">
             <div class="mb-4">
-              <h3 class="h5 fw-bold text-danger mb-3 d-flex align-items-center gap-2">
+              <h3
+                class="h5 fw-bold text-danger mb-3 d-flex align-items-center gap-2"
+              >
                 <AlertTriangle :size="20" /> 사용상의 주의사항
               </h3>
-              <div class="p-3 bg-danger bg-opacity-10 rounded text-dark lh-lg" style="white-space: pre-wrap">
+              <div
+                class="p-3 bg-danger bg-opacity-10 rounded text-dark lh-lg"
+                style="white-space: pre-wrap"
+              >
                 {{ selectedDrug.caution || "정보가 없습니다." }}
               </div>
             </div>
 
             <div>
-              <h3 class="h5 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+              <h3
+                class="h5 fw-bold text-primary mb-3 d-flex align-items-center gap-2"
+              >
                 <Info :size="20" /> 복용 시 주의사항
               </h3>
-              <div class="p-3 bg-primary bg-opacity-10 rounded text-dark lh-lg" style="white-space: pre-wrap">
+              <div
+                class="p-3 bg-primary bg-opacity-10 rounded text-dark lh-lg"
+                style="white-space: pre-wrap"
+              >
                 {{ selectedDrug.caution_intake || "정보가 없습니다." }}
               </div>
             </div>
@@ -253,30 +306,62 @@ const getFormIcon = (form) => {
           <div v-else-if="activeTab === 'reviews'">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h3 class="h5 fw-bold mb-0">리뷰 ({{ reviews?.length || 0 }})</h3>
-              <button class="btn btn-primary btn-sm text-white" @click="goReviewWrite">
+              <button
+                class="btn btn-primary btn-sm text-white"
+                @click="goReviewWrite"
+              >
                 <MessageSquare :size="16" /> 리뷰 작성
               </button>
             </div>
 
             <div v-if="reviews?.length > 0" class="d-flex flex-column gap-3">
-              <div v-for="review in reviews" :key="review.id" class="border rounded p-4 bg-white shadow-sm"
-                @click="goReviewDetail(review.id)">
-                <div class="d-flex justify-content-between mb-2">
-                  <span class="fw-bold">{{ review.username }}님</span>
+              <div
+                v-for="review in reviews"
+                :key="review.id"
+                class="border rounded p-4 bg-white shadow-sm cursor-pointer hover-shadow"
+                @click="goReviewDetail(review.id)"
+              >
+                <div
+                  class="d-flex justify-content-between align-items-start mb-2"
+                >
+                  <div>
+                    <h4 class="h6 fw-bold text-dark mb-1">
+                      {{ review.username }}님
+                    </h4>
+                  </div>
+
                   <div class="text-warning small">
-                    <Star v-for="i in 5" :key="i" :size="16" :fill="i <= review.score ? '#FFC107' : 'none'" :class="i <= review.score
-                      ? 'text-warning'
-                      : 'text-secondary opacity-25'
-                      " />
+                    <Star
+                      v-for="i in 5"
+                      :key="i"
+                      :size="14"
+                      :fill="i <= review.score ? '#FFC107' : 'none'"
+                      :class="
+                        i <= review.score
+                          ? 'text-warning'
+                          : 'text-secondary opacity-25'
+                      "
+                    />
                   </div>
                 </div>
+
                 <p class="text-secondary small mb-2">
                   {{ formatDate(review.created_at) }}
                 </p>
                 <h5 class="h6 fw-bold mb-2">{{ review.title }}</h5>
-                <p class="text-dark mb-3 lh-base" style="white-space: pre-wrap">
-                  {{ review.content }}
-                </p>
+                <p class="text-dark mb-3 lh-base">{{ review.content }}</p>
+
+                <div class="d-flex align-items-center gap-2 pt-2 border-top">
+                  <div class="d-flex align-items-center text-secondary small">
+                    <MessageCircle
+                      :size="16"
+                      class="me-1 text-primary opacity-75"
+                    />
+                    <span class="fw-bold"
+                      >댓글 {{ review.comment_count || 0 }}개</span
+                    >
+                  </div>
+                </div>
               </div>
             </div>
             <div v-else class="text-center py-5 text-secondary">
@@ -288,7 +373,10 @@ const getFormIcon = (form) => {
     </div>
   </div>
 
-  <div v-else class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
+  <div
+    v-else
+    class="min-vh-100 d-flex flex-column justify-content-center align-items-center"
+  >
     <div class="spinner-border text-primary mb-3"></div>
     <p class="text-secondary">약 정보를 불러오는 중입니다...</p>
   </div>

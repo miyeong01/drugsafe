@@ -60,14 +60,28 @@ export const useDrugStore = defineStore(
     };
 
     // 3. 해당 약의 리뷰 목록 가져오기
-    const getReviews = function (id) {
+    const getReviews = function (drugId = null) {
+  // ✨ drugId가 있으면 특정 약의 리뷰를, 없으면 전체 리뷰(커뮤니티용)를 가져옵니다.
+      let url = `${API_URL}/medicines/reviews/`; 
+      
+      if (drugId && drugId !== 'undefined') {
+        url = `${API_URL}/medicines/drugs/${drugId}/reviews/`;
+      }
+
       axios({
         method: "get",
-        url: `${API_URL}/medicines/drugs/${id}/reviews/`,
+        url: url,
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
       })
-        .then((res) => (reviews.value = res.data))
-        .catch((err) => console.log(err));
-    };
+        .then((res) => {
+          reviews.value = res.data;
+        })
+        .catch((err) => {
+          console.error("리뷰 로드 실패:", err);
+        });
+      }
 
     // 4. 리뷰 등록하기
     const createReview = function (id, reviewData) {

@@ -1,148 +1,97 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { 
-  Search, 
-  Star, 
-  MessageSquare, 
-  ThumbsUp, 
-  TrendingUp, 
-  Clock, 
+import { ref, computed, onMounted } from "vue";
+import { useDrugStore } from "@/stores/drug";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import {
+  Search,
+  Star,
+  MessageCircle,
+  ThumbsUp,
+  TrendingUp,
   Filter,
-  Plus
-} from 'lucide-vue-next';
+  Plus,
+  ClipboardList,
+} from "lucide-vue-next";
 
 // Props 정의
 const props = defineProps({
   onNavigate: {
     type: Function,
-    required: true
-  }
+    required: true,
+  },
 });
 
-// 상태 관리
-const searchQuery = ref('');
-const sortBy = ref('latest');
-const activeTab = ref('all');
+const drugStore = useDrugStore();
+const { reviews } = storeToRefs(drugStore);
+const router = useRouter();
 
-// 모든 리뷰 데이터
-const allReviews = [
-  {
-    id: '1',
-    title: '타이레놀정 500mg 사용 후기',
-    drugName: '타이레놀정 500mg',
-    author: '김**',
-    authorAvatar: '👤',
-    rating: 5,
-    date: '2025.01.15',
-    preview: '두통에 정말 효과가 좋았어요. 평소 편두통이 심한 편인데, 이 약을 먹고 30분 정도 지나니 통증이 많이 가라앉았습니다.',
-    category: '두통',
-    helpful: 24,
-    comments: 8,
-    views: 342,
-  },
-  {
-    id: '2',
-    title: '게보린정 효과 있나요?',
-    drugName: '게보린정',
-    author: '이**',
-    authorAvatar: '👤',
-    rating: 4,
-    date: '2025.01.14',
-    preview: '두통에 효과는 있는데 졸음이 와서 운전 전에는 먹지 않는 게 좋을 것 같아요.',
-    category: '두통',
-    helpful: 18,
-    comments: 5,
-    views: 256,
-  },
-  {
-    id: '3',
-    title: '펜잘정 사용 후기',
-    drugName: '펜잘정',
-    author: '박**',
-    authorAvatar: '👤',
-    rating: 5,
-    date: '2025.01.13',
-    preview: '효과 빠르고 좋습니다. 생리통이 심할 때 먹으면 금방 나아져요.',
-    category: '생리통',
-    helpful: 15,
-    comments: 3,
-    views: 189,
-  },
-  {
-    id: '4',
-    title: '판피린티정 감기에 효과 좋아요',
-    drugName: '판피린티정',
-    author: '최**',
-    authorAvatar: '👤',
-    rating: 5,
-    date: '2025.01.12',
-    preview: '종합감기약으로 정말 좋습니다. 콧물, 기침, 열 모두 잡아줘요.',
-    category: '종합감기',
-    helpful: 32,
-    comments: 12,
-    views: 487,
-  },
-  {
-    id: '5',
-    title: '베아제정 소화불량에 추천',
-    drugName: '베아제정',
-    author: '정**',
-    authorAvatar: '👤',
-    rating: 4,
-    date: '2025.01.11',
-    preview: '과식했을 때 먹으면 속이 편해집니다. 항상 가방에 넣고 다녀요.',
-    category: '소화불량',
-    helpful: 21,
-    comments: 6,
-    views: 298,
-  }
-];
+// 상태 관리
+const searchQuery = ref("");
+const sortBy = ref("latest");
+const activeTab = ref("all");
+
+// 페이지 로드 시 전체 리뷰 데이터를 가져옴.
+onMounted(() => {
+  // drugId 없이 호출하면 전체 리뷰를 가져오도록 스토어 액션 구성
+  drugStore.getReviews();
+});
 
 // 계산된 속성: 필터링 및 정렬된 리뷰
 const filteredReviews = computed(() => {
-  let filtered = [...allReviews];
+  // reviews가 null일 경우를 대비해 빈 배열로 시작합니다.
+  let list = reviews.value ? [...reviews.value] : [];
 
-  // 검색 필터링
+  // 검색 필터링 (제목, 약품명 기준)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(review => 
-      review.title.toLowerCase().includes(query) ||
-      review.drugName.toLowerCase().includes(query) ||
-      review.category.toLowerCase().includes(query)
+    list = list.filter(
+      (review) =>
+        review.title?.toLowerCase().includes(query) ||
+        review.drug_name?.toLowerCase().includes(query) ||
+        review.content?.toLowerCase().includes(query)
     );
   }
 
-  // 탭 필터링 (인기 리뷰 탭일 경우 도움순으로 고정)
-  if (activeTab.value === 'popular') {
-    return filtered.sort((a, b) => b.helpful - a.helpful);
+  // 정렬 로직
+  if (activeTab.value === "popular" || sortBy.value === "comments") {
+    // 댓글 많은 순 정렬
+    list.sort((a, b) => (b.comment_count || 0) - (a.comment_count || 0));
+  } else if (sortBy.value === "latest") {
+    // 최신순 정렬
+    list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
-  // 일반 정렬
-  if (sortBy.value === 'helpful') {
-    filtered.sort((a, b) => b.helpful - a.helpful);
-  } else if (sortBy.value === 'comments') {
-    filtered.sort((a, b) => b.comments - a.comments);
-  } else if (sortBy.value === 'views') {
-    filtered.sort((a, b) => b.views - a.views);
-  } else {
-    // 최신순 (기본 데이터 순서가 최신순이라고 가정)
-    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-  }
-
-  return filtered;
+  return list;
 });
 
 // 전체 통계 계산
-const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comments, 0));
+const totalComments = computed(() => {
+  return reviews.value
+    ? reviews.value.reduce((sum, r) => sum + (r.comment_count || 0), 0)
+    : 0;
+});
+
+// 리뷰 상세 페이지 이동 함수 추가
+const goReviewDetail = (drugId, reviewId) => {
+  router.push({
+    name: "ReviewDetail", // 1. router/index.js에 설정한 이름을 확인하세요!
+    params: { 
+      drugId: drugId, 
+      reviewId: reviewId 
+    }
+  });
+};
 </script>
 
 <template>
   <div class="community-page bg-pastel py-5 min-vh-100">
-    <div class="container" style="max-width: 1000px;">
-      
+    <div class="container" style="max-width: 1000px">
       <div class="mb-5">
         <h1 class="fw-bold text-dark mb-2">커뮤니티</h1>
-        <p class="text-secondary fs-5">다양한 의약품 사용 후기를 확인하고 공유하세요</p>
+        <p class="text-secondary fs-5">
+          다양한 의약품 사용 후기를 확인하고 공유하세요
+        </p>
       </div>
 
       <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
@@ -150,65 +99,42 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
           <div class="col-md-8">
             <div class="search-input-group">
               <Search class="search-icon" :size="20" />
-              <input 
-                type="text" 
-                class="form-control ps-5 py-3 border-0 bg-light rounded-3" 
-                placeholder="리뷰 검색 (제목, 약품명, 카테고리)"
+              <input
+                type="text"
+                class="form-control ps-5 py-3 border-0 bg-light rounded-3"
+                placeholder="리뷰 검색 (제목, 내용, 약품명)"
                 v-model="searchQuery"
-              >
+              />
             </div>
           </div>
           <div class="col-md-4">
             <div class="d-flex align-items-center gap-2 h-100">
               <Filter class="text-secondary" :size="20" />
-              <select class="form-select border-0 bg-light py-3 rounded-3" v-model="sortBy">
+              <select
+                class="form-select border-0 bg-light py-3 rounded-3"
+                v-model="sortBy"
+              >
                 <option value="latest">최신순</option>
-                <option value="helpful">도움순</option>
                 <option value="comments">댓글순</option>
-                <option value="views">조회순</option>
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row g-4 mb-5">
-        <div class="col-md-4">
-          <div class="stat-card p-4 rounded-4 text-center border-0 shadow-sm">
-            <TrendingUp class="mb-2 text-primary" :size="32" />
-            <div class="fs-2 fw-bold text-dark">{{ allReviews.length }}</div>
-            <div class="text-secondary small">전체 리뷰</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="stat-card p-4 rounded-4 text-center border-0 shadow-sm">
-            <Star class="mb-2 text-warning fill-warning" :size="32" />
-            <div class="fs-2 fw-bold text-dark">4.6</div>
-            <div class="text-secondary small">평균 평점</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="stat-card p-4 rounded-4 text-center border-0 shadow-sm">
-            <MessageSquare class="mb-2 text-info" :size="32" />
-            <div class="fs-2 fw-bold text-dark">{{ totalComments }}</div>
-            <div class="text-secondary small">전체 댓글</div>
-          </div>
-        </div>
-      </div>
-
       <ul class="nav nav-pills mb-4 gap-2">
         <li class="nav-item">
-          <button 
-            class="nav-link rounded-pill px-4 py-2" 
+          <button
+            class="nav-link rounded-pill px-4 py-2"
             :class="{ active: activeTab === 'all' }"
             @click="activeTab = 'all'"
           >
-            <Clock class="me-2" :size="16" />전체 리뷰
+            <ClipboardList class="me-2" :size="16" />전체 리뷰
           </button>
         </li>
         <li class="nav-item">
-          <button 
-            class="nav-link rounded-pill px-4 py-2" 
+          <button
+            class="nav-link rounded-pill px-4 py-2"
             :class="{ active: activeTab === 'popular' }"
             @click="activeTab = 'popular'"
           >
@@ -219,75 +145,56 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
 
       <div class="review-list d-flex flex-column gap-4 mb-5">
         <template v-if="filteredReviews.length > 0">
-          <div 
-            v-for="review in filteredReviews" 
-            :key="review.id" 
-            class="card border-0 shadow-sm p-4 rounded-4 review-card"
-            @click="onNavigate('review-detail')"
+          <div
+            v-for="review in filteredReviews"
+            :key="review.id"
+            class="card border-0 shadow-sm p-4 rounded-4 review-card mb-3"
+            @click="goReviewDetail(review.drug, review.id)"
           >
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div class="d-flex align-items-center gap-3">
-                <div class="avatar-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center">
-                  {{ review.authorAvatar }}
-                </div>
-                <div>
-                  <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="fw-bold text-dark">{{ review.author }}</span>
-                    <span class="text-muted small">· {{ review.date }}</span>
-                  </div>
-                  <div class="star-rating">
-                    <Star 
-                      v-for="i in 5" 
-                      :key="i" 
-                      :size="14" 
-                      :class="i <= review.rating ? 'fill-warning text-warning' : 'text-light-gray'" 
-                    />
-                  </div>
-                </div>
-              </div>
-              <span class="badge rounded-pill bg-light text-secondary px-3 py-2">
-                {{ review.category }}
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="small fw-bold text-dark">
+                {{ review.drug_name }}
               </span>
             </div>
 
-            <h3 class="h5 fw-bold mb-2">{{ review.title }}</h3>
-            <p class="text-secondary small mb-3 text-truncate-2">{{ review.preview }}</p>
+            <h5 class="h6 fw-bold text-dark mb-2">
+              {{ review.title || "제목 없는 리뷰" }}
+            </h5>
 
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <span class="small text-primary">약품명:</span>
-              <button 
-                class="btn btn-link p-0 small fw-bold text-decoration-none"
-                @click.stop="onNavigate('detail')"
+            <p
+              class="text-secondary small mb-3 text-truncate-2"
+              style="white-space: pre-wrap"
+            >
+              {{ review.content }}
+            </p>
+
+            <div
+              class="d-flex align-items-center gap-4 pt-3 border-top text-muted small"
+            >
+              <span class="d-flex align-items-center gap-1">
+                <MessageCircle :size="14" /> 댓글
+                {{ review.comment_count || 0 }}
+              </span>
+              <span class="ms-auto"
+                >{{ review.username }}님</span
               >
-                {{ review.drugName }}
-              </button>
-            </div>
-
-            <div class="d-flex align-items-center gap-4 pt-3 border-top text-muted small">
-              <span class="d-flex align-items-center gap-1">
-                <ThumbsUp :size="14" /> 도움 {{ review.helpful }}
-              </span>
-              <span class="d-flex align-items-center gap-1">
-                <MessageSquare :size="14" /> 댓글 {{ review.comments }}
-              </span>
-              <span>조회 {{ review.views }}</span>
+              <span class="vr" style="height: 12px; margin-top: 2px;"></span> <span>{{ new Date(review.created_at).toLocaleDateString() }}</span>
             </div>
           </div>
         </template>
-        
+
         <div v-else class="card border-0 shadow-sm p-5 text-center rounded-4">
           <p class="text-muted mb-0">검색 결과가 없습니다.</p>
         </div>
       </div>
 
-      <button 
+      <button
         class="btn btn-primary fab-button shadow-lg d-flex align-items-center gap-2 px-4 py-3 rounded-pill"
         @click="onNavigate('write-review')"
       >
         <Plus :size="24" />
         <span class="fw-bold">리뷰 작성하기</span>
       </button>
-
     </div>
   </div>
 </template>
@@ -295,7 +202,7 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
 <style scoped>
 /* 파스텔 배경 및 폰트 */
 .bg-pastel {
-  background-color: #F0F7FF;
+  background-color: #f0f7ff;
 }
 
 /* 검색창 아이콘 배치 */
@@ -327,8 +234,8 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
   font-weight: 500;
 }
 .nav-pills .nav-link.active {
-  background-color: #4D9FFF;
-  border-color: #4D9FFF;
+  background-color: #4d9fff;
+  border-color: #4d9fff;
   color: white;
 }
 
@@ -336,11 +243,11 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
 .review-card {
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid #E5F0FF !important;
+  border: 1px solid #e5f0ff !important;
 }
 .review-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 .avatar-circle {
@@ -366,11 +273,11 @@ const totalComments = computed(() => allReviews.reduce((sum, r) => sum + r.comme
   bottom: 2rem;
   right: 2rem;
   z-index: 1000;
-  background-color: #4D9FFF;
+  background-color: #4d9fff;
   border: none;
 }
 .fab-button:hover {
-  background-color: #3A8FEF;
+  background-color: #3a8fef;
 }
 
 /* 별점 fill 효과 */

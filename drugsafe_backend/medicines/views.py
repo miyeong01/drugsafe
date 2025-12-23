@@ -58,6 +58,19 @@ def drug_detail(request, drug_pk):
 #             serializer.save(drug=drug)
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+@permission_classes([AllowAny]) # 누구나 볼 수 있도록 설정
+def all_review_list(request):
+    # 모든 리뷰를 최신순으로 가져옵니다.
+    # drug_name 등 필요한 정보를 위해 select_related나 
+    # SerializerMethodField 로직이 포함된 ReviewSerializer를 사용합니다.
+    reviews = Review.objects.all().order_by('-created_at')
+    
+    # context에 request를 담아 전달하면 시리얼라이저에서 
+    # 현재 로그인 유저의 좋아요 여부 등을 처리할 수 있습니다.
+    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
+    return Response(serializer.data)
+
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def review_list(request, drug_pk):

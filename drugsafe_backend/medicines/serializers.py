@@ -37,6 +37,7 @@ class DrugListSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     drug_name = serializers.ReadOnlyField(source='drug.name')
+    comment_count = serializers.SerializerMethodField()
     class Meta:
         model = Review
         fields = '__all__'
@@ -54,6 +55,8 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'allow_null' : True,
             },
         }
+    def get_comment_count(self, obj):
+        return obj.comments.count()
 
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -67,7 +70,14 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReviewDetailSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
+    comment_count = serializers.SerializerMethodField()
     class Meta:
         model = Review
-        fields = ('user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments')
+        fields = ('id', 'user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments', 'comment_count',)
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
+        
+    def get_comment_count(self, obj):
+        try:
+            return obj.comments.count()
+        except:
+            return obj.comment_set.count()
