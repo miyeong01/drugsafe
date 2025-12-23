@@ -1,0 +1,107 @@
+[
+{
+    "model": "medicines.symptom",
+    "pk": 1,
+    "fields": {
+        "name": "두통"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 2,
+    "fields": {
+        "name": "치통"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 3,
+    "fields": {
+        "name": "발열"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 4,
+    "fields": {
+        "name": "복통"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 5,
+    "fields": {
+        "name": "생리통"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 6,
+    "fields": {
+        "name": "위장약"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 7,
+    "fields": {
+        "name": "종합감기"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 8,
+    "fields": {
+        "name": "코감기"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 9,
+    "fields": {
+        "name": "기침"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 10,
+    "fields": {
+        "name": "재채기"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 11,
+    "fields": {
+        "name": "소화불량"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 12,
+    "fields": {
+        "name": "알레르기"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 13,
+    "fields": {
+        "name": "육체피로"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 14,
+    "fields": {
+        "name": "관절통"
+    }
+},
+{
+    "model": "medicines.symptom",
+    "pk": 15,
+    "fields": {
+        "name": "근육통"
+    }
+}
+]
