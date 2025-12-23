@@ -1,20 +1,15 @@
 <template>
   <div v-if="selectedReview" class="min-vh-100 bg-light py-5">
     <div class="container" style="max-width: 900px">
-      <button
-        class="btn btn-light shadow-sm rounded-pill px-3 mb-4 d-flex align-items-center gap-2"
-        @click="goBack"
-      >
+      <button class="btn btn-light shadow-sm rounded-pill px-3 mb-4 d-flex align-items-center gap-2" @click="goBack">
         <ArrowLeft :size="18" /> 목록으로
       </button>
 
       <div class="card border-0 shadow-sm p-4 p-md-5 mb-4">
         <div class="d-flex justify-content-between align-items-start mb-4">
           <div class="d-flex align-items-center gap-3 flex-grow-1">
-            <div
-              class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-              style="width: 50px; height: 50px"
-            >
+            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+              style="width: 50px; height: 50px">
               <span class="fs-4">👤</span>
             </div>
 
@@ -25,22 +20,11 @@
                   formatDate(selectedReview.created_at)
                 }}</span>
 
-                <div
-                  v-if="accountStore.userInfo?.pk === selectedReview.user"
-                  class="ms-auto d-flex gap-2"
-                >
-                  <button
-                    class="btn btn-outline-secondary btn-sm border-0 p-1"
-                    @click="onReviewEdit"
-                    title="수정"
-                  >
+                <div v-if="accountStore.userInfo?.pk === selectedReview.user" class="ms-auto d-flex gap-2">
+                  <button class="btn btn-outline-secondary btn-sm border-0 p-1" @click="onReviewEdit" title="수정">
                     <Edit3 :size="18" />
                   </button>
-                  <button
-                    class="btn btn-outline-danger btn-sm border-0 p-1"
-                    @click="onReviewDelete"
-                    title="삭제"
-                  >
+                  <button class="btn btn-outline-danger btn-sm border-0 p-1" @click="onReviewDelete" title="삭제">
                     <Trash2 :size="18" />
                   </button>
                 </div>
@@ -48,15 +32,10 @@
 
               <div class="d-flex align-items-center gap-2">
                 <div class="text-warning small">
-                  <span
-                    v-for="i in 5"
-                    :key="i"
-                    :class="
-                      i <= selectedReview.score
-                        ? 'text-warning'
-                        : 'text-secondary opacity-25'
-                    "
-                  >
+                  <span v-for="i in 5" :key="i" :class="i <= selectedReview.score
+                      ? 'text-warning'
+                      : 'text-secondary opacity-25'
+                    ">
                     ★
                   </span>
                 </div>
@@ -81,33 +60,19 @@
         </h3>
 
         <div class="mb-5">
-          <textarea
-            v-model="newComment"
-            class="form-control mb-2"
-            rows="3"
-            placeholder="댓글을 입력하세요..."
-          ></textarea>
+          <textarea v-model="newComment" class="form-control mb-2" rows="3" placeholder="댓글을 입력하세요..."></textarea>
           <div class="d-flex justify-content-end">
-            <button
-              class="btn btn-primary text-white px-4"
-              @click="handleSubmitComment"
-            >
+            <button class="btn btn-primary text-white px-4" @click="handleSubmitComment">
               댓글 작성
             </button>
           </div>
         </div>
 
         <div class="d-flex flex-column gap-3">
-          <div
-            v-for="comment in selectedReview.comments"
-            :key="comment.id"
-            class="p-3 bg-light rounded shadow-sm"
-          >
+          <div v-for="comment in paginatedComments" :key="comment.id" class="p-3 bg-light rounded shadow-sm">
             <div class="d-flex gap-3">
-              <div
-                class="bg-white rounded-circle d-flex align-items-center justify-content-center border"
-                style="width: 40px; height: 40px; flex-shrink: 0"
-              >
+              <div class="bg-white rounded-circle d-flex align-items-center justify-content-center border"
+                style="width: 40px; height: 40px; flex-shrink: 0">
                 <span>👤</span>
               </div>
               <div class="flex-grow-1">
@@ -117,12 +82,9 @@
                     {{ formatDate(comment.created_at) }}
                   </span>
 
-                  <button
-                    v-if="accountStore.userInfo?.pk === comment.user"
-                    class="btn btn-outline-danger btn-sm border-0 p-1 ms-auto"
-                    @click="onCommentDelete(comment.id)"
-                    title="삭제"
-                  >
+                  <button v-if="accountStore.userInfo?.pk === comment.user"
+                    class="btn btn-outline-danger btn-sm border-0 p-1 ms-auto" @click="onCommentDelete(comment.id)"
+                    title="삭제">
                     <Trash2 :size="18" />
                   </button>
                 </div>
@@ -130,10 +92,26 @@
               </div>
             </div>
           </div>
-          <div
-            v-if="!selectedReview.comments?.length"
-            class="text-center py-4 text-secondary small"
-          >
+
+          <nav v-if="totalPages > 1" class="d-flex justify-content-center mt-4">
+            <div class="minimal-pagination d-flex align-items-center gap-3">
+              <button class="btn-arrow" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+                <ChevronLeft :size="20" />
+              </button>
+
+              <div class="current-page-display shadow-sm">
+                <span class="fw-bold text-primary">{{ currentPage }}</span>
+                <span class="text-muted mx-1">/</span>
+                <span class="text-secondary small">{{ totalPages }}</span>
+              </div>
+
+              <button class="btn-arrow" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
+                <ChevronRight :size="20" />
+              </button>
+            </div>
+          </nav>
+
+          <div v-if="!selectedReview.comments?.length" class="text-center py-4 text-secondary small">
             첫 댓글을 남겨보세요!
           </div>
         </div>
@@ -141,28 +119,24 @@
     </div>
   </div>
 
-  <div
-    v-else
-    class="min-vh-100 d-flex flex-column justify-content-center align-items-center"
-  >
+  <div v-else class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
     <div class="spinner-border text-primary mb-3"></div>
     <p class="text-secondary">리뷰 정보를 불러오는 중입니다...</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useDrugStore } from "@/stores/drug";
 import { useAccountStore } from "@/stores/accounts";
 import {
   ArrowLeft,
-  ThumbsUp,
-  Share2,
-  MoreVertical,
   Trash2,
   Edit3,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-vue-next";
 
 const route = useRoute();
@@ -175,6 +149,9 @@ const newComment = ref("");
 
 const drugId = route.params.drugId;
 const reviewId = route.params.reviewId;
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
 
 onMounted(async () => {
   // 1. 로그인 상태인데 내 정보(userInfo)가 없다면 서버에서 가져오기
@@ -251,6 +228,32 @@ const onCommentDelete = (commentId) => {
       .catch((err) => console.error(err));
   }
 };
+
+// 전체 페이지 수 계산
+const totalPages = computed(() => {
+  const count = selectedReview.value?.comments?.length || 0;
+  return Math.ceil(count / itemsPerPage) || 1;
+});
+
+// 현재 페이지에 해당하는 댓글만 추출 (v-for 대상)
+const paginatedComments = computed(() => {
+  const list = selectedReview.value?.comments || [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return list.slice(start, end);
+});
+
+// 페이지 변경 함수
+const changePage = (page) => {
+  currentPage.value = page;
+};
+
+// 리뷰가 바뀌거나 댓글이 삭제/추가되어 데이터가 갱신될 때 페이지 번호 유효성 체크
+watch(() => selectedReview.value?.comments?.length, (newVal) => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = Math.max(1, totalPages.value);
+  }
+});
 </script>
 
 <style scoped>
@@ -258,8 +261,56 @@ const onCommentDelete = (commentId) => {
   background-color: #0d6efd;
   border: none;
 }
+
 .form-control:focus {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
+
+/* 페이지네이션 컨테이너 스타일 */
+.minimal-pagination {
+  background-color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5f0ff;
+}
+
+/* 화살표 버튼 */
+.btn-arrow {
+  border: none;
+  background: none;
+  color: #0d6efd;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-arrow:hover:not(:disabled) {
+  background-color: #f0f7ff;
+  transform: scale(1.1);
+}
+
+.btn-arrow:disabled {
+  color: #dee2e6;
+  cursor: not-allowed;
+}
+
+/* 중앙 번호 표시 박스 */
+.current-page-display {
+  background-color: #f8f9fa;
+  padding: 6px 18px;
+  border-radius: 20px;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid #edf2f7;
+}
+
+.current-page-display span {
+  font-size: 0.9rem;
 }
 </style>
