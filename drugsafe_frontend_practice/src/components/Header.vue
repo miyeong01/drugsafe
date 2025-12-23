@@ -4,6 +4,8 @@ import { Heart, User, Menu, Pill } from "lucide-vue-next";
 import { useAccountStore } from "@/stores/accounts";
 import { storeToRefs } from "pinia";
 import { handleError } from "vue";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
 
 const router = useRouter();
 const route = useRoute();
@@ -26,102 +28,50 @@ const handleLogout = () => {
 <template>
   <header class="border-bottom bg-white sticky-top py-3">
     <div class="container-fluid px-4">
-      <div
-        class="d-flex align-items-center justify-content-between"
-        style="height: 40px"
-      >
-        <div
-          class="d-flex align-items-center gap-2"
-          @click="goHome"
-          style="cursor: pointer"
-        >
-          <div
-            class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
-            style="width: 36px; height: 36px"
-          >
-            <Pill class="text-white" :size="20" />
+      <nav class="navbar navbar-expand-md navbar-light p-0">
+        <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
+          
+          <div class="d-flex align-items-center gap-2" @click="goHome" style="cursor: pointer">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px">
+              <Pill class="text-white" :size="20" />
+            </div>
+            <span class="text-primary fw-bold fs-5">DrugSafe</span>
           </div>
-          <span class="text-primary fw-bold fs-5">DrugSafe</span>
+
+          <div class="d-flex align-items-center gap-2 order-md-last">
+            <template v-if="!isLogin">
+              <button @click="goAuth('signup')" class="btn btn-outline-secondary btn-sm fw-medium px-3" style="border-color: #dee2e6; color: #495057">SignUp</button>
+              <button @click="goAuth('login')" class="btn btn-primary btn-sm fw-medium px-3 text-white">Login</button>
+            </template>
+            <template v-else>
+              <button class="btn p-2 border-0 text-dark" @click="router.push('/profile')">
+                <User :size="20" />
+              </button>
+              <button @click="handleLogout" class="btn btn-primary btn-sm fw-medium px-3 text-white">LogOut</button>
+            </template>
+
+            <button 
+              class="btn p-2 border-0 text-dark d-md-none" 
+              type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#navbarNav"
+            >
+              <Menu :size="20" />
+            </button>
+          </div>
+
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <div class="navbar-nav gap-3 gap-md-5 py-3 py-md-0">
+              <RouterLink to="/" class="nav-link fw-medium" :class="isActive('home') ? 'text-primary' : 'text-dark'">Home</RouterLink>
+              <RouterLink to="/chatbot" class="nav-link fw-medium" :class="isActive('chatbot') ? 'text-primary' : 'text-dark'">ChatBot</RouterLink>
+              <RouterLink to="/search" class="nav-link fw-medium" :class="isActive('search') ? 'text-primary' : 'text-dark'">Search</RouterLink>
+              <RouterLink to="/community" class="nav-link fw-medium" :class="isActive('community') ? 'text-primary' : 'text-dark'">Community</RouterLink>
+              <RouterLink to="/FAQ" class="nav-link fw-medium" :class="isActive('FAQ') ? 'text-primary' : 'text-dark'">FAQ</RouterLink>
+            </div>
+          </div>
+
         </div>
-
-        <nav class="d-none d-md-flex align-items-center gap-5">
-          <RouterLink
-            to="/"
-            class="text-decoration-none fw-medium"
-            :class="isActive('home') ? 'text-primary' : 'text-dark'"
-          >
-            Home
-          </RouterLink>
-
-          <RouterLink
-            to="/chatbot"
-            class="text-decoration-none fw-medium"
-            :class="isActive('chatbot') ? 'text-primary' : 'text-dark'"
-          >
-            ChatBot
-          </RouterLink>
-
-          <RouterLink
-            to="/search"
-            class="text-decoration-none fw-medium"
-            :class="isActive('search') ? 'text-primary' : 'text-dark'"
-          >
-            Search
-          </RouterLink>
-
-          <RouterLink
-            to="/community"
-            class="text-decoration-none fw-medium"
-            :class="isActive('community') ? 'text-primary' : 'text-dark'"
-          >
-            Community
-          </RouterLink>
-
-          <RouterLink
-            to="/FAQ"
-            class="text-decoration-none fw-medium"
-            :class="isActive('FAQ') ? 'text-primary' : 'text-dark'"
-          >
-            FAQ
-          </RouterLink>
-        </nav>
-
-        <div class="d-flex align-items-center gap-2">
-          <template v-if="!isLogin">
-            <button
-              @click="goAuth('signup')"
-              class="btn btn-outline-secondary btn-sm fw-medium px-3 ms-2"
-              style="border-color: #dee2e6; color: #495057"
-            >
-              SignUp
-            </button>
-
-            <button
-              @click="goAuth('login')"
-              class="btn btn-primary btn-sm fw-medium px-3 text-white"
-            >
-              Login
-            </button>
-          </template>
-
-          <template v-else>
-            <button
-              class="btn p-2 border-0 text-dark"
-              @click="router.push('/profile')"
-            >
-              <User :size="20" />
-            </button>
-            
-            <button @click="handleLogout" class="btn btn-primary btn-sm fw-medium px-3 text-white">
-              LogOut
-            </button>
-          </template>
-
-          <button class="btn p-2 border-0 text-dark d-md-none">
-            <Menu :size="20" />
-          </button>
-        </div>
-      </div>
+      </nav>
     </div>
   </header>
 </template>
