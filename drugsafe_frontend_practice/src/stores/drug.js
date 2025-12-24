@@ -13,7 +13,15 @@ export const useDrugStore = defineStore(
     const reviews = ref([]); // 리뷰 목록 저장
     const myFavorites = ref([]); // 즐겨찾기 목록 담을 변수
     const myReviews = ref([]); // 실제 리뷰 데이터를 담을 변수
+    const myReviewsPage = ref(1)
+    const myReviewsTotal = ref(0)
+    const myReviewsNext = ref(null)
+    const myReviewsPrev = ref(null)
     const myComments = ref([]); // 댓글 저장용 변수
+    const myCommentsPage = ref(1)
+    const myCommentsTotal = ref(0)
+    const myCommentsNext = ref(null)
+    const myCommentsPrev = ref(null)
     const nextPage = ref(null);
     const prevPage = ref(null);
     const totalCount = ref(0);
@@ -222,35 +230,46 @@ export const useDrugStore = defineStore(
       });
     };
 
-    // 10. 내가 작성한 리뷰 조회
-    const getMyReviews = function () {
-      axios({
-        method: "get",
-        url: `http://127.0.0.1:8000/medicines/user-reviews/`,
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`, // 내 토큰 동봉
-        },
-      })
-        .then((res) => {
-          myReviews.value = res.data; // 서버에서 받은 데이터 저장
-          console.log("스토어에 저장된 데이터:", myReviews.value);
-        })
-        .catch((err) => console.error("내 리뷰 로드 실패:", err));
+    // 내 리뷰 조회 함수 수정
+    const getMyReviews = async (page = 1) => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${API_URL}/medicines/user-reviews/`, {
+          params: { page },
+          headers: { Authorization: `Token ${token}` }
+        });
+        
+        myReviews.value = res.data.results;
+        myReviewsPage.value = page;
+        myReviewsTotal.value = res.data.count;
+        myReviewsNext.value = res.data.next;
+        myReviewsPrev.value = res.data.previous;
+      } catch (err) {
+        console.error("내 리뷰 조회 실패:", err);
+      }
     };
 
-    // 11. 내가 작성한 댓글 조회
-    const getMyComments = function () {
-      axios({
-        method: "get",
-        url: `http://127.0.0.1:8000/medicines/user-comments/`,
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => {
-          myComments.value = res.data;
-        })
-        .catch((err) => console.error("댓글 로드 실패:", err));
+    // 내 댓글 조회 함수 수정
+    const getMyComments = async (page = 1) => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${API_URL}/medicines/user-comments/`, {
+          params: { page },
+          headers: { Authorization: `Token ${token}` }
+        });
+        
+        myComments.value = res.data.results;
+        myCommentsPage.value = page;
+        myCommentsTotal.value = res.data.count;
+        myCommentsNext.value = res.data.next;
+        myCommentsPrev.value = res.data.previous;
+      } catch (err) {
+        console.error("내 댓글 조회 실패:", err);
+      }
     };
 
     // 12. 즐겨찾기 토글 함수
@@ -353,8 +372,16 @@ export const useDrugStore = defineStore(
       updateReview,
       deleteComment,
       myReviews,
+      myReviewsPage,
+      myReviewsTotal,
+      myReviewsNext,
+      myReviewsPrev,
       getMyReviews,
       myComments,
+      myCommentsPage,
+      myCommentsTotal,
+      myCommentsNext,
+      myCommentsPrev,
       getMyComments,
       toggleFavorite,
       myFavorites,

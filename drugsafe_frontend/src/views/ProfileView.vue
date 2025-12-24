@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { onMounted } from 'vue'
 import { useAccountStore } from '@/stores/accounts'
@@ -16,13 +16,31 @@ import {
   MessageCircle,
   MessageSquare,
   MessageCircleCode,
-  MessageCircleHeart
+  MessageCircleHeart,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const accountStore = useAccountStore()
 const drugStore = useDrugStore()
-const { myReviews, myComments, myFavorites } = storeToRefs(drugStore)
+const { 
+  myReviews, 
+  myReviewsPage,
+  myReviewsTotal,
+  myReviewsNext,
+  myReviewsPrev,
+  myComments,
+  myCommentsPage,
+  myCommentsTotal,
+  myCommentsNext,
+  myCommentsPrev,
+  myFavorites 
+} = storeToRefs(drugStore)
+
+// 페이지네이션 계산
+const reviewTotalPages = computed(() => Math.ceil(myReviewsTotal.value / 10) || 1)
+const commentTotalPages = computed(() => Math.ceil(myCommentsTotal.value / 10) || 1)
 
 onMounted(async () => {
   // 토큰이 있을 때만 실행
@@ -31,8 +49,8 @@ onMounted(async () => {
     if (!accountStore.userInfo) {
       await accountStore.getUserInfo()
     }
-    await drugStore.getMyReviews()
-    await drugStore.getMyComments()
+    await drugStore.getMyReviews(1)
+    await drugStore.getMyComments(1)
     await drugStore.getFavorites()
   }
 
@@ -71,6 +89,24 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
   }
 
   router.push(target);
+}
+
+// 리뷰 페이지 변경
+const changeReviewPage = (direction) => {
+  if (direction === 'prev' && myReviewsPrev.value && myReviewsPage.value > 1) {
+    drugStore.getMyReviews(myReviewsPage.value - 1)
+  } else if (direction === 'next' && myReviewsNext.value) {
+    drugStore.getMyReviews(myReviewsPage.value + 1)
+  }
+}
+
+// 댓글 페이지 변경
+const changeCommentPage = (direction) => {
+  if (direction === 'prev' && myCommentsPrev.value && myCommentsPage.value > 1) {
+    drugStore.getMyComments(myCommentsPage.value - 1)
+  } else if (direction === 'next' && myCommentsNext.value) {
+    drugStore.getMyComments(myCommentsPage.value + 1)
+  }
 }
 </script>
 
@@ -119,7 +155,7 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
             <div class="card-body">
               <FileText class="mx-auto mb-2 text-primary" :size="32" />
               <div class="fw-medium text-dark mb-1">작성한 리뷰</div>
-              <p class="text-secondary mb-0">{{ myReviews?.length || 0 }}개</p>
+              <p class="text-secondary mb-0">{{ myReviewsTotal || 0 }}개</p>
             </div>
           </div>
         </div>
@@ -128,7 +164,7 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
             <div class="card-body">
               <MessageCircle class="mx-auto mb-2 text-primary" :size="32" />
               <div class="fw-medium text-dark mb-1">작성한 댓글</div>
-              <p class="text-secondary mb-0">{{ myComments?.length || 0 }}개</p>
+              <p class="text-secondary mb-0">{{ myCommentsTotal || 0 }}개</p>
             </div>
           </div>
         </div>
@@ -224,6 +260,25 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
             <p>아직 작성한 리뷰가 없습니다.</p>
           </div>
         </div>
+
+        <!-- 리뷰 페이지네이션 -->
+        <nav v-if="myReviewsNext || myReviewsPrev" class="d-flex justify-content-center mt-4">
+          <div class="minimal-pagination d-flex align-items-center gap-3">
+            <button class="btn-arrow" :disabled="!myReviewsPrev" @click="changeReviewPage('prev')">
+              <ChevronLeft :size="20" />
+            </button>
+
+            <div class="current-page-display shadow-sm">
+              <span class="fw-bold text-primary">{{ myReviewsPage }}</span>
+              <span class="text-muted mx-1">/</span>
+              <span class="text-secondary small">{{ reviewTotalPages }}</span>
+            </div>
+
+            <button class="btn-arrow" :disabled="!myReviewsNext" @click="changeReviewPage('next')">
+              <ChevronRight :size="20" />
+            </button>
+          </div>
+        </nav>
       </div>
 
       <div v-if="activeTab === 'comments'">
@@ -249,6 +304,25 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
             <p>아직 작성한 댓글이 없습니다.</p>
           </div>
         </div>
+
+        <!-- 댓글 페이지네이션 -->
+        <nav v-if="myCommentsNext || myCommentsPrev" class="d-flex justify-content-center mt-4">
+          <div class="minimal-pagination d-flex align-items-center gap-3">
+            <button class="btn-arrow" :disabled="!myCommentsPrev" @click="changeCommentPage('prev')">
+              <ChevronLeft :size="20" />
+            </button>
+
+            <div class="current-page-display shadow-sm">
+              <span class="fw-bold text-primary">{{ myCommentsPage }}</span>
+              <span class="text-muted mx-1">/</span>
+              <span class="text-secondary small">{{ commentTotalPages }}</span>
+            </div>
+
+            <button class="btn-arrow" :disabled="!myCommentsNext" @click="changeCommentPage('next')">
+              <ChevronRight :size="20" />
+            </button>
+          </div>
+        </nav>
       </div>
     </div>
   </div>
@@ -279,5 +353,46 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* 페이지네이션 스타일 */
+.minimal-pagination {
+  background-color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5f0ff;
+}
+
+.btn-arrow {
+  border: none;
+  background: none;
+  color: #4d9fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-arrow:hover:not(:disabled) {
+  background-color: #f0f7ff;
+  transform: scale(1.1);
+}
+
+.btn-arrow:disabled {
+  color: #dee2e6;
+  cursor: not-allowed;
+}
+
+.current-page-display {
+  background-color: #f8f9fa;
+  padding: 6px 18px;
+  border-radius: 20px;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid #edf2f7;
 }
 </style>
