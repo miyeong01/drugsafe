@@ -44,7 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
-        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at', 'score' ,'is_helpful', 'helpful_count', 'comment_count',)
+        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at','is_helpful', 'helpful_count', 'comment_count',)
         extra_kwargs = {
             'score' : {'required': True},
             'title' : {
@@ -73,6 +73,7 @@ class ReviewListSerializer(serializers.ModelSerializer):
     comment_count = serializers.SerializerMethodField()
     is_helpful = serializers.SerializerMethodField()
     helpful_count = serializers.IntegerField(source='helpful_users.count', read_only=True)
+    drug_id = serializers.IntegerField(source='drug.id', read_only=True)
 
     class Meta:
         model = Review

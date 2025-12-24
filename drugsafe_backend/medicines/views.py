@@ -151,7 +151,7 @@ def review_list(request, drug_pk):
         return paginator.get_paginated_response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = ReviewSerializer(data=request.data)
+        serializer = ReviewSerializer(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save(drug=drug, user=request.user, form=drug.form)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

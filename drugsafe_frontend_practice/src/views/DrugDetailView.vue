@@ -134,7 +134,7 @@ const ratingDistribution = computed(() => {
 
   reviews.value.forEach((r) => {
     // 점수를 정수로 변환 (5, 4, 3, 2, 1)
-    const scoreVal = Math.floor(Number(r.score));
+    const scoreVal = Math.floor(Number(r.score) || 0);
     const starObj = dist.find((d) => d.stars === scoreVal);
     if (starObj) {
       starObj.count++;
