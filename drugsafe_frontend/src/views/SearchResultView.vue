@@ -24,60 +24,56 @@ const router = useRouter();
 const route = useRoute();
 const drugStore = useDrugStore();
 const currentPage = ref(1);
-const itemsPerPage = 10;
+// const itemsPerPage = 10;
 
 // URL의 쿼리(?q=...)를 가져와서 검색어 초기화
 const keyword = ref(route.query.q || "");
 
 // 필터와 정렬이 적용된 가공된 데이터 리스트
 const filteredDrugs = computed(() => {
-  let list = [...drugStore.drugs]; // 원본 데이터 복사
+  let list = Array.isArray(drugStore.drugs)
+    ? [...drugStore.drugs]
+    : [];
 
-  // 1. 제형 필터링 로직
-  // 체크된 필터 키들만 추출 (예: ['tablet', 'syrup'])
-  const activeFilterKeys = Object.keys(filters).filter((key) => filters[key]);
-
-  if (activeFilterKeys.length > 0) {
-    list = list.filter((drug) => {
-      // 데이터의 form_name(예: '알약')이 선택된 필터의 한글 라벨과 일치하는지 확인
-      return activeFilterKeys.some((key) => drug.form_name === formLabels[key]);
-    });
+  // 1. 필터
+  const activeFilterKeys = Object.keys(filters).filter((k) => filters[k]);
+  if (activeFilterKeys.length) {
+    list = list.filter((drug) =>
+      activeFilterKeys.some((k) => drug.form_name === formLabels[k])
+    );
   }
 
-  // 2. 정렬 로직
+  // 2. 정렬
   if (sortBy.value === "rating") {
     list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   } else if (sortBy.value === "reviews") {
     list.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
   }
-  // 'relevance'(관련도순)는 기본 서버 응답 순서를 유지합니다.
 
   return list;
 });
 
-// 데이터 불러오기 함수
-const fetchDrugs = () => {
-  const queryKeyword = route.query.q || "";
-  const querySymptomId = route.query.symptom || null; // URL에서 ID 꺼내기
 
-  console.log(
-    "데이터 요청 시도 - 검색어:",
-    queryKeyword,
-    "증상ID:",
-    querySymptomId
-  );
+
+// 데이터 불러오기 함수
+const fetchDrugs = (page = 1) => {
+  currentPage.value = page;
+
+  const queryKeyword = route.query.q || "";
+  const querySymptomId = route.query.symptom || null;
 
   if (querySymptomId) {
-    drugStore.getDrugs("", querySymptomId);
+    drugStore.getDrugs("", querySymptomId, page);
   } else {
-    drugStore.getDrugs(queryKeyword, null);
+    drugStore.getDrugs(queryKeyword, null, page);
   }
 };
+
 
 watch(
   () => [route.query.q, route.query.symptom],
   () => {
-    fetchDrugs();
+    fetchDrugs(1);
   }
 );
 
@@ -157,8 +153,10 @@ const getFormIcon = (form) => {
 };
 
 const totalPages = computed(() => {
-  return Math.ceil(filteredDrugs.value.length / itemsPerPage);
+  return Math.ceil(drugStore.totalCount / 10);
 });
+
+
 
 // 현재 페이지 주변 5개 버튼만 보여주는 로직
 const displayedPages = computed(() => {
@@ -180,11 +178,11 @@ const displayedPages = computed(() => {
   return pages;
 });
 
-const paginatedDrugs = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredDrugs.value.slice(start, end);
-});
+// const paginatedDrugs = computed(() => {
+//   const start = (currentPage.value - 1) * itemsPerPage;
+//   const end = start + itemsPerPage;
+//   return filteredDrugs.value.slice(start, end);
+// });
 
 watch(
   [keyword, filters, sortBy],
@@ -195,9 +193,14 @@ watch(
 );
 
 const changePage = (page) => {
-  currentPage.value = page;
-  window.scrollTo(0, 0); // 페이지 이동 시 상단으로 스크롤
-};
+  currentPage.value = page
+  drugStore.getDrugs(
+    route.query.q || "",
+    route.query.symptom || null,
+    page
+  )
+  window.scrollTo(0, 0)
+}
 </script>
 
 <template>
@@ -292,7 +295,7 @@ const changePage = (page) => {
 
           <div class="d-flex flex-column gap-3">
             <div
-              v-for="drug in paginatedDrugs"
+              v-for="drug in filteredDrugs"
               :key="drug.id"
               class="card border-0 shadow-sm hover-shadow cursor-pointer"
               @click="goDetail(drug.id)"
@@ -409,7 +412,7 @@ const changePage = (page) => {
       <div class="minimal-pagination d-flex align-items-center gap-3">
         <button
           class="btn-arrow"
-          :disabled="currentPage === 1"
+          :disabled="!drugStore.prevPage"
           @click="changePage(currentPage - 1)"
         >
           <ChevronLeft :size="20" />
@@ -423,7 +426,7 @@ const changePage = (page) => {
   
         <button
           class="btn-arrow"
-          :disabled="currentPage === totalPages"
+          :disabled="!drugStore.nextPage"
           @click="changePage(currentPage + 1)"
         >
           <ChevronRight :size="20" />

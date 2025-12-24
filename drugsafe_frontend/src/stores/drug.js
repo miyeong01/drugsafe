@@ -16,10 +16,12 @@ export const useDrugStore = defineStore(
     const myComments = ref([]); // 댓글 저장용 변수
     const nextPage = ref(null);
     const prevPage = ref(null);
+    const totalCount = ref(0)
     const reviewCount = ref(0)
+    const reviewPage = ref(1)
 
     // 1. 약 목록 가져오기
-    const getDrugs = function (searchKeyword = "", symptomId = null) {
+    const getDrugs = function (searchKeyword = "", symptomId = null, page = 1) {
       console.log("스토어 호출됨 - keyword:", searchKeyword, "ID:", symptomId);
 
       const token = localStorage.getItem("token");
@@ -31,12 +33,16 @@ export const useDrugStore = defineStore(
         params: {
           search: searchKeyword,
           symptom: symptomId,
+          page: page, // 페이지 전달
         },
         headers: headers,
       })
         .then((res) => {
           console.log("검색 결과:", res.data);
-          drugs.value = res.data;
+          drugs.value = res.data.results;
+          nextPage.value = res.data.next;
+          prevPage.value = res.data.previous;
+          totalCount.value = res.data.count;
         })
         .catch((err) => console.log(err));
     };
@@ -63,35 +69,25 @@ export const useDrugStore = defineStore(
     };
 
     // 3. 해당 약의 리뷰 목록 가져오기
-    const getReviews = function (param = null) {
-      // ✨ drugId가 있으면 특정 약의 리뷰를, 없으면 전체 리뷰(커뮤니티용)를 가져옵니다.
-      let url = `${API_URL}/medicines/reviews/`;
+    const getReviews = async (drugId = null, page = 1) => {
+      try {
+        const res = await axios.get(
+          drugId
+            ? `${API_URL}/medicines/${drugId}/reviews/`
+            : `${API_URL}/medicines/reviews/`,
+          {
+            params: { page },
+          }
+        )
 
-      if (typeof param === "string" && param.startsWith("http")) {
-        url = param;
+        reviews.value = res.data.results
+        reviewPage.value = page
+        totalCount.value = res.data.count
+        nextPage.value = res.data.next
+        prevPage.value = res.data.previous
+      } catch (err) {
+        console.error("리뷰 로드 실패", err)
       }
-      else if (param) {
-        url = `${API_URL}/medicines/drugs/${param}/reviews/`;
-      }
-
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Token ${token}` } : {};
-
-      axios({
-        method: "get",
-        url: url,
-        headers: headers,
-      })
-        .then((res) => {
-          reviews.value = res.data.results;
-          nextPage.value = res.data.next;
-          prevPage.value = res.data.previous;
-          reviewCount.value = res.data.count;
-        })
-        .catch((err) => {
-          console.error("리뷰 로드 실패:", err);
-          throw err;
-        });
     }
 
     // 4. 리뷰 등록하기
@@ -287,6 +283,10 @@ export const useDrugStore = defineStore(
 
     return {
       drugs,
+      nextPage,
+      prevPage,
+      reviewPage,
+      totalCount,
       selectedDrug,
       API_URL,
       reviews,
