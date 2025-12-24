@@ -69,18 +69,17 @@ export const useDrugStore = defineStore(
     };
 
     // 3. 해당 약의 리뷰 목록 가져오기
-    const getReviews = async (drugId = null, page = 1) => {
+    const getReviews = async (drugId = null, page = 1, params = {}) => {
       try {
-        const token = localStorage.getItem("token");
-        const headers = token ? { Authorization: `Token ${token}` } : {};
-
         const res = await axios.get(
           drugId
             ? `${API_URL}/medicines/drugs/${drugId}/reviews/`
             : `${API_URL}/medicines/reviews/`,
           {
-            params: { page },
-            headers: headers,
+            params: { 
+              page,
+              ...params  // ✅ search, sort 등 추가 파라미터 포함
+            },
           }
         );
 
