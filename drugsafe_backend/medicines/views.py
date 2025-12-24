@@ -16,26 +16,39 @@ from rest_framework.pagination import PageNumberPagination
 # Create your views here.
 @api_view(['GET'])
 def drug_list(request):
+    # 1. 기본 쿼리셋
     drugs = Drug.objects.annotate(
         avg_rating=Coalesce(Avg('drugs__score'), 0.0),
         review_cnt=Coalesce(Count('drugs'), 0)
     )
     
-    # 2. 필터링 적용 (페이지네이션 전에!)
+    # 2. 검색 필터
     symptom_id = request.GET.get('symptom')
     search_query = request.GET.get('search')
-    form_id = request.GET.get('form')  # 제형 필터 추가
-
+    
     if symptom_id:
         drugs = drugs.filter(symptom_id=symptom_id)
-    if search_query:
+    elif search_query:
         drugs = drugs.filter(name__icontains=search_query)
-    if form_id:
-        drugs = drugs.filter(form_id=form_id)
-
+    
+    # 3. 제형 필터 (여러 개 선택 가능)
+    form_filter = request.GET.get('form')  # 예: "1,2,3"
+    if form_filter:
+        form_ids = [int(f) for f in form_filter.split(',') if f.isdigit()]
+        if form_ids:
+            drugs = drugs.filter(form_id__in=form_ids)
+    
+    # 4. 정렬
+    sort_by = request.GET.get('sort', 'relevance')
+    if sort_by == 'rating':
+        drugs = drugs.order_by('-avg_rating', '-review_cnt')
+    elif sort_by == 'reviews':
+        drugs = drugs.order_by('-review_cnt', '-avg_rating')
+    # relevance는 기본 정렬 유지
+    
+    # 5. 페이지네이션 (필터링/정렬 후에!)
     paginator = PageNumberPagination()
-    paginator.page_size = 10   # 여기서 페이지 크기 설정
-
+    paginator.page_size = 10
     page = paginator.paginate_queryset(drugs, request)
 
     serializer = DrugListSerializer(

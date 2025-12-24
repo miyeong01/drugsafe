@@ -24,100 +24,101 @@ const router = useRouter();
 const route = useRoute();
 const drugStore = useDrugStore();
 const currentPage = ref(1);
-// const itemsPerPage = 10;
 
-// URL의 쿼리(?q=...)를 가져와서 검색어 초기화
 const keyword = ref(route.query.q || "");
+const sortBy = ref("relevance");
 
-// 필터와 정렬이 적용된 가공된 데이터 리스트
-const filteredDrugs = computed(() => {
-  let list = Array.isArray(drugStore.drugs)
-    ? [...drugStore.drugs]
-    : [];
-
-  // 1. 필터
-  const activeFilterKeys = Object.keys(filters).filter((k) => filters[k]);
-  if (activeFilterKeys.length) {
-    list = list.filter((drug) =>
-      activeFilterKeys.some((k) => drug.form_name === formLabels[k])
-    );
-  }
-
-  // 2. 정렬
-  if (sortBy.value === "rating") {
-    list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  } else if (sortBy.value === "reviews") {
-    list.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
-  }
-
-  return list;
+// 필터 상태 (form_name → form_id로 매핑)
+const filters = reactive({
+  tablet: false,    // 1
+  powder: false,    // 2
+  liquid: false,    // 3
+  syrup: false,     // 4
+  spray: false,     // 5
+  film: false,      // 6
+  cream: false,     // 7
+  ointment: false,  // 8
+  patch: false,     // 9
+  lotion: false,    // 10
 });
 
+const formLabels = {
+  tablet: "알약",
+  powder: "가루",
+  liquid: "액상",
+  syrup: "시럽",
+  spray: "스프레이",
+  film: "필름",
+  cream: "크림",
+  ointment: "연고",
+  patch: "부착형",
+  lotion: "로션",
+};
 
+// form_name → form_id 매핑
+const formIdMap = {
+  tablet: 1,
+  powder: 2,
+  liquid: 3,
+  syrup: 4,
+  spray: 5,
+  film: 6,
+  cream: 7,
+  ointment: 8,
+  patch: 9,
+  lotion: 10,
+};
+
+// ✅ 백엔드에서 필터링/정렬된 데이터를 그대로 사용
+const filteredDrugs = computed(() => drugStore.drugs || []);
+
+const totalPages = computed(() => {
+  return Math.ceil(drugStore.totalCount / 10) || 1;
+});
+
+// 선택된 제형 ID 배열 계산
+const selectedFormIds = computed(() => {
+  return Object.keys(filters)
+    .filter(key => filters[key])
+    .map(key => formIdMap[key]);
+});
 
 // 데이터 불러오기 함수
 const fetchDrugs = (page = 1) => {
   currentPage.value = page;
-
+  
+  const filterParams = {
+    sort: sortBy.value,
+    forms: selectedFormIds.value
+  };
+  
   const queryKeyword = route.query.q || "";
   const querySymptomId = route.query.symptom || null;
-
-  if (querySymptomId) {
-    drugStore.getDrugs("", querySymptomId, page);
-  } else {
-    drugStore.getDrugs(queryKeyword, null, page);
-  }
+  
+  drugStore.getDrugs(queryKeyword, querySymptomId, page, filterParams);
 };
 
+onMounted(() => {
+  fetchDrugs();
+});
 
+// URL 쿼리 변경 감지
 watch(
   () => [route.query.q, route.query.symptom],
   () => {
+    keyword.value = route.query.q || "";
     fetchDrugs(1);
   }
 );
 
-onMounted(() => {
-  fetchDrugs(); // 초기 로드 시 실행
-});
-
-// [수정] 중복된 watch를 하나로 통합했습니다.
+// 필터/정렬 변경 시 1페이지부터 다시 조회
 watch(
-  () => route.query.q,
-  (newVal) => {
-    keyword.value = newVal || "";
-    fetchDrugs();
-  }
+  [filters, sortBy],
+  () => {
+    fetchDrugs(1);
+  },
+  { deep: true }
 );
-
-const sortBy = ref("relevance");
-
-// 필터 상태
-const filters = reactive({
-  powder: false,
-  lotion: false,
-  cream: false,
-  tablet: false,
-  syrup: false,
-  liquid: false,
-  spray: false,
-  patch: false,
-  ointment: false,
-  film: false,
-});
-
-const formLabels = {
-  powder: "가루",
-  lotion: "로션",
-  cream: "크림",
-  tablet: "알약",
-  syrup: "시럽",
-  liquid: "액상",
-  spray: "스프레이",
-  patch: "부착형",
-  ointment: "연고",
-  film: "필름",
-};
 
 // 필터 초기화
 function resetFilters() {
@@ -152,55 +153,12 @@ const getFormIcon = (form) => {
   return map[form] || Pill;
 };
 
-const totalPages = computed(() => {
-  return Math.ceil(drugStore.totalCount / 10);
-});
-
-
-
-// 현재 페이지 주변 5개 버튼만 보여주는 로직
-const displayedPages = computed(() => {
-  const range = 2; // 현재 페이지 앞뒤로 보여줄 개수
-  let start = Math.max(1, currentPage.value - range);
-  let end = Math.min(totalPages.value, currentPage.value + range);
-
-  // 페이지가 너무 적을 때를 위한 보정
-  if (currentPage.value <= range) {
-    end = Math.min(totalPages.value, 5);
-  } else if (currentPage.value + range >= totalPages.value) {
-    start = Math.max(1, totalPages.value - 4);
-  }
-
-  const pages = [];
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-  return pages;
-});
-
-// const paginatedDrugs = computed(() => {
-//   const start = (currentPage.value - 1) * itemsPerPage;
-//   const end = start + itemsPerPage;
-//   return filteredDrugs.value.slice(start, end);
-// });
-
-watch(
-  [keyword, filters, sortBy],
-  () => {
-    currentPage.value = 1;
-  },
-  { deep: true }
-);
-
+// 페이지 변경
 const changePage = (page) => {
-  currentPage.value = page
-  drugStore.getDrugs(
-    route.query.q || "",
-    route.query.symptom || null,
-    page
-  )
-  window.scrollTo(0, 0)
-}
+  if (page < 1 || page > totalPages.value) return;
+  fetchDrugs(page);
+  window.scrollTo(0, 0);
+};
 </script>
 
 <template>
@@ -228,8 +186,7 @@ const changePage = (page) => {
         <p class="text-secondary">
           <span class="text-primary fw-bold">'{{ keyword || "전체" }}'</span>
           에 대한 검색 결과
-          <span class="fw-bold text-dark">{{ filteredDrugs.length }}</span
-          >건
+          <span class="fw-bold text-dark">{{ drugStore.totalCount }}</span>건
         </p>
       </div>
 
@@ -280,7 +237,7 @@ const changePage = (page) => {
         <div class="col-lg-9">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="small text-secondary"
-              >총 {{ filteredDrugs.length }}개의 의약품</span
+              >총 {{ drugStore.totalCount }}개의 의약품</span
             >
 
             <select
@@ -306,7 +263,6 @@ const changePage = (page) => {
                     class="bg-light rounded d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
                     style="width: 80px; height: 80px"
                   >
-                    <!-- 이미지 있을 때 -->
                     <div v-if="drug.image_url">
                       <img
                         :src="drug.image_url"
@@ -315,7 +271,6 @@ const changePage = (page) => {
                       />
                     </div>
 
-                    <!-- 이미지 없을 때 -->
                     <div v-else class="bg-white rounded-circle p-2 shadow-sm">
                       <component
                         :is="getFormIcon(drug.form)"
@@ -405,6 +360,7 @@ const changePage = (page) => {
         </div>
       </div>
     </div>
+    
     <nav
       v-if="totalPages > 1"
       class="custom-position-nav mt-5 d-flex justify-content-center"
@@ -434,10 +390,10 @@ const changePage = (page) => {
       </div>
     </nav>
   </div>
-
 </template>
 
 <style scoped>
+/* 기존 스타일 유지 */
 .hover-shadow:hover {
   transform: translateY(-3px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
@@ -452,37 +408,25 @@ const changePage = (page) => {
   cursor: pointer;
 }
 
-/* 즐겨찾기 버튼 (크기와 위치를 강력하게 고정) */
 .fav-btn {
   width: 105px !important;
-  /* 너비를 명확하게 고정 */
   height: 34px !important;
-  /* 높이 고정 */
   flex-shrink: 0 !important;
-  /* 중요: 제목이 길어져도 버튼이 절대 찌그러지지 않음 */
   display: flex;
-  /* 내부 아이콘과 텍스트 정렬을 위해 추가 */
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
   white-space: nowrap;
-  /* 버튼 안의 글자는 줄바꿈 방지 */
   margin-top: 2px;
-  /* 제목 첫 줄과 높이를 맞춤 */
 }
 
-/* 약 이름 전용 스타일 (줄바꿈 허용) */
 .drug-name {
   white-space: normal !important;
-  /* 줄바꿈 허용 */
   word-break: keep-all;
-  /* 한글 단어가 어색하게 잘리지 않게 함 */
   line-height: 1.4;
   display: block;
-  /* 영역을 확실히 차지하게 함 */
 }
 
-/* 제조사 이름 등을 위한 기존 말줄임표 스타일 */
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -494,7 +438,6 @@ const changePage = (page) => {
   height: 24px;
 }
 
-/* 페이지네이션 컨테이너 */
 .minimal-pagination {
   background-color: white;
   padding: 8px 16px;
@@ -502,7 +445,6 @@ const changePage = (page) => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* 화살표 버튼 스타일 */
 .btn-arrow {
   border: none;
   background: none;
@@ -526,7 +468,6 @@ const changePage = (page) => {
   cursor: not-allowed;
 }
 
-/* 중앙 페이지 번호 박스 */
 .current-page-display {
   background-color: #f8f9fa;
   padding: 6px 18px;
@@ -541,10 +482,9 @@ const changePage = (page) => {
 }
 
 .custom-position-nav {
-  /* 마진 대신 좌표 이동을 사용합니다 */
   position: relative;
-  transform: translateY(-20px); /* 숫자가 커질수록 위로 더 많이 올라갑니다 */
-  z-index: 10; /* 다른 요소보다 위에 보이도록 설정 */
-  margin-bottom: -40px; /* 이동한 만큼 아래쪽 빈 공간을 제거하여 레이아웃을 맞춤 */
+  transform: translateY(-20px);
+  z-index: 10;
+  margin-bottom: -40px;
 }
 </style>
