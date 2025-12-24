@@ -103,10 +103,11 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     comment_count = serializers.SerializerMethodField()
     helpful_count = serializers.IntegerField(source='helpful_users.count', read_only=True)
     is_helpful = serializers.SerializerMethodField()
+    drug_name = serializers.ReadOnlyField(source='drug.name')
 
     class Meta:
         model = Review
-        fields = ('id', 'user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments', 'comment_count', 'helpful_count', 'is_helpful',)
+        fields = ('id', 'user', 'username', 'drug', 'form', 'score', 'created_at', 'updated_at', 'title', 'content', 'comments', 'comment_count', 'helpful_count', 'is_helpful', 'drug_name')
         read_only_fields = ('user', 'drug', 'form', 'created_at', 'updated_at',)
         
     def get_comment_count(self, obj):

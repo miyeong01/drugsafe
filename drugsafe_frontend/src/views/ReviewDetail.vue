@@ -16,6 +16,7 @@
             <div class="flex-grow-1">
               <div class="d-flex align-items-center gap-2 mb-1">
                 <span class="fw-bold">{{ selectedReview.username }}님</span>
+                <span class="text-secondary small border-start ps-2">{{ selectedReview.drug_name }}</span>
                 <span class="text-secondary small border-start ps-2">{{
                   formatDate(selectedReview.created_at)
                 }}</span>
