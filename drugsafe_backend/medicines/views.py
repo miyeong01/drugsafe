@@ -7,9 +7,10 @@ from .ai.gms_client import parse_user_input, explain
 import asyncio, re
 
 from .models import Drug, Review, Comment, Favorite
-from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer
+from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer, ReviewDetailSerializer, ReviewListSerializer
 from django.db.models import Avg, Count, Max
 from django.db.models.functions import Coalesce
+from .pagination import ReviewPagination
 
 # Create your views here.
 @api_view(['GET'])
@@ -61,15 +62,21 @@ def drug_detail(request, drug_pk):
 @api_view(['GET'])
 @permission_classes([AllowAny]) # 누구나 볼 수 있도록 설정
 def all_review_list(request):
-    # 모든 리뷰를 최신순으로 가져옵니다.
-    # drug_name 등 필요한 정보를 위해 select_related나 
-    # SerializerMethodField 로직이 포함된 ReviewSerializer를 사용합니다.
-    reviews = Review.objects.all().order_by('-created_at')
-    
-    # context에 request를 담아 전달하면 시리얼라이저에서 
-    # 현재 로그인 유저의 좋아요 여부 등을 처리할 수 있습니다.
-    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
-    return Response(serializer.data)
+    qs = (
+        Review.objects
+        .select_related("user", "drug")
+        .order_by("-created_at")
+    )
+
+    paginator = ReviewPagination()
+    page = paginator.paginate_queryset(qs, request)
+
+    serializer = ReviewListSerializer(
+        page,
+        many=True,
+        context={'request': request}
+    )
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -77,9 +84,18 @@ def review_list(request, drug_pk):
     drug = get_object_or_404(Drug, pk=drug_pk)
 
     if request.method == 'GET':
-        reviews = Review.objects.filter(drug=drug)
-        serializer = ReviewSerializer(reviews, many=True, context={'request': request})
-        return Response(serializer.data)
+        qs = (
+            Review.objects
+            .filter(drug=drug)
+            .select_related("user", "drug")
+            .order_by("-created_at")
+        )
+
+        paginator = ReviewPagination()
+        page = paginator.paginate_queryset(qs, request)
+
+        serializer = ReviewListSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     elif request.method == 'POST':
         serializer = ReviewSerializer(data=request.data)

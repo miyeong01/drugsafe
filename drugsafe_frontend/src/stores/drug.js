@@ -14,6 +14,9 @@ export const useDrugStore = defineStore(
     const myFavorites = ref([]); // 즐겨찾기 목록 담을 변수
     const myReviews = ref([]); // 실제 리뷰 데이터를 담을 변수
     const myComments = ref([]); // 댓글 저장용 변수
+    const nextPage = ref(null);
+    const prevPage = ref(null);
+    const reviewCount = ref(0)
 
     // 1. 약 목록 가져오기
     const getDrugs = function (searchKeyword = "", symptomId = null) {
@@ -60,12 +63,15 @@ export const useDrugStore = defineStore(
     };
 
     // 3. 해당 약의 리뷰 목록 가져오기
-    const getReviews = function (drugId = null) {
+    const getReviews = function (param = null) {
       // ✨ drugId가 있으면 특정 약의 리뷰를, 없으면 전체 리뷰(커뮤니티용)를 가져옵니다.
       let url = `${API_URL}/medicines/reviews/`;
 
-      if (drugId && drugId !== 'undefined') {
-        url = `${API_URL}/medicines/drugs/${drugId}/reviews/`;
+      if (typeof param === "string" && param.startsWith("http")) {
+        url = param;
+      }
+      else if (param) {
+        url = `${API_URL}/medicines/drugs/${param}/reviews/`;
       }
 
       const token = localStorage.getItem("token");
@@ -77,10 +83,14 @@ export const useDrugStore = defineStore(
         headers: headers,
       })
         .then((res) => {
-          reviews.value = res.data;
+          reviews.value = res.data.results;
+          nextPage.value = res.data.next;
+          prevPage.value = res.data.previous;
+          reviewCount.value = res.data.count;
         })
         .catch((err) => {
           console.error("리뷰 로드 실패:", err);
+          throw err;
         });
     }
 
@@ -280,6 +290,9 @@ export const useDrugStore = defineStore(
       selectedDrug,
       API_URL,
       reviews,
+      nextPage,
+      prevPage,
+      reviewCount,
       getDrugs,
       getDrugDetail,
       getReviews,
