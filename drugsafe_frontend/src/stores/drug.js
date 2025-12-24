@@ -16,9 +16,9 @@ export const useDrugStore = defineStore(
     const myComments = ref([]); // 댓글 저장용 변수
     const nextPage = ref(null);
     const prevPage = ref(null);
-    const totalCount = ref(0)
-    const reviewCount = ref(0)
-    const reviewPage = ref(1)
+    const totalCount = ref(0);
+    const reviewCount = ref(0);
+    const reviewPage = ref(1);
 
     // 1. 약 목록 가져오기
     const getDrugs = function (searchKeyword = "", symptomId = null, page = 1) {
@@ -71,24 +71,28 @@ export const useDrugStore = defineStore(
     // 3. 해당 약의 리뷰 목록 가져오기
     const getReviews = async (drugId = null, page = 1) => {
       try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Token ${token}` } : {};
+
         const res = await axios.get(
           drugId
             ? `${API_URL}/medicines/drugs/${drugId}/reviews/`
             : `${API_URL}/medicines/reviews/`,
           {
             params: { page },
+            headers: headers,
           }
-        )
+        );
 
-        reviews.value = res.data.results
-        reviewPage.value = page
-        totalCount.value = res.data.count
-        nextPage.value = res.data.next
-        prevPage.value = res.data.previous
+        reviews.value = res.data.results;
+        reviewPage.value = page;
+        totalCount.value = res.data.count;
+        nextPage.value = res.data.next;
+        prevPage.value = res.data.previous;
       } catch (err) {
-        console.error("리뷰 로드 실패", err)
+        console.error("리뷰 로드 실패", err);
       }
-    }
+    };
 
     // 4. 리뷰 등록하기
     const createReview = function (id, reviewData) {
@@ -113,7 +117,12 @@ export const useDrugStore = defineStore(
 
       // 1. 전달받은 인자가 유효한지 확인
       if (!drugId || !reviewId) {
-        console.error("ID가 누락되었습니다. drugId:", drugId, "reviewId:", reviewId);
+        console.error(
+          "ID가 누락되었습니다. drugId:",
+          drugId,
+          "reviewId:",
+          reviewId
+        );
         return;
       }
 
@@ -273,6 +282,11 @@ export const useDrugStore = defineStore(
             review.helpful_count = res.data.helpful_count;
             review.is_helpful = res.data.is_helpful;
           }
+
+          if (selectedReview.value && selectedReview.value.id === reviewId) {
+            selectedReview.value.helpful_count = res.data.helpful_count;
+            selectedReview.value.is_helpful = res.data.is_helpful;
+          }
           return res.data;
         })
         .catch((err) => {
@@ -310,7 +324,7 @@ export const useDrugStore = defineStore(
       toggleFavorite,
       myFavorites,
       getFavorites,
-      toggleHelpful
+      toggleHelpful,
     };
   },
   { persist: true }

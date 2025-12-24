@@ -44,7 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
-        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at', 'score')
+        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at', 'score' ,'is_helpful', 'helpful_count', 'comment_count',)
         extra_kwargs = {
             'score' : {'required': True},
             'title' : {
@@ -71,6 +71,8 @@ class ReviewListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     drug_name = serializers.CharField(source="drug.name")
     comment_count = serializers.SerializerMethodField()
+    is_helpful = serializers.SerializerMethodField()
+    helpful_count = serializers.IntegerField(source='helpful_users.count', read_only=True)
 
     class Meta:
         model = Review
@@ -83,10 +85,18 @@ class ReviewListSerializer(serializers.ModelSerializer):
             "username",
             "drug_name",
             "drug_id",
-            'score'
+            'score',
+            'is_helpful',
+            'helpful_count',
         ]
     def get_comment_count(self, obj):
-        return obj.comments.count() 
+        return obj.comments.count()
+    
+    def get_is_helpful(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.helpful_users.filter(pk=request.user.pk).exists()
+        return False
 
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
