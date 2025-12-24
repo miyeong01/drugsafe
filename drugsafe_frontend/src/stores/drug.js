@@ -21,8 +21,20 @@ export const useDrugStore = defineStore(
     const reviewPage = ref(1);
 
     // 1. 약 목록 가져오기
-    const getDrugs = function (searchKeyword = "", symptomId = null, page = 1, filters = {}) {
-      console.log("스토어 호출됨 - keyword:", searchKeyword, "ID:", symptomId, "filters:", filters);
+    const getDrugs = function (
+      searchKeyword = "",
+      symptomId = null,
+      page = 1,
+      filters = {}
+    ) {
+      console.log(
+        "스토어 호출됨 - keyword:",
+        searchKeyword,
+        "ID:",
+        symptomId,
+        "filters:",
+        filters
+      );
 
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Token ${token}` } : {};
@@ -41,7 +53,7 @@ export const useDrugStore = defineStore(
 
       // ✅ 제형 필터 추가 (배열을 콤마로 연결)
       if (filters.forms && filters.forms.length > 0) {
-        params.form = filters.forms.join(',');
+        params.form = filters.forms.join(",");
       }
 
       // ✅ 정렬 추가
@@ -91,15 +103,19 @@ export const useDrugStore = defineStore(
     // 3. 해당 약의 리뷰 목록 가져오기
     const getReviews = async (drugId = null, page = 1, params = {}) => {
       try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Token ${token}` } : {};
+
         const res = await axios.get(
           drugId
             ? `${API_URL}/medicines/drugs/${drugId}/reviews/`
             : `${API_URL}/medicines/reviews/`,
           {
-            params: { 
+            params: {
               page,
-              ...params  // ✅ search, sort 등 추가 파라미터 포함
+              ...params,
             },
+            headers: headers,
           }
         );
 
