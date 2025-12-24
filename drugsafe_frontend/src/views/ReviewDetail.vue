@@ -270,7 +270,7 @@ watch(() => selectedReview.value?.comments?.length, (newVal) => {
 
 const onToggleHelpful = (reviewId) => {
   if (!accountStore.isLogin) {
-    if (confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?")) {
+    if (confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
       router.push({ path: "/auth", query: { mode: "login" } });
     }
     return;
