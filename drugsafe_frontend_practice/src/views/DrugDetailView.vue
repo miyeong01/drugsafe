@@ -80,7 +80,7 @@ const goReviewDetail = (reviewId) => {
 // 즐겨찾기 버튼 클릭 핸들러
 const handleToggleFavorite = () => {
   if (!accountStore.isLogin) {
-    if (confirm("즐겨찾기 기능은 로그인이 필요합니다. 로그인하시겠습니까?")) {
+    if (confirm("즐겨찾기 기능은 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?")) {
       router.push({ path: "/auth", query: { mode: "login" } });
     }
     return;
@@ -137,7 +137,7 @@ const ratingDistribution = computed(() => {
 
 const onToggleHelpful = (reviewId) => {
   if (!accountStore.isLogin) {
-    if (confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?")) {
+    if (confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
       router.push({ path: "/auth", query: { mode: "login" } });
     }
     return;
