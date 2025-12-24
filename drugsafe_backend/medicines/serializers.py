@@ -67,6 +67,26 @@ class ReviewSerializer(serializers.ModelSerializer):
             return obj.helpful_users.filter(pk=user.pk).exists()
         return False
 
+class ReviewListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username")
+    drug_name = serializers.CharField(source="drug.name")
+    comment_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            "id",
+            "title",
+            "content",
+            "created_at",
+            "comment_count",
+            "username",
+            "drug_name",
+            "drug_id",
+        ]
+    def get_comment_count(self, obj):
+        return obj.comments.count() 
+
 class CommentSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     drug_id = serializers.ReadOnlyField(source='review.drug.id')

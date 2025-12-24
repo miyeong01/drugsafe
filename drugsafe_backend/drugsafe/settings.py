@@ -150,6 +150,8 @@ REST_FRAMEWORK = {
         # 기본적으로 인증된 사용자만 쓰기(POST 등)가 가능하게 설정
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
 }
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'

@@ -26,7 +26,7 @@ const props = defineProps({
 
 const drugStore = useDrugStore();
 const accountStore = useAccountStore(); // ✨ 추가: 토큰 확인을 위해 필요
-const { reviews } = storeToRefs(drugStore);
+const { reviews, nextPage, prevPage } = storeToRefs(drugStore);
 const router = useRouter();
 
 const searchQuery = ref("");
@@ -79,28 +79,32 @@ const goReviewDetail = (drugId, reviewId) => {
   });
 };
 
-const currentPage = ref(1);
-const itemsPerPage = 10;
+// const currentPage = ref(1);
+// const itemsPerPage = 10;
 
-const totalPages = computed(() => {
-  const count = filteredReviews.value ? filteredReviews.value.length : 0;
-  return Math.ceil(count / itemsPerPage) || 1;
-});
+// const totalPages = computed(() => {
+//   const count = filteredReviews.value ? filteredReviews.value.length : 0;
+//   return Math.ceil(count / itemsPerPage) || 1;
+// });
 
-const paginatedReviews = computed(() => {
-  const list = filteredReviews.value || [];
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return list.slice(start, end);
-});
+// const paginatedReviews = computed(() => {
+//   const list = filteredReviews.value || [];
+//   const start = (currentPage.value - 1) * itemsPerPage;
+//   const end = start + itemsPerPage;
+//   return list.slice(start, end);
+// });
 
-watch([searchQuery, sortBy, activeTab], () => {
-  currentPage.value = 1;
-});
+// watch([searchQuery, sortBy, activeTab], () => {
+//   currentPage.value = 1;
+// });
 
-const changePage = (page) => {
-  currentPage.value = page;
-  window.scrollTo(0, 0);
+const changePage = (direction) => {
+  if (direction === "next" && nextPage.value) {
+    drugStore.getReviews(nextPage.value);
+  }
+  if (direction === "prev" && prevPage.value) {
+    drugStore.getReviews(prevPage.value);
+  }
 };
 
 // 도움이 돼요 클릭 핸들러 (accountStore 사용)
@@ -164,7 +168,7 @@ const onToggleHelpful = (reviewId) => {
 
       <div class="review-list d-flex flex-column gap-4 mb-5">
         <template v-if="filteredReviews.length > 0">
-          <div v-for="review in paginatedReviews" :key="review.id"
+          <div v-for="review in filteredReviews" :key="review.id"
             class="card border-0 shadow-sm p-4 rounded-4 review-card mb-3"
             @click="goReviewDetail(review.drug, review.id)">
             <div class="d-flex align-items-center gap-2 mb-2">
@@ -211,19 +215,13 @@ const onToggleHelpful = (reviewId) => {
       </div>
     </div>
 
-    <nav v-if="totalPages > 1" class="custom-position-nav d-flex justify-content-center">
+    <nav v-if="prevPage || nextPage" class="custom-position-nav d-flex justify-content-center">
       <div class="minimal-pagination d-flex align-items-center gap-3">
-        <button class="btn-arrow" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+        <button class="btn-arrow" :disabled="!prevPage" @click="changePage('prev')">
           <ChevronLeft :size="20" />
         </button>
 
-        <div class="current-page-display shadow-sm">
-          <span class="fw-bold text-primary">{{ currentPage }}</span>
-          <span class="text-muted mx-1">/</span>
-          <span class="text-secondary small">{{ totalPages }}</span>
-        </div>
-
-        <button class="btn-arrow" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
+        <button class="btn-arrow" :disabled="!nextPage" @click="changePage('next')">
           <ChevronRight :size="20" />
         </button>
       </div>
