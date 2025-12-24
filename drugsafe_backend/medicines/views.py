@@ -93,7 +93,7 @@ from django.db.models import Q
 def all_review_list(request):
     # 1. 기본 쿼리셋
     qs = (
-        Review.objects
+         Review.objects
         .select_related("user", "drug")
     )
     

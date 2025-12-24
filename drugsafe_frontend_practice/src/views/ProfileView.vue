@@ -8,6 +8,9 @@ import { storeToRefs } from 'pinia'
 import {
   Heart,
   Pill,
+  Droplet,
+  SprayCan,
+  Bandage,
   FileText,
   Settings,
   CheckCircle2,
@@ -20,6 +23,28 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-vue-next'
+
+import film from "@/assets/icons/film.svg?component";
+import lotion from "@/assets/icons/lotion.svg?component";
+import cream from "@/assets/icons/cream.svg?component";
+import ointment from "@/assets/icons/ointment.svg?component";
+import powder from "@/assets/icons/powder.svg?component";
+
+const getFormIcon = (form) => {
+  const map = {
+    1: Pill,
+    2: powder,
+    3: Droplet,
+    4: Droplet,
+    5: SprayCan,
+    6: film,
+    7: cream,
+    8: ointment,
+    9: Bandage,
+    10: lotion,
+  };
+  return map[form] || Pill;
+}
 
 const router = useRouter()
 const accountStore = useAccountStore()
@@ -213,7 +238,9 @@ const changeFavoritePage = (direction) => {
                 <div class="flex-shrink-0 bg-light rounded d-flex align-items-center justify-content-center"
                   style="width: 80px; height: 80px; overflow: hidden;">
                   <img v-if="drug.image_url" :src="drug.image_url" alt="약 이미지" class="w-100 h-100 object-fit-contain" />
-                  <Pill v-else class="text-secondary opacity-50" :size="32" />
+                  <div v-else class="text-secondary opacity-50" :size="32">
+                    <component :is="getFormIcon(drug.form)" class="text-primary drug-icon" />
+                  </div>
                 </div>
 
                 <div class="flex-grow-1">
@@ -426,5 +453,9 @@ const changeFavoritePage = (direction) => {
   min-width: 80px;
   text-align: center;
   border: 1px solid #edf2f7;
+}
+.drug-icon {
+  width: 25px;
+  height: 25px;
 }
 </style>
