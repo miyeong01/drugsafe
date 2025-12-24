@@ -21,20 +21,40 @@ export const useDrugStore = defineStore(
     const reviewPage = ref(1);
 
     // 1. 약 목록 가져오기
-    const getDrugs = function (searchKeyword = "", symptomId = null, page = 1) {
-      console.log("스토어 호출됨 - keyword:", searchKeyword, "ID:", symptomId);
+    const getDrugs = function (searchKeyword = "", symptomId = null, page = 1, filters = {}) {
+      console.log("스토어 호출됨 - keyword:", searchKeyword, "ID:", symptomId, "filters:", filters);
 
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Token ${token}` } : {};
 
+      // ✅ params 객체 생성
+      const params = {
+        page: page,
+      };
+
+      // 검색어 또는 증상 ID 추가
+      if (symptomId) {
+        params.symptom = symptomId;
+      } else if (searchKeyword) {
+        params.search = searchKeyword;
+      }
+
+      // ✅ 제형 필터 추가 (배열을 콤마로 연결)
+      if (filters.forms && filters.forms.length > 0) {
+        params.form = filters.forms.join(',');
+      }
+
+      // ✅ 정렬 추가
+      if (filters.sort) {
+        params.sort = filters.sort;
+      }
+
+      console.log("최종 params:", params); // 디버깅용
+
       axios({
         method: "get",
         url: `${API_URL}/medicines/drugs/`,
-        params: {
-          search: searchKeyword,
-          symptom: symptomId,
-          page: page, // 페이지 전달
-        },
+        params: params,
         headers: headers,
       })
         .then((res) => {
