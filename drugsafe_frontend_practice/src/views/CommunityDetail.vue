@@ -46,17 +46,6 @@ onMounted(() => {
 const filteredReviews = computed(() => {
   let list = reviews.value ? [...reviews.value] : [];
 
-  // 1. 검색 필터링 (제목, 약품명, 내용)
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    list = list.filter(
-      (review) =>
-        review.title?.toLowerCase().includes(query) ||
-        review.drug_name?.toLowerCase().includes(query) ||
-        review.content?.toLowerCase().includes(query)
-    );
-  }
-
   // 2. 정렬 로직 (인기순/댓글순/최신순 통합)
   if (activeTab.value === "popular" || sortBy.value === "helpful") {
     list.sort((a, b) => (b.helpful_count || 0) - (a.helpful_count || 0));
@@ -71,6 +60,30 @@ const filteredReviews = computed(() => {
   return list;
 });
 
+onMounted(() => {
+  fetchReviews();
+});
+
+// ✅ 검색/정렬 변경 시 백엔드에 새로 요청
+watch([searchQuery, sortBy], () => {
+  fetchReviews();
+});
+
+const fetchReviews = () => {
+  const params = {};
+  
+  if (searchQuery.value) {
+    params.search = searchQuery.value;
+  }
+  
+  // activeTab이 'popular'가 아닐 때만 sortBy 적용
+  if (activeTab.value !== "popular") {
+    params.sort = sortBy.value;
+  }
+  
+  drugStore.getReviews(null, 1, params);
+};
+
 const totalComments = computed(() => {
   return reviews.value
     ? reviews.value.reduce((sum, r) => sum + (r.comment_count || 0), 0)
@@ -78,12 +91,8 @@ const totalComments = computed(() => {
 });
 
 const goReviewDetail = (drugId, reviewId) => {
-  // ✨ 콘솔을 찍어서 값이 제대로 들어오는지 확인하세요.
-  console.log("이동 시도 - drugId:", drugId, "reviewId:", reviewId);
-
   if (!drugId) {
-    console.error("drugId가 없습니다! 데이터 구조를 확인하세요.");
-    // 만약 review.drug가 객체라면 drugId.id 로 접근해야 할 수도 있습니다.
+    console.error("drugId가 없습니다!");
     return;
   }
 
@@ -116,14 +125,22 @@ const goReviewDetail = (drugId, reviewId) => {
 // });
 
 const changePage = (direction) => {
-  if (direction === "prev" && prevPage.value) {
-    if (drugStore.reviewPage > 1) {
-      drugStore.getReviews(null, drugStore.reviewPage - 1);
-    }
+  const params = {};
+  
+  if (searchQuery.value) {
+    params.search = searchQuery.value;
   }
-
+  
+  if (activeTab.value !== "popular") {
+    params.sort = sortBy.value;
+  }
+  
+  if (direction === "prev" && prevPage.value && reviewPage.value > 1) {
+    drugStore.getReviews(null, reviewPage.value - 1, params);
+  }
+  
   if (direction === "next" && nextPage.value) {
-    drugStore.getReviews(null, drugStore.reviewPage + 1);
+    drugStore.getReviews(null, reviewPage.value + 1, params);
   }
 };
 
