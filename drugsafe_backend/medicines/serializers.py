@@ -44,7 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
-        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at',)
+        read_only_fields = ('user', 'drug', 'drug_name', 'form', 'created_at', 'updated_at', 'score')
         extra_kwargs = {
             'score' : {'required': True},
             'title' : {
@@ -83,6 +83,7 @@ class ReviewListSerializer(serializers.ModelSerializer):
             "username",
             "drug_name",
             "drug_id",
+            'score'
         ]
     def get_comment_count(self, obj):
         return obj.comments.count() 

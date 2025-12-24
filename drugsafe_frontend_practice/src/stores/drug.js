@@ -73,7 +73,7 @@ export const useDrugStore = defineStore(
       try {
         const res = await axios.get(
           drugId
-            ? `${API_URL}/medicines/${drugId}/reviews/`
+            ? `${API_URL}/medicines/drugs/${drugId}/reviews/`
             : `${API_URL}/medicines/reviews/`,
           {
             params: { page },

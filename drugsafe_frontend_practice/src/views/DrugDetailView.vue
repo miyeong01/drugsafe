@@ -41,6 +41,7 @@ onMounted(() => {
   const drugId = route.params.drugId;
   drugStore.getDrugDetail(drugId);
   drugStore.getReviews(drugId);
+  console.log("첫 번째 리뷰 데이터의 점수:", reviews.value[0]?.score);
 });
 
 const goReviewWrite = () => {
@@ -105,13 +106,21 @@ const getFormIcon = (form) => {
   return map[form] || Pill;
 }
 
-// 리뷰 평점 통계 계산 로직
+// 평균 평점 계산 로직 수정
 const averageRating = computed(() => {
-  if (!reviews.value?.length) return 0;
-  const sum = reviews.value.reduce((acc, r) => acc + r.score, 0);
-  return (sum / reviews.value.length).toFixed(1);
+  if (!reviews.value || reviews.value.length === 0) return "0.0";
+
+  const sum = reviews.value.reduce((acc, r) => {
+    // r.score가 문자열로 넘어오거나 없을 경우를 대비해 Number()와 기본값(0) 처리
+    const s = Number(r.score) || 0;
+    return acc + s;
+  }, 0);
+
+  const avg = sum / reviews.value.length;
+  return isNaN(avg) ? "0.0" : avg.toFixed(1);
 });
 
+// 평점 분포 계산 로직 수정
 const ratingDistribution = computed(() => {
   const dist = [
     { stars: 5, count: 0, percentage: 0 },
@@ -121,15 +130,21 @@ const ratingDistribution = computed(() => {
     { stars: 1, count: 0, percentage: 0 },
   ];
 
-  if (!reviews.value?.length) return dist;
+  if (!reviews.value || reviews.value.length === 0) return dist;
 
-  reviews.value.forEach(r => {
-    const starObj = dist.find(d => d.stars === Math.floor(r.score));
-    if (starObj) starObj.count++;
+  reviews.value.forEach((r) => {
+    // 점수를 정수로 변환 (5, 4, 3, 2, 1)
+    const scoreVal = Math.floor(Number(r.score));
+    const starObj = dist.find((d) => d.stars === scoreVal);
+    if (starObj) {
+      starObj.count++;
+    }
   });
 
-  dist.forEach(d => {
-    d.percentage = (d.count / reviews.value.length) * 100;
+  // 전체 리뷰 개수를 기준으로 백분율 계산
+  const total = reviews.value.length;
+  dist.forEach((d) => {
+    d.percentage = total > 0 ? (d.count / total) * 100 : 0;
   });
 
   return dist;
