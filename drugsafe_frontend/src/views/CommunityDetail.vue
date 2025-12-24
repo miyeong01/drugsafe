@@ -122,13 +122,10 @@ const changePage = (direction) => {
 // 도움이 돼요 클릭 핸들러 (accountStore 사용)
 const onToggleHelpful = (reviewId) => {
   if (!accountStore.isLogin) {
-    if (
-      confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")
-    ) {
-      router.push({ path: "/auth", query: { mode: "login" } });
-    }
+    alert("로그인이 필요합니다.");
     return;
   }
+  // Pinia 스토어의 toggleHelpful 실행 -> 서버 DB 업데이트 -> 내 화면 숫자 업데이트
   drugStore.toggleHelpful(reviewId);
 };
 </script>
@@ -225,7 +222,7 @@ const onToggleHelpful = (reviewId) => {
                 class="btn btn-sm rounded-pill px-3 border d-flex align-items-center gap-1 transition-all"
                 :class="
                   review.is_helpful
-                    ? 'btn-danger text-white border-danger'
+                    ? 'btn-danger text-white'
                     : 'btn-light text-muted'
                 "
                 @click.stop="onToggleHelpful(review.id)"
@@ -234,9 +231,7 @@ const onToggleHelpful = (reviewId) => {
                   :size="14"
                   :fill="review.is_helpful ? 'white' : 'none'"
                 />
-
                 <span class="ms-1 small">도움이 돼요</span>
-
                 <span class="fw-bold ms-1">{{
                   review.helpful_count || 0
                 }}</span>
