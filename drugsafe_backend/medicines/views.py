@@ -21,13 +21,17 @@ def drug_list(request):
         review_cnt=Coalesce(Count('drugs'), 0)
     )
     
+    # 2. 필터링 적용 (페이지네이션 전에!)
     symptom_id = request.GET.get('symptom')
     search_query = request.GET.get('search')
+    form_id = request.GET.get('form')  # 제형 필터 추가
 
     if symptom_id:
         drugs = drugs.filter(symptom_id=symptom_id)
-    elif search_query:
+    if search_query:
         drugs = drugs.filter(name__icontains=search_query)
+    if form_id:
+        drugs = drugs.filter(form_id=form_id)
 
     paginator = PageNumberPagination()
     paginator.page_size = 10   # 여기서 페이지 크기 설정
@@ -69,16 +73,41 @@ def drug_detail(request, drug_pk):
 #         if serializer.is_valid(raise_exception=True):
 #             serializer.save(drug=drug)
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
+from django.db.models import Q
 
 @api_view(['GET'])
-@permission_classes([AllowAny]) # 누구나 볼 수 있도록 설정
+@permission_classes([AllowAny])
 def all_review_list(request):
+    # 1. 기본 쿼리셋
     qs = (
         Review.objects
         .select_related("user", "drug")
-        .order_by("-created_at")
     )
-
+    
+    # 2. 검색 필터 (페이지네이션 전에!)
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        # title, content, drug_name 모두 검색
+        qs = qs.filter(
+            Q(title__icontains=search_query) |
+            Q(content__icontains=search_query) |
+            Q(drug__name__icontains=search_query)
+        )
+    
+    # 3. 정렬 (페이지네이션 전에!)
+    sort_by = request.GET.get('sort', 'latest')
+    if sort_by == 'helpful':
+        qs = qs.annotate(
+            helpful_count=Count('helpful_users')
+        ).order_by('-helpful_count', '-created_at')
+    elif sort_by == 'comments':
+        qs = qs.annotate(
+            comment_count=Count('comments')
+        ).order_by('-comment_count', '-created_at')
+    else:  # latest
+        qs = qs.order_by('-created_at')
+    
+    # 4. 필터링/정렬된 결과에 페이지네이션
     paginator = ReviewPagination()
     page = paginator.paginate_queryset(qs, request)
 
