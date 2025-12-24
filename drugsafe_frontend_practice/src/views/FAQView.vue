@@ -39,15 +39,10 @@ const faqCategories = [
         question: '검색 결과가 정확한가요?',
         answer: '모든 의약품 정보는 식품의약품안전처의 공식 데이터를 기반으로 제공되므로 신뢰할 수 있습니다.',
       },
-      {
-        id: 'search-3',
-        question: '처방전 필요한 약도 검색할 수 있나요?',
-        answer: '네, 처방전이 필요한 전문의약품도 검색이 가능합니다. 다만 의사의 처방이 필요합니다.',
-      },
     ],
   },
   {
-    category: '즐겨찾',
+    category: '즐겨찾기',
     items: [
       {
         id: 'medication-1',
