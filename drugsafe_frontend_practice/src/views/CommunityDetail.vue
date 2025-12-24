@@ -26,15 +26,20 @@ const props = defineProps({
 
 const drugStore = useDrugStore();
 const accountStore = useAccountStore(); // ✨ 추가: 토큰 확인을 위해 필요
-const { reviews, nextPage, prevPage } = storeToRefs(drugStore);
+const { reviews, nextPage, prevPage, reviewPage, totalCount } = storeToRefs(drugStore);
 const router = useRouter();
 
 const searchQuery = ref("");
 const sortBy = ref("latest");
 const activeTab = ref("all");
 
+const currentPage = computed(() => reviewPage.value)
+const totalPages = computed(() => {
+  return Math.ceil(totalCount.value / 10) || 1
+})
+
 onMounted(() => {
-  drugStore.getReviews();
+  drugStore.getReviews(null,1);
 });
 
 // ✨ [통합된 필터링/정렬 로직] 중복 선언을 피하기 위해 하나로 합쳤습니다.
@@ -111,11 +116,14 @@ const goReviewDetail = (drugId, reviewId) => {
 // });
 
 const changePage = (direction) => {
-  if (direction === "next" && nextPage.value) {
-    drugStore.getReviews(nextPage.value);
-  }
   if (direction === "prev" && prevPage.value) {
-    drugStore.getReviews(prevPage.value);
+    if (drugStore.reviewPage > 1) {
+      drugStore.getReviews(null, drugStore.reviewPage - 1);
+    }
+  }
+
+  if (direction === "next" && nextPage.value) {
+    drugStore.getReviews(null, drugStore.reviewPage + 1);
   }
 };
 
@@ -256,24 +264,19 @@ const onToggleHelpful = (reviewId) => {
       </div>
     </div>
 
-    <nav
-      v-if="prevPage || nextPage"
-      class="custom-position-nav d-flex justify-content-center"
-    >
+    <nav v-if="prevPage || nextPage" class="custom-position-nav d-flex justify-content-center">
       <div class="minimal-pagination d-flex align-items-center gap-3">
-        <button
-          class="btn-arrow"
-          :disabled="!prevPage"
-          @click="changePage('prev')"
-        >
+        <button class="btn-arrow" :disabled="!prevPage" @click="changePage('prev')">
           <ChevronLeft :size="20" />
         </button>
 
-        <button
-          class="btn-arrow"
-          :disabled="!nextPage"
-          @click="changePage('next')"
-        >
+        <div class="current-page-display shadow-sm">
+          <span class="fw-bold text-primary">{{ currentPage }}</span>
+          <span class="text-muted mx-1">/</span>
+          <span class="text-secondary small">{{ totalPages }}</span>
+        </div>
+
+        <button class="btn-arrow" :disabled="!nextPage" @click="changePage('next')">
           <ChevronRight :size="20" />
         </button>
       </div>

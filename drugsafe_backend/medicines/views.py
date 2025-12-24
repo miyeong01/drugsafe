@@ -11,6 +11,7 @@ from .serializers import DrugListSerializer, CommentSerializer, ReviewSerializer
 from django.db.models import Avg, Count, Max
 from django.db.models.functions import Coalesce
 from .pagination import ReviewPagination
+from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
 @api_view(['GET'])
@@ -28,8 +29,18 @@ def drug_list(request):
     elif search_query:
         drugs = drugs.filter(name__icontains=search_query)
 
-    serializer = DrugListSerializer(drugs, many=True, context={'request': request})
-    return Response(serializer.data)
+    paginator = PageNumberPagination()
+    paginator.page_size = 10   # 여기서 페이지 크기 설정
+
+    page = paginator.paginate_queryset(drugs, request)
+
+    serializer = DrugListSerializer(
+        page,
+        many=True,
+        context={'request': request}
+    )
+
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 def drug_detail(request, drug_pk):
@@ -94,7 +105,7 @@ def review_list(request, drug_pk):
         paginator = ReviewPagination()
         page = paginator.paginate_queryset(qs, request)
 
-        serializer = ReviewSerializer(page, many=True, context={'request': request})
+        serializer = ReviewListSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
     elif request.method == 'POST':
