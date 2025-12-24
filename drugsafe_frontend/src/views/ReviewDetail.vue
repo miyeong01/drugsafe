@@ -191,9 +191,16 @@ const formatDate = (dateString) => {
 
 const handleSubmitComment = () => {
   if (!accountStore.isLogin) {
-    alert("댓글 작성을 위해 로그인이 필요합니다.");
+    if (
+      confirm(
+        "댓글 작성을 위해 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+      )
+    ) {
+      router.push({ path: "/auth", query: { mode: "login" } });
+    }
     return;
   }
+
   if (!newComment.value.trim()) return;
 
   drugStore
