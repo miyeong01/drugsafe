@@ -1,16 +1,38 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { ArrowLeft, Trash2, Pill } from "lucide-vue-next";
+import { ArrowLeft, Trash2, Pill, SprayCan, Droplet, Bandage } from "lucide-vue-next";
 import { useAccountStore } from "@/stores/accounts";
 import { useDrugStore } from "@/stores/drug";
 import { storeToRefs } from "pinia";
+
+import film from "@/assets/icons/film.svg?component";
+import lotion from "@/assets/icons/lotion.svg?component";
+import cream from "@/assets/icons/cream.svg?component";
+import ointment from "@/assets/icons/ointment.svg?component";
+import powder from "@/assets/icons/powder.svg?component";
 
 const router = useRouter();
 const accountStore = useAccountStore();
 const drugStore = useDrugStore();
 
 const { myFavorites } = storeToRefs(drugStore);
+
+const getFormIcon = (form) => {
+  const map = {
+    1: Pill,
+    2: powder,
+    3: Droplet,
+    4: Droplet,
+    5: SprayCan,
+    6: film,
+    7: cream,
+    8: ointment,
+    9: Bandage,
+    10: lotion,
+  };
+  return map[form] || Pill;
+}
 
 // 현재 활성화된 탭
 const activeTab = ref("password");
@@ -172,7 +194,9 @@ const handleDeleteItem = async (drugId) => {
                       :src="item.image_url"
                       class="w-100 h-100 object-fit-contain"
                     />
-                    <Pill v-else class="text-secondary opacity-50" :size="20" />
+                    <div v-else class="text-secondary opacity-50" :size="20">
+                      <component :is="getFormIcon(item.form)" class="text-primary drug-icon"/>
+                    </div>
                   </div>
 
                   <div>
@@ -226,5 +250,9 @@ const handleDeleteItem = async (drugId) => {
 }
 .btn-white:hover {
   background-color: #f8f9fa;
+}
+.drug-icon {
+  width: 25px;
+  height: 25px;
 }
 </style>
