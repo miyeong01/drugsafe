@@ -228,18 +228,29 @@ def comment_detail(request, review_pk, comment_pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_reviews(request):
-    # 최신순 정렬 및 request 정보 전달
+    # 최신순 정렬
     reviews = Review.objects.filter(user=request.user).order_by('-created_at')
-    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
-    return Response(serializer.data)
+    
+    # ✅ 페이지네이션 추가
+    paginator = ReviewPagination()
+    page = paginator.paginate_queryset(reviews, request)
+    
+    serializer = ReviewSerializer(page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_comments(request):
-    # 최신순 정렬 및 request 정보 전달
+    # 최신순 정렬
     comments = Comment.objects.filter(user=request.user).order_by('-created_at')
-    serializer = CommentSerializer(comments, many=True, context={'request': request})
-    return Response(serializer.data)
+    
+    # ✅ 페이지네이션 추가
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    page = paginator.paginate_queryset(comments, request)
+    
+    serializer = CommentSerializer(page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
