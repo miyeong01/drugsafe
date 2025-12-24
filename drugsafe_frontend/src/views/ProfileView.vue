@@ -35,12 +35,17 @@ const {
   myCommentsTotal,
   myCommentsNext,
   myCommentsPrev,
-  myFavorites 
+  myFavorites,
+  myFavoritesPage,
+  myFavoritesTotal,
+  myFavoritesNext,
+  myFavoritesPrev,
 } = storeToRefs(drugStore)
 
 // 페이지네이션 계산
 const reviewTotalPages = computed(() => Math.ceil(myReviewsTotal.value / 10) || 1)
 const commentTotalPages = computed(() => Math.ceil(myCommentsTotal.value / 10) || 1)
+const favoriteTotalPages = computed(() => Math.ceil(myFavoritesTotal.value / 10) || 1)
 
 onMounted(async () => {
   // 토큰이 있을 때만 실행
@@ -51,7 +56,7 @@ onMounted(async () => {
     }
     await drugStore.getMyReviews(1)
     await drugStore.getMyComments(1)
-    await drugStore.getFavorites()
+    await drugStore.getFavorites(1)
   }
 
   console.log('리뷰 로드 완료:', drugStore.myReviews)
@@ -108,6 +113,15 @@ const changeCommentPage = (direction) => {
     drugStore.getMyComments(myCommentsPage.value + 1)
   }
 }
+
+// 즐겨찾기 페이지 변경
+const changeFavoritePage = (direction) => {
+  if (direction === 'prev' && myFavoritesPrev.value && myFavoritesPage.value > 1) {
+    drugStore.getFavorites(myFavoritesPage.value - 1)
+  } else if (direction === 'next' && myFavoritesNext.value) {
+    drugStore.getFavorites(myFavoritesPage.value + 1)
+  }
+}
 </script>
 
 <template>
@@ -146,7 +160,7 @@ const changeCommentPage = (direction) => {
             <div class="card-body">
               <Heart class="mx-auto mb-2 text-primary" :size="32" />
               <div class="fw-medium text-dark mb-1">즐겨찾기</div>
-              <p class="text-secondary mb-0">{{ myFavorites?.length || 0 }}개</p>
+              <p class="text-secondary mb-0">{{ myFavoritesTotal || 0 }}개</p>
             </div>
           </div>
         </div>
@@ -228,6 +242,24 @@ const changeCommentPage = (direction) => {
             <p>즐겨찾기한 약이 없습니다.<br><small>자주 복용하시는 약을 등록해보세요!</small></p>
           </div>
         </div>
+        <!-- 즐겨찾기 페이지네이션 -->
+        <nav v-if="myFavoritesNext || myFavoritesPrev" class="d-flex justify-content-center mt-4">
+          <div class="minimal-pagination d-flex align-items-center gap-3">
+            <button class="btn-arrow" :disabled="!myFavoritesPrev" @click="changeFavoritePage('prev')">
+              <ChevronLeft :size="20" />
+            </button>
+
+            <div class="current-page-display shadow-sm">
+              <span class="fw-bold text-primary">{{ myFavoritesPage }}</span>
+              <span class="text-muted mx-1">/</span>
+              <span class="text-secondary small">{{ favoriteTotalPages }}</span>
+            </div>
+
+            <button class="btn-arrow" :disabled="!myFavoritesNext" @click="changeFavoritePage('next')">
+              <ChevronRight :size="20" />
+            </button>
+          </div>
+        </nav>
       </div>
 
       <div v-if="activeTab === 'reviews'">

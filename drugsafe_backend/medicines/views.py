@@ -265,11 +265,17 @@ def user_favorites(request):
             avg_rating=Coalesce(Avg('drugs__score'), 0.0),
             review_cnt=Coalesce(Count('drugs'), 0)
         )
+        .order_by('-id')  # 최신 즐겨찾기 순
     )
     
-    # 3. context에 request를 담아 즐겨찾기 여부 로직이 에러 나지 않게 합니다.
-    serializer = DrugListSerializer(drugs, many=True, context={'request': request})
-    return Response(serializer.data)
+    # 3. ✅ 페이지네이션 추가
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    page = paginator.paginate_queryset(drugs, request)
+    
+    # 4. context에 request를 담아 즐겨찾기 여부 로직이 에러 나지 않게 합니다.
+    serializer = DrugListSerializer(page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
 
 # 약 상세 페이지에서 즐겨찾기를 누를 때 호출할 함수
 @api_view(['POST'])

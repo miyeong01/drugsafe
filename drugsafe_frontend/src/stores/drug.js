@@ -12,6 +12,10 @@ export const useDrugStore = defineStore(
     const accountStore = useAccountStore();
     const reviews = ref([]); // 리뷰 목록 저장
     const myFavorites = ref([]); // 즐겨찾기 목록 담을 변수
+    const myFavoritesPage = ref(1)
+    const myFavoritesTotal = ref(0)
+    const myFavoritesNext = ref(null)
+    const myFavoritesPrev = ref(null)
     const myReviews = ref([]); // 실제 리뷰 데이터를 담을 변수
     const myReviewsPage = ref(1)
     const myReviewsTotal = ref(0)
@@ -299,22 +303,26 @@ export const useDrugStore = defineStore(
         });
     };
 
-    // 13. 즐겨찾기 목록 가져오기 함수
-    const getFavorites = function () {
-      return axios({
-        method: "get",
-        url: `${API_URL}/medicines/user-favorites/`,
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      })
-        .then((res) => {
-          myFavorites.value = res.data;
-        })
-        .catch((err) => {
-          console.error("즐겨찾기 로드 실패:", err);
-          throw err;
+    // 즐겨찾기 조회 함수
+    const getFavorites = async (page = 1) => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${API_URL}/medicines/user-favorites/`, {
+          params: { page },
+          headers: { Authorization: `Token ${token}` }
         });
+        
+        myFavorites.value = res.data.results;
+        myFavoritesPage.value = page;
+        myFavoritesTotal.value = res.data.count;
+        myFavoritesNext.value = res.data.next;
+        myFavoritesPrev.value = res.data.previous;
+      } catch (err) {
+        console.error("즐겨찾기 조회 실패:", err);
+        myFavorites.value = [];
+      }
     };
 
     // 14. 리뷰 '도움이 돼요' 토글 함수 추가
@@ -385,6 +393,10 @@ export const useDrugStore = defineStore(
       getMyComments,
       toggleFavorite,
       myFavorites,
+      myFavoritesPage,
+      myFavoritesTotal,
+      myFavoritesNext,
+      myFavoritesPrev,
       getFavorites,
       toggleHelpful,
     };
