@@ -71,7 +71,7 @@ def all_review_list(request):
     paginator = ReviewPagination()
     page = paginator.paginate_queryset(qs, request)
 
-    serializer = ReviewListSerializer(
+    serializer = ReviewSerializer(
         page,
         many=True,
         context={'request': request}
@@ -94,7 +94,7 @@ def review_list(request, drug_pk):
         paginator = ReviewPagination()
         page = paginator.paginate_queryset(qs, request)
 
-        serializer = ReviewListSerializer(page, many=True)
+        serializer = ReviewSerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     elif request.method == 'POST':

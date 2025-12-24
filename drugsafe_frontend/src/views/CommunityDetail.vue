@@ -73,9 +73,21 @@ const totalComments = computed(() => {
 });
 
 const goReviewDetail = (drugId, reviewId) => {
+  // ✨ 콘솔을 찍어서 값이 제대로 들어오는지 확인하세요.
+  console.log("이동 시도 - drugId:", drugId, "reviewId:", reviewId);
+
+  if (!drugId) {
+    console.error("drugId가 없습니다! 데이터 구조를 확인하세요.");
+    // 만약 review.drug가 객체라면 drugId.id 로 접근해야 할 수도 있습니다.
+    return;
+  }
+
   router.push({
     name: "ReviewDetail",
-    params: { drugId: drugId, reviewId: reviewId },
+    params: {
+      drugId: drugId,
+      reviewId: reviewId,
+    },
   });
 };
 
@@ -110,7 +122,9 @@ const changePage = (direction) => {
 // 도움이 돼요 클릭 핸들러 (accountStore 사용)
 const onToggleHelpful = (reviewId) => {
   if (!accountStore.isLogin) {
-    if (confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
+    if (
+      confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")
+    ) {
       router.push({ path: "/auth", query: { mode: "login" } });
     }
     return;
@@ -134,14 +148,21 @@ const onToggleHelpful = (reviewId) => {
           <div class="col-md-8">
             <div class="search-input-group">
               <Search class="search-icon" :size="20" />
-              <input type="text" class="form-control ps-5 py-3 border-0 bg-light rounded-3"
-                placeholder="리뷰 검색 (제목, 내용, 약품명)" v-model="searchQuery" />
+              <input
+                type="text"
+                class="form-control ps-5 py-3 border-0 bg-light rounded-3"
+                placeholder="리뷰 검색 (제목, 내용, 약품명)"
+                v-model="searchQuery"
+              />
             </div>
           </div>
           <div class="col-md-4">
             <div class="d-flex align-items-center gap-2 h-100">
               <Filter class="text-secondary" :size="20" />
-              <select class="form-select border-0 bg-light py-3 rounded-3" v-model="sortBy">
+              <select
+                class="form-select border-0 bg-light py-3 rounded-3"
+                v-model="sortBy"
+              >
                 <option value="latest">최신순</option>
                 <option value="comments">댓글순</option>
                 <option value="helpful">도움순</option>
@@ -153,14 +174,20 @@ const onToggleHelpful = (reviewId) => {
 
       <ul class="nav nav-pills mb-4 gap-2">
         <li class="nav-item">
-          <button class="nav-link rounded-pill px-4 py-2" :class="{ active: activeTab === 'all' }"
-            @click="activeTab = 'all'">
+          <button
+            class="nav-link rounded-pill px-4 py-2"
+            :class="{ active: activeTab === 'all' }"
+            @click="activeTab = 'all'"
+          >
             <ClipboardList class="me-2" :size="16" />전체 리뷰
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link rounded-pill px-4 py-2" :class="{ active: activeTab === 'popular' }"
-            @click="activeTab = 'popular'">
+          <button
+            class="nav-link rounded-pill px-4 py-2"
+            :class="{ active: activeTab === 'popular' }"
+            @click="activeTab = 'popular'"
+          >
             <TrendingUp class="me-2" :size="16" />인기 리뷰
           </button>
         </li>
@@ -168,9 +195,12 @@ const onToggleHelpful = (reviewId) => {
 
       <div class="review-list d-flex flex-column gap-4 mb-5">
         <template v-if="filteredReviews.length > 0">
-          <div v-for="review in filteredReviews" :key="review.id"
+          <div
+            v-for="review in filteredReviews"
+            :key="review.id"
             class="card border-0 shadow-sm p-4 rounded-4 review-card mb-3"
-            @click="goReviewDetail(review.drug, review.id)">
+            @click="goReviewDetail(review.drug, review.id)"
+          >
             <div class="d-flex align-items-center gap-2 mb-2">
               <span class="small fw-bold text-dark">
                 {{ review.drug_name }}
@@ -181,19 +211,35 @@ const onToggleHelpful = (reviewId) => {
               {{ review.title || "제목 없는 리뷰" }}
             </h5>
 
-            <p class="text-secondary small mb-3 text-truncate-2" style="white-space: pre-wrap">
+            <p
+              class="text-secondary small mb-3 text-truncate-2"
+              style="white-space: pre-wrap"
+            >
               {{ review.content }}
             </p>
 
-            <div class="d-flex align-items-center gap-3 pt-3 border-top text-muted small">
-              <button class="btn btn-sm rounded-pill px-3 border d-flex align-items-center gap-1 transition-all"
-                :class="review.is_helpful ? 'btn-danger text-white border-danger' : 'btn-light text-muted'"
-                @click.stop="onToggleHelpful(review.id)">
-                <ThumbsUp :size="14" :fill="review.is_helpful ? 'white' : 'none'" />
+            <div
+              class="d-flex align-items-center gap-3 pt-3 border-top text-muted small"
+            >
+              <button
+                class="btn btn-sm rounded-pill px-3 border d-flex align-items-center gap-1 transition-all"
+                :class="
+                  review.is_helpful
+                    ? 'btn-danger text-white border-danger'
+                    : 'btn-light text-muted'
+                "
+                @click.stop="onToggleHelpful(review.id)"
+              >
+                <ThumbsUp
+                  :size="14"
+                  :fill="review.is_helpful ? 'white' : 'none'"
+                />
 
                 <span class="ms-1 small">도움이 돼요</span>
 
-                <span class="fw-bold ms-1">{{ review.helpful_count || 0 }}</span>
+                <span class="fw-bold ms-1">{{
+                  review.helpful_count || 0
+                }}</span>
               </button>
 
               <span class="d-flex align-items-center gap-1">
@@ -215,13 +261,24 @@ const onToggleHelpful = (reviewId) => {
       </div>
     </div>
 
-    <nav v-if="prevPage || nextPage" class="custom-position-nav d-flex justify-content-center">
+    <nav
+      v-if="prevPage || nextPage"
+      class="custom-position-nav d-flex justify-content-center"
+    >
       <div class="minimal-pagination d-flex align-items-center gap-3">
-        <button class="btn-arrow" :disabled="!prevPage" @click="changePage('prev')">
+        <button
+          class="btn-arrow"
+          :disabled="!prevPage"
+          @click="changePage('prev')"
+        >
           <ChevronLeft :size="20" />
         </button>
 
-        <button class="btn-arrow" :disabled="!nextPage" @click="changePage('next')">
+        <button
+          class="btn-arrow"
+          :disabled="!nextPage"
+          @click="changePage('next')"
+        >
           <ChevronRight :size="20" />
         </button>
       </div>
