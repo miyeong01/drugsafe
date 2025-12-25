@@ -24,7 +24,6 @@ class Command(BaseCommand):
                     symptom_obj, _ = Symptom.objects.get_or_create(name=symptom_name)
 
                     # (2) Drug 데이터 생성 (create 사용)
-                    # 주의: defaults={...}를 쓰지 않고 바로 필드명을 나열해야 합니다.
                     Drug.objects.create(
                         name=row['제품명'], 
                         company=row.get('업체명', ''),

@@ -16,8 +16,7 @@ import JointIcon from "@/assets/icons/joint.svg?component";
 import MuscleIcon from "@/assets/icons/muscle.svg?component"
 import Search from "@/assets/icons/search.svg?component"; 
 import MaskIcon from "@/assets/icons/mask.svg?component";
-// 캐러셀에 필요한 아이콘(Bot, MessageSquare, Heart) 추가 임포트
-import { ArrowRight, Activity, Users, Search as SearchIcon, Sparkles, Bot, MessageSquare, Heart } from "lucide-vue-next";
+import { ArrowRight, Activity, Users, Search as SearchIcon, Sparkles, Bot } from "lucide-vue-next";
 
 const router = useRouter();
 const searchQuery = ref("");
@@ -218,7 +217,6 @@ const handleSymptomClick = (symptom) => {
               <h3 class="business-title">AI ChatBot</h3>
               <p class="business-subtitle fw-medium">AI 챗봇 서비스</p>
               <p class="business-text">최신 의약품 데이터를<br>기반으로 더 나은 솔루션 제공</p>
-              <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
             <div class="card-visual"><Activity :size="80" class="card-icon" /></div>
           </div>
@@ -229,7 +227,6 @@ const handleSymptomClick = (symptom) => {
               <h3 class="business-title">Community</h3>
               <p class="business-subtitle fw-medium">커뮤니티</p>
               <p class="business-text">의약품 후기 공유를 통해<br>더 안전한 선택을 돕습니다</p>
-              <!-- <button class="card-btn"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
             <div class="card-visual"><Users :size="80" class="card-icon" /></div>
           </div>
@@ -240,7 +237,6 @@ const handleSymptomClick = (symptom) => {
               <h3 class="business-title">Search</h3>
               <p class="business-subtitle fw-medium">의약품 필터링 조회</p>
               <p class="business-text">증상 및 제형 필터링을 통해<br>필요한 정보에 쉽게 접근할 수 있습니다</p>
-              <!-- <button class="card-btn" @click="router.push('/community')"><span>더 보기</span><ArrowRight :size="16" /></button> -->
             </div>
             <div class="card-visual"><SearchIcon :size="80" class="card-icon" /></div>
           </div>
@@ -263,13 +259,11 @@ const handleSymptomClick = (symptom) => {
 </template>
 
 <style scoped>
-/* --- 캐러셀 통합 스타일 --- */
 .hero-carousel, .carousel-inner, .carousel-item {
   height: 100vh;
   min-height: 700px;
 }
 
-/* 커스텀 인디케이터 스타일 */
 .custom-indicators {
   bottom: 40px;
   z-index: 15;
@@ -291,7 +285,6 @@ const handleSymptomClick = (symptom) => {
   opacity: 1;
 }
 
-/* 좌우 컨트롤 커스텀 */
 .custom-control {
   width: 5%;
   opacity: 0;
@@ -310,7 +303,6 @@ const handleSymptomClick = (symptom) => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* Hero 및 기본 스타일 (기존 HomeView.vue 스타일 병합) */
 .home-wrapper { overflow-x: hidden; background: #ffffff; }
 .container-custom { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
 
@@ -354,16 +346,13 @@ const handleSymptomClick = (symptom) => {
 .pill-2 { bottom: 25%; right: 15%; animation-delay: -2s; }
 .pill-3 { top: 60%; right: 25%; animation-delay: -4s; }
 
-/* 나머지 섹션 스타일(Solution, Business 등)은 기존 코드와 동일 */
 .solution-section { padding: 140px 0; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); }
 .solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
 .glass-card { position: relative; width: 550px; height: 550px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); overflow: hidden; }
-/* ... (이하 애니메이션 및 반응형 스타일 생략) ... */
 
 @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
 @keyframes pillFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(180deg); } }
 
-/* (중략) 기존 HomeView.vue의 나머지 스타일 모두 포함 */
 .home-wrapper {
   overflow-x: hidden;
   background: #ffffff;
@@ -375,7 +364,6 @@ const handleSymptomClick = (symptom) => {
   padding: 0 40px;
 }
 
-/* Hero Section - Premium 3D */
 .hero-section {
   position: relative;
   height: 100vh;
@@ -531,7 +519,6 @@ const handleSymptomClick = (symptom) => {
   }
 }
 
-/* Solution Section - Glassmorphism */
 .solution-section {
   padding: 140px 0;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
@@ -708,7 +695,6 @@ const handleSymptomClick = (symptom) => {
   }
 }
 
-/* Business Cards - Premium Design */
 .business-section {
   padding: 140px 0;
   background: #ffffff;
@@ -970,7 +956,6 @@ const handleSymptomClick = (symptom) => {
   }
 }
 
-/* Symptoms Grid - Modern Cards */
 .symptoms-section {
   padding: 140px 0;
   background: #ffffff;
@@ -1097,7 +1082,6 @@ const handleSymptomClick = (symptom) => {
   color: white;
 }
 
-/* Network Section - Premium Gradient */
 .network-section {
   position: relative;
   padding: 160px 0;
@@ -1166,7 +1150,6 @@ const handleSymptomClick = (symptom) => {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* Magazine Section - 3D Card */
 .magazine-section {
   padding: 140px 0;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
@@ -1300,7 +1283,6 @@ const handleSymptomClick = (symptom) => {
   box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
   .solution-grid,
   .card-3d-wrapper {

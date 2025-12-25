@@ -28,7 +28,7 @@ const currentPage = ref(1);
 const keyword = ref(route.query.q || "");
 const sortBy = ref("relevance");
 
-// 필터 상태 (form_name → form_id로 매핑)
+// 필터 상태
 const filters = reactive({
   tablet: false,    // 1
   powder: false,    // 2
@@ -69,7 +69,7 @@ const formIdMap = {
   lotion: 10,
 };
 
-// ✅ 백엔드에서 필터링/정렬된 데이터를 그대로 사용
+// 백엔드에서 필터링/정렬된 데이터를 그대로 사용
 const filteredDrugs = computed(() => drugStore.drugs || []);
 
 const totalPages = computed(() => {
@@ -393,7 +393,6 @@ const changePage = (page) => {
 </template>
 
 <style scoped>
-/* 기존 스타일 유지 */
 .hover-shadow:hover {
   transform: translateY(-3px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
@@ -425,12 +424,6 @@ const changePage = (page) => {
   word-break: keep-all;
   line-height: 1.4;
   display: block;
-}
-
-.text-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .drug-icon {

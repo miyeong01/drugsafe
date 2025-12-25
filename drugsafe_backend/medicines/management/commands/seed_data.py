@@ -32,7 +32,7 @@ class Command(BaseCommand):
             
             # 각 약에 연결된 Form(제형)이 있다면 가져오기
             # 만약 Drug와 Form이 1:N 관계라면 drug.form을 사용, 
-            # 여기서는 Review 모델 구조에 맞춰 임의의 Form 하나를 선택합니다.
+            # 여기서는 Review 모델 구조에 맞춰 임의의 Form 하나를 선택
             target_form = Form.objects.first() 
 
             for i in range(10):

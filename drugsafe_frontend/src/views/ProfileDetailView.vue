@@ -58,13 +58,10 @@ const goBack = () => {
 // 비밀번호 변경
 const handlePasswordChange = async () => {
   try {
-    // 1. 비밀번호 변경 요청
     await accountStore.changePassword(passwordData);
 
     alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
 
-    // 2. ✅ 여기서 로그아웃 함수를 반드시 실행해야 합니다!
-    // 스토어에 정의된 logOut 함수가 토큰을 지우고 홈으로 보냅니다.
     await accountStore.logOut();
   } catch (error) {
     console.error("변경 실패:", error);
@@ -76,12 +73,8 @@ const handlePasswordChange = async () => {
 const handleDeleteItem = async (drugId) => {
   if (confirm(`정말 즐겨찾기에서 삭제하시겠습니까?`)) {
     try {
-      // 1. 서버에 삭제(토글) 요청을 보냅니다.
-      // (drugStore.toggleFavorite가 axios를 return하고 있어야 await가 작동합니다.)
       await drugStore.toggleFavorite(drugId);
 
-      // 2. 서버 응답이 성공하면 로컬 배열(myFavorites)에서 해당 항목을 즉시 제거합니다.
-      // 새로고침 없이도 Vue의 반응성 덕분에 화면에서 바로 사라집니다.
       myFavorites.value = myFavorites.value.filter(item => item.id !== drugId);
 
       alert("삭제되었습니다.");
@@ -228,7 +221,6 @@ const handleDeleteItem = async (drugId) => {
 </template>
 
 <style scoped>
-/* 탭 활성화 스타일 */
 .nav-pills .nav-link.active {
   background-color: #f8f9fa;
   color: #0d6efd;
@@ -238,13 +230,11 @@ const handleDeleteItem = async (drugId) => {
   color: #6c757d;
 }
 
-/* 리스트 항목 호버 효과 */
 .hover-bg:hover {
   background-color: #f8f9fa;
   transition: background-color 0.2s;
 }
 
-/* 버튼 흰색 배경 */
 .btn-white {
   background-color: white;
 }

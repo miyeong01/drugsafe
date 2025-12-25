@@ -4,7 +4,6 @@ import { Search } from 'lucide-vue-next'
 
 const searchQuery = ref('')
 
-// 데이터 정의 (내용은 그대로 유지)
 const faqCategories = [
   {
     category: '서비스 이용',
@@ -53,7 +52,6 @@ const faqCategories = [
   },
 ]
 
-// 검색 필터 로직 (그대로 유지)
 const filteredFAQs = computed(() => {
   return faqCategories
     .map((cat) => ({
@@ -165,14 +163,12 @@ const filteredFAQs = computed(() => {
 </template>
 
 <style scoped>
-/* 아코디언 버튼 클릭 시(열렸을 때) 배경색과 글자색 커스텀 */
 .accordion-button:not(.collapsed) {
   color: #0d6efd;
   background-color: #f0f7ff;
-  box-shadow: none; /* 파란 테두리 제거 */
+  box-shadow: none;
 }
 
-/* 아코디언 버튼 포커스 시 테두리 제거 */
 .accordion-button:focus {
   box-shadow: none;
   border-color: rgba(0,0,0,.125);

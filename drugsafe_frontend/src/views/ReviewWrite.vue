@@ -74,7 +74,6 @@ const handleSubmit = async () => {
     alert("리뷰가 등록되었습니다!");
 
     // 4. 등록 후 약 상세 페이지로 이동
-    // (라우터의 name 설정이 'DrugDetail'인지 확인해 보세요!)
     router.push({ name: "drug-detail", params: { drugId: drugId } });
   } catch (error) {
     console.error("리뷰 등록 실패:", error);

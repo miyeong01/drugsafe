@@ -171,7 +171,6 @@ onMounted(async () => {
   // 1. 로그인 상태인데 내 정보(userInfo)가 없다면 서버에서 가져오기
   if (accountStore.token && !accountStore.userInfo) {
     try {
-      // accountStore에 getUserInfo라는 함수가 있는지 확인해보세요!
       await accountStore.getUserInfo();
     } catch (err) {
       console.error("유저 정보를 가져오는데 실패했습니다:", err);
@@ -189,6 +188,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString();
 };
 
+// 댓글 작성 함수
 const handleSubmitComment = () => {
   if (!accountStore.isLogin) {
     if (
@@ -207,7 +207,6 @@ const handleSubmitComment = () => {
     .createComment(reviewId, newComment.value)
     .then(() => {
       newComment.value = "";
-      // 댓글 작성 후 목록을 새로고침하기 위해 다시 호출
       drugStore.getReviewDetail(drugId, reviewId);
     })
     .catch((err) => {
@@ -244,7 +243,7 @@ const onCommentDelete = (commentId) => {
     drugStore
       .deleteComment(reviewId, commentId)
       .then(() => {
-        drugStore.getReviewDetail(drugId, reviewId); // 목록 새로고침
+        drugStore.getReviewDetail(drugId, reviewId);
       })
       .catch((err) => console.error(err));
   }
@@ -256,7 +255,7 @@ const totalPages = computed(() => {
   return Math.ceil(count / itemsPerPage) || 1;
 });
 
-// 현재 페이지에 해당하는 댓글만 추출 (v-for 대상)
+// 현재 페이지에 해당하는 댓글만 추출
 const paginatedComments = computed(() => {
   const list = selectedReview.value?.comments || [];
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -283,7 +282,7 @@ const onToggleHelpful = (reviewId) => {
     }
     return;
   }
-  // 스토어의 액션 호출 (서버와 통신 후 selectedReview 상태가 자동으로 업데이트됩니다)
+  // 스토어의 액션 호출
   drugStore.toggleHelpful(reviewId);
 };
 </script>
@@ -299,7 +298,6 @@ const onToggleHelpful = (reviewId) => {
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
 }
 
-/* 페이지네이션 컨테이너 스타일 */
 .minimal-pagination {
   background-color: white;
   padding: 8px 16px;
@@ -308,7 +306,6 @@ const onToggleHelpful = (reviewId) => {
   border: 1px solid #e5f0ff;
 }
 
-/* 화살표 버튼 */
 .btn-arrow {
   border: none;
   background: none;
@@ -332,7 +329,6 @@ const onToggleHelpful = (reviewId) => {
   cursor: not-allowed;
 }
 
-/* 중앙 번호 표시 박스 */
 .current-page-display {
   background-color: #f8f9fa;
   padding: 6px 18px;

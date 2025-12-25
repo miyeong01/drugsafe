@@ -16,22 +16,18 @@ class DrugListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = request.user if request else None
         if user and user.is_authenticated:
-            # favorite 모델의 related_name='favorites' 확인
             return obj.favorites.filter(user=user).exists()
         return False
     
     def get_rating(self, obj):
         try:
-            # Review의 related_name='drugs'와 필드명 'score' 사용
             average = obj.drugs.aggregate(Avg('score'))['score__avg']
             return round(float(average), 1) if average else 0.0
         except Exception as e:
-            # 서버가 죽지 않도록 에러 로깅만 하고 0.0 반환
             print(f"Rating Error: {e}")
             return 0.0
 
     def get_review_count(self, obj):
-        # Review의 related_name='drugs' 사용
         return obj.drugs.count()
 
 class ReviewSerializer(serializers.ModelSerializer):

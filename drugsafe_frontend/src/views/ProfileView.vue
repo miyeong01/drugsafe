@@ -83,8 +83,6 @@ onMounted(async () => {
     await drugStore.getMyComments(1)
     await drugStore.getFavorites(1)
   }
-
-  console.log('리뷰 로드 완료:', drugStore.myReviews)
 })
 
 // 날짜 형식을 예쁘게 바꿔주는 함수
@@ -103,9 +101,9 @@ const goProfileEdit = () => {
   router.push({ name: 'profile-edit' })
 }
 
-const goCommunity = () => {
-  router.push('/community')
-}
+// const goCommunity = () => {
+//   router.push('/community')
+// }
 
 const goReviewDetail = (drugId, reviewId, commentId = null) => {
   const target = {
@@ -113,7 +111,6 @@ const goReviewDetail = (drugId, reviewId, commentId = null) => {
     params: { drugId: drugId, reviewId: reviewId }
   };
 
-  // ✅ 댓글 ID가 있으면 해시(#)를 추가합니다.
   if (commentId) {
     target.hash = `#comment-${commentId}`;
   }
@@ -388,22 +385,17 @@ const changeFavoritePage = (direction) => {
 </template>
 
 <style scoped>
-/* 탭 활성화 스타일 (부트스트랩 오버라이드) */
 .nav-pills .nav-link.active {
   background-color: #f8f9fa;
-  /* bg-light */
   color: #0d6efd;
-  /* Primary Color */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-weight: bold;
 }
 
 .nav-pills .nav-link {
   color: #6c757d;
-  /* Secondary Color */
 }
 
-/* 호버 시 그림자 효과 */
 .hover-shadow:hover {
   transform: translateY(-2px);
   box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
@@ -414,7 +406,6 @@ const changeFavoritePage = (direction) => {
   cursor: pointer;
 }
 
-/* 페이지네이션 스타일 */
 .minimal-pagination {
   background-color: white;
   padding: 8px 16px;

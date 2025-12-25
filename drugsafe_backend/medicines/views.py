@@ -228,10 +228,8 @@ def comment_detail(request, review_pk, comment_pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_reviews(request):
-    # 최신순 정렬
     reviews = Review.objects.filter(user=request.user).order_by('-created_at')
-    
-    # ✅ 페이지네이션 추가
+
     paginator = ReviewPagination()
     page = paginator.paginate_queryset(reviews, request)
     
@@ -241,10 +239,8 @@ def user_reviews(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_comments(request):
-    # 최신순 정렬
     comments = Comment.objects.filter(user=request.user).order_by('-created_at')
     
-    # ✅ 페이지네이션 추가
     paginator = PageNumberPagination()
     paginator.page_size = 10
     page = paginator.paginate_queryset(comments, request)
@@ -255,29 +251,24 @@ def user_comments(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_favorites(request):
-    # 1. 내가 찜한 약의 ID 목록을 먼저 가져옵니다.
     favorite_ids = Favorite.objects.filter(user=request.user).values_list('drug_id', flat=True)
     
-    # 2. 해당 약들을 가져오면서 별점과 리뷰 수를 계산(annotate)합니다.
     drugs = (
         Drug.objects.filter(id__in=favorite_ids)
         .annotate(
             avg_rating=Coalesce(Avg('drugs__score'), 0.0),
             review_cnt=Coalesce(Count('drugs'), 0)
         )
-        .order_by('-id')  # 최신 즐겨찾기 순
+        .order_by('-id') 
     )
     
-    # 3. ✅ 페이지네이션 추가
     paginator = PageNumberPagination()
     paginator.page_size = 10
     page = paginator.paginate_queryset(drugs, request)
     
-    # 4. context에 request를 담아 즐겨찾기 여부 로직이 에러 나지 않게 합니다.
     serializer = DrugListSerializer(page, many=True, context={'request': request})
     return paginator.get_paginated_response(serializer.data)
 
-# 약 상세 페이지에서 즐겨찾기를 누를 때 호출할 함수
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def toggle_favorite(request, drug_pk):
@@ -300,11 +291,9 @@ def toggle_helpful(request, review_pk):
     user = request.user
 
     if review.helpful_users.filter(pk=user.pk).exists():
-        # 이미 눌렀다면 취소
         review.helpful_users.remove(user)
         is_helpful = False
     else:
-        # 처음 누르는 것이라면 추가
         review.helpful_users.add(user)
         is_helpful = True
 
@@ -353,35 +342,6 @@ def recommend_drug(parsed, user_message):
 
     return Response({'answer': answer})
 
-# def check_interaction(parsed, user_message):
-#     drugs = parsed.get("drugs")
-
-#     if not drugs or len(drugs) < 2:
-#         return Response({
-#             "answer": "비교할 약품 이름을 두 개 이상 입력해주세요."
-#         })
-
-#     qs = Drug.objects.filter(name__in=drugs)[:2]
-
-#     if qs.count() < 2:
-#         return Response({
-#             "answer": "입력한 약 중 일부의 정보가 없습니다."
-#         })
-
-#     context = ""
-#     for d in qs:
-#         context += f"""
-# - 약명: {d.name}
-# - 성분/효능: {d.efficacy}
-# - 주의사항: {d.caution}
-# """
-
-#     answer = asyncio.run(
-#         explain(context, user_message)
-#     )
-
-#     return Response({"answer": answer})
-
 def find_drug_candidates(keyword: str):
     return (
         Drug.objects
@@ -417,7 +377,6 @@ def explain_drug_by_name(keyword: str):
             "answer": "해당 이름의 의약품을 찾을 수 없습니다."
         })
 
-    # 1개면 바로 설명
     if cnt == 1:
         drug = qs.first()
         return Response({
@@ -426,7 +385,6 @@ def explain_drug_by_name(keyword: str):
             "answer": format_drug_info(drug)
         })
 
-    # 여러 개면 선택지
     candidates = qs[:3]
 
     return Response({
@@ -507,7 +465,6 @@ def chatbot_view(request):
     user_message = request.data.get('message', '').strip()
     selected_drug_id = request.data.get('selected_drug_id')
 
-    # 1. 카드 클릭으로 들어온 경우 (최우선)
     if selected_drug_id:
         drug = (
             Drug.objects
@@ -525,8 +482,6 @@ def chatbot_view(request):
                 "answer": format_drug_info(drug)
             })
         
-
-    # 2. 일반 자연어 처리
     parsed = asyncio.run(parse_user_input(user_message))
     intent = parsed.get('intent')
 
