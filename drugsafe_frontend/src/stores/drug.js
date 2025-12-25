@@ -32,26 +32,17 @@ export const useDrugStore = defineStore(
     const reviewCount = ref(0);
     const reviewPage = ref(1);
 
-    // 1. 약 목록 가져오기
+    // 약 목록 가져오기
     const getDrugs = function (
       searchKeyword = "",
       symptomId = null,
       page = 1,
       filters = {}
     ) {
-      console.log(
-        "스토어 호출됨 - keyword:",
-        searchKeyword,
-        "ID:",
-        symptomId,
-        "filters:",
-        filters
-      );
-
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Token ${token}` } : {};
 
-      // ✅ params 객체 생성
+      // params 객체 생성
       const params = {
         page: page,
       };
@@ -63,17 +54,15 @@ export const useDrugStore = defineStore(
         params.search = searchKeyword;
       }
 
-      // ✅ 제형 필터 추가 (배열을 콤마로 연결)
+      // 제형 필터 추가 (배열을 콤마로 연결)
       if (filters.forms && filters.forms.length > 0) {
         params.form = filters.forms.join(",");
       }
 
-      // ✅ 정렬 추가
+      // 정렬 추가
       if (filters.sort) {
         params.sort = filters.sort;
       }
-
-      console.log("최종 params:", params); // 디버깅용
 
       axios({
         method: "get",
@@ -82,7 +71,6 @@ export const useDrugStore = defineStore(
         headers: headers,
       })
         .then((res) => {
-          console.log("검색 결과:", res.data);
           drugs.value = res.data.results;
           nextPage.value = res.data.next;
           prevPage.value = res.data.previous;
@@ -91,18 +79,18 @@ export const useDrugStore = defineStore(
         .catch((err) => console.log(err));
     };
 
-    // 2. 특정 약 상세 정보 가져오기
+    // 특정 약 상세 정보 가져오기
     const getDrugDetail = function (id) {
       selectedDrug.value = null;
 
-      // ✅ 로컬 스토리지에서 현재 로그인한 유저의 토큰을 가져옵니다.
+      // 로컬 스토리지에서 현재 로그인한 유저의 토큰을 가져옴
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Token ${token}` } : {};
 
       axios({
         method: "get",
         url: `${API_URL}/medicines/drugs/${id}/`,
-        headers: headers, // ✅ 반드시 헤더를 포함해야 장고가 '나'를 인식합니다.
+        headers: headers,
       })
         .then((res) => {
           selectedDrug.value = res.data;
@@ -112,7 +100,7 @@ export const useDrugStore = defineStore(
         });
     };
 
-    // 3. 해당 약의 리뷰 목록 가져오기
+    // 해당 약 리뷰 목록 가져오기
     const getReviews = async (drugId = null, page = 1, params = {}) => {
       try {
         const token = localStorage.getItem("token");
@@ -141,17 +129,14 @@ export const useDrugStore = defineStore(
       }
     };
 
-    // 4. 리뷰 등록하기
+    // 리뷰 등록하기
     const createReview = function (id, reviewData) {
-      // 토큰이 실제로 담겨있는지 콘솔에서 확인합니다.
-      console.log("전송되는 토큰:", accountStore.token);
-
       return axios({
         method: "post",
         url: `${API_URL}/medicines/drugs/${id}/reviews/`,
         data: reviewData,
         headers: {
-          Authorization: `Token ${accountStore.token}`, // Token과 값 사이에 공백이 있는지 확인
+          Authorization: `Token ${accountStore.token}`,
         },
       });
     };
@@ -162,7 +147,7 @@ export const useDrugStore = defineStore(
     const getReviewDetail = function (drugId, reviewId) {
       selectedReview.value = null;
 
-      // 1. 전달받은 인자가 유효한지 확인
+      // 전달받은 인자 유효한지 확인
       if (!drugId || !reviewId) {
         console.error(
           "ID가 누락되었습니다. drugId:",
@@ -176,9 +161,6 @@ export const useDrugStore = defineStore(
       const token = localStorage.getItem("token");
       const url = `${API_URL}/medicines/drugs/${drugId}/reviews/${reviewId}/`;
 
-      // 2. 실제 요청 주소를 콘솔에서 클릭해 보세요.
-      console.log("요청 URL:", url);
-
       axios({
         method: "get",
         url: url,
@@ -188,17 +170,16 @@ export const useDrugStore = defineStore(
           selectedReview.value = res.data;
         })
         .catch((err) => {
-          // 3. 서버가 보내주는 정확한 에러 코드를 확인합니다.
           console.error(`에러 발생! 상태 코드: ${err.response?.status}`);
           console.dir(err);
         });
     };
 
-    // 6. 댓글 등록하기
+    // 댓글 등록하기
     const createComment = function (reviewId, content) {
       return axios({
         method: "post",
-        url: `${API_URL}/medicines/reviews/${reviewId}/comments/`, // URL은 urls.py 설정에 맞춰 확인 필요
+        url: `${API_URL}/medicines/reviews/${reviewId}/comments/`,
         data: { content },
         headers: {
           Authorization: `Token ${accountStore.token}`,
@@ -206,7 +187,7 @@ export const useDrugStore = defineStore(
       });
     };
 
-    // 7. 리뷰 삭제
+    // 리뷰 삭제
     const deleteReview = function (drugId, reviewId) {
       return axios({
         method: "delete",
@@ -215,7 +196,7 @@ export const useDrugStore = defineStore(
       });
     };
 
-    // 8. 리뷰 수정
+    // 리뷰 수정
     const updateReview = function (drugId, reviewId, reviewData) {
       return axios({
         method: "put",
@@ -225,7 +206,7 @@ export const useDrugStore = defineStore(
       });
     };
 
-    // 9. 댓글 삭제
+    // 댓글 삭제
     const deleteComment = function (reviewId, commentId) {
       return axios({
         method: "delete",
@@ -276,14 +257,12 @@ export const useDrugStore = defineStore(
       }
     };
 
-    // 12. 즐겨찾기 토글 함수
+    // 즐겨찾기 토글 함수
     const toggleFavorite = function (drugId) {
-      // ✅ 반드시 return을 추가해야 컴포넌트에서 await가 작동합니다.
       return axios({
         method: "post",
         url: `${API_URL}/medicines/drugs/${drugId}/favorite/`,
         headers: {
-          // accountStore의 토큰을 사용하거나 직접 가져옵니다.
           Authorization: `Token ${localStorage.getItem("token")}`,
         },
       })
@@ -325,7 +304,7 @@ export const useDrugStore = defineStore(
       }
     };
 
-    // 14. 리뷰 '도움이 돼요' 토글 함수 추가
+    // 리뷰 '도움이 돼요' 토글 함수 추가
     const toggleHelpful = function (reviewId) {
       const token = localStorage.getItem("token");
       if (!token) return Promise.reject("로그인이 필요합니다.");
@@ -338,7 +317,6 @@ export const useDrugStore = defineStore(
         },
       })
         .then((res) => {
-          // ✨ 실시간으로 스토어의 reviews 배열 내 데이터를 업데이트합니다.
           const review = reviews.value.find((r) => r.id === reviewId);
           if (review) {
             review.helpful_count = res.data.helpful_count;

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useDrugStore } from "@/stores/drug";
-import { useAccountStore } from "@/stores/accounts"; // ✨ 추가: accountStore 임포트 필요
+import { useAccountStore } from "@/stores/accounts";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import {
@@ -25,7 +25,7 @@ const props = defineProps({
 });
 
 const drugStore = useDrugStore();
-const accountStore = useAccountStore(); // ✨ 추가: 토큰 확인을 위해 필요
+const accountStore = useAccountStore();
 const { reviews, nextPage, prevPage, reviewPage, totalCount } = storeToRefs(drugStore);
 const router = useRouter();
 
@@ -42,11 +42,10 @@ onMounted(() => {
   drugStore.getReviews(null,1);
 });
 
-// ✨ [통합된 필터링/정렬 로직] 중복 선언을 피하기 위해 하나로 합쳤습니다.
 const filteredReviews = computed(() => {
   let list = reviews.value ? [...reviews.value] : [];
 
-  // 2. 정렬 로직 (인기순/댓글순/최신순 통합)
+  // 정렬 로직 (인기순/댓글순/최신순 통합)
   if (activeTab.value === "popular" || sortBy.value === "helpful") {
     list.sort((a, b) => (b.helpful_count || 0) - (a.helpful_count || 0));
   } else if (sortBy.value === "comments") {
@@ -64,7 +63,7 @@ onMounted(() => {
   fetchReviews();
 });
 
-// ✅ 검색/정렬 변경 시 백엔드에 새로 요청
+// 검색/정렬 변경 시 백엔드에 새로 요청
 watch([searchQuery, sortBy], () => {
   fetchReviews();
 });
@@ -105,25 +104,6 @@ const goReviewDetail = (drugId, reviewId) => {
   });
 };
 
-// const currentPage = ref(1);
-// const itemsPerPage = 10;
-
-// const totalPages = computed(() => {
-//   const count = filteredReviews.value ? filteredReviews.value.length : 0;
-//   return Math.ceil(count / itemsPerPage) || 1;
-// });
-
-// const paginatedReviews = computed(() => {
-//   const list = filteredReviews.value || [];
-//   const start = (currentPage.value - 1) * itemsPerPage;
-//   const end = start + itemsPerPage;
-//   return list.slice(start, end);
-// });
-
-// watch([searchQuery, sortBy, activeTab], () => {
-//   currentPage.value = 1;
-// });
-
 const changePage = (direction) => {
   const params = {};
   
@@ -144,7 +124,7 @@ const changePage = (direction) => {
   }
 };
 
-// 도움이 돼요 클릭 핸들러 (accountStore 사용)
+// 도움이 돼요 클릭 핸들러
 const onToggleHelpful = (reviewId) => {
   if (!accountStore.isLogin) {
     alert("로그인이 필요합니다.");
@@ -320,16 +300,6 @@ const onToggleHelpful = (reviewId) => {
   color: #adb5bd;
 }
 
-/* 통계 카드 */
-.stat-card {
-  background: white;
-  transition: transform 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-}
-
 /* 탭 버튼 스타일 (DrugSafe 테마) */
 .nav-pills .nav-link {
   color: #6c757d;
@@ -356,16 +326,6 @@ const onToggleHelpful = (reviewId) => {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
-.avatar-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.text-light-gray {
-  color: #dee2e6;
-}
-
 .text-truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -373,21 +333,7 @@ const onToggleHelpful = (reviewId) => {
   overflow: hidden;
 }
 
-/* 플로팅 버튼 (FAB) */
-.fab-button {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 1000;
-  background-color: #4d9fff;
-  border: none;
-}
 
-.fab-button:hover {
-  background-color: #3a8fef;
-}
-
-/* 별점 fill 효과 */
 .fill-warning {
   fill: #ffc107;
 }

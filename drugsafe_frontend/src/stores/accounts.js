@@ -29,7 +29,7 @@ export const useAccountStore = defineStore("accounts", () => {
       });
   };
 
-  // 회원가입 액션
+  // 회원가입
   const signup = function (payload) {
     const {
       username,
@@ -78,7 +78,7 @@ export const useAccountStore = defineStore("accounts", () => {
         token.value = res.data.key;
         localStorage.setItem("token", res.data.key);
 
-        // ✅ 로그인 직후 유저 정보를 바로 가져옵니다.
+        // 로그인 직후 유저 정보 가져옴
         getUserInfo();
 
         alert("반갑습니다! 로그인이 완료되었습니다.");

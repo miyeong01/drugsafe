@@ -9,7 +9,7 @@ import {
   Heart,
   MessageSquare,
   ArrowLeft,
-  AlertTriangle, // 주의사항 아이콘 누락 방지
+  AlertTriangle,
   Info,
   Pill,
   Droplet,
@@ -41,7 +41,6 @@ onMounted(() => {
   const drugId = route.params.drugId;
   drugStore.getDrugDetail(drugId);
   drugStore.getReviews(drugId);
-  console.log("첫 번째 리뷰 데이터의 점수:", reviews.value[0]?.score);
 });
 
 const goReviewWrite = () => {
@@ -70,7 +69,7 @@ const formatDate = (dateString) => {
 
 const goReviewDetail = (reviewId) => {
   router.push({
-    name: "ReviewDetail", // router/index.js에 정의된 상세 페이지 route 이름
+    name: "ReviewDetail",
     params: {
       drugId: selectedDrug.value.id, // 약 ID
       reviewId: reviewId            // 리뷰 ID
@@ -86,7 +85,7 @@ const handleToggleFavorite = () => {
     }
     return;
   }
-  // ✅ 스토어의 토글 함수 호출
+  // 스토어의 토글 함수 호출
   drugStore.toggleFavorite(selectedDrug.value.id);
 };
 
@@ -111,7 +110,7 @@ const averageRating = computed(() => {
   if (!reviews.value || reviews.value.length === 0) return "0.0";
 
   const sum = reviews.value.reduce((acc, r) => {
-    // r.score가 문자열로 넘어오거나 없을 경우를 대비해 Number()와 기본값(0) 처리
+    // r.score가 문자열로 넘어오거나 없을 경우를 대비 -> Number()와 기본값(0) 처리
     const s = Number(r.score) || 0;
     return acc + s;
   }, 0);
@@ -133,7 +132,7 @@ const ratingDistribution = computed(() => {
   if (!reviews.value || reviews.value.length === 0) return dist;
 
   reviews.value.forEach((r) => {
-    // 점수를 정수로 변환 (5, 4, 3, 2, 1)
+    // 점수를 정수로 변환
     const scoreVal = Math.floor(Number(r.score) || 0);
     const starObj = dist.find((d) => d.stars === scoreVal);
     if (starObj) {
@@ -157,7 +156,6 @@ const onToggleHelpful = (reviewId) => {
     }
     return;
   }
-  // Pinia 스토어의 액션 호출
   drugStore.toggleHelpful(reviewId);
 };
 </script>
@@ -399,20 +397,15 @@ const onToggleHelpful = (reviewId) => {
 
 .review-card {
   cursor: pointer;
-  /* 마우스 커서를 손가락 모양으로 변경 */
+  /* 마우스 커서 손가락 모양으로 변경 */
   transition: all 0.2s ease-in-out;
-  /* 부드러운 애니메이션 효과 */
 }
 
 .review-card:hover {
   background-color: #fdfdfd !important;
-  /* 배경색 아주 살짝 변경 */
   transform: translateY(-3px);
-  /* 위로 살짝 떠오름 */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-  /* 그림자 강조 */
   border-color: #0d6efd !important;
-  /* 테두리 강조 */
 }
 
 .drug-icon {

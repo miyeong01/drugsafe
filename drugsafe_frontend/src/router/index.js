@@ -72,13 +72,13 @@ const router = createRouter({
     }
   ],
 
-  // ✨ 페이지 이동 시 스크롤 위치 제어
+  // 페이지 이동 시 스크롤 위치 제어
   scrollBehavior(to, from, savedPosition) {
-    // 1. 뒤로가기/앞으로가기 버튼을 눌렀을 때는 이전 스크롤 위치를 유지합니다.
+    // 1. 뒤로가기/앞으로가기 버튼을 눌렀을 때는 이전 스크롤 위치를 유지
     if (savedPosition) {
       return savedPosition
     } else {
-      // 2. 그 외에 일반적인 페이지 이동은 항상 맨 위(0, 0)로 보냅니다.
+      // 2. 그 외에 일반적인 페이지 이동은 항상 맨 위(0, 0)로 보냄
       return { top: 0 }
     }
   },

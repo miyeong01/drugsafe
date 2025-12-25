@@ -1,7 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router';
 
-// Footer는 표시할 데이터나 로직이 없어서 script 부분이 비어있어도 됩니다.
 </script>
 
 <template>

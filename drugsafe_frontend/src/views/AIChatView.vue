@@ -56,8 +56,6 @@ const handleSend = async (manualMessage = null) => {
   messages.value.push({
     role: 'ai',
     text: '',
-    // type: res.data.type,
-    // candidates: res.data.candidates || [], // 후보 리스트
     isStreaming: true,
     status: '입력 중입니다...'
   })
@@ -159,21 +157,6 @@ const handleKeyPress = (e) => {
           <div ref="messagesEndRef"></div>
         </div>
 
-        <!-- <div class="quick-questions-area">
-          <p class="quick-questions-title">자주 묻는 질문:</p>
-          <div class="quick-questions-buttons">
-            <button
-              v-for="(question, index) in quickQuestions"
-              :key="index"
-              @click="handleQuickQuestion(question)"
-              class="question-btn"
-            >
-              {{ question }}
-            </button>
-          </div>
-        </div> -->
-
-
         <div class="input-area">
           <div class="input-wrapper">
             <input type="text" v-model="message" @keydown="handleKeyPress" placeholder="증상이나 궁금하신 의약품 이름을 입력하세요..."
@@ -237,7 +220,6 @@ const handleKeyPress = (e) => {
 
 .content-wrapper {
   max-width: 56rem;
-  /* max-w-4xl */
   margin: 0 auto;
 }
 
@@ -359,41 +341,6 @@ const handleKeyPress = (e) => {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* 자주 묻는 질문 영역 */
-.quick-questions-area {
-  padding: 0 2rem 1.5rem 2rem;
-  background-color: white;
-}
-
-.quick-questions-title {
-  font-size: 1rem;
-  color: var(--text-gray, #718096);
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-
-.quick-questions-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.question-btn {
-  padding: 0.75rem 1.25rem;
-  background-color: white;
-  border: 2px solid var(--primary-blue, #4D9FFF);
-  color: var(--primary-blue, #4D9FFF);
-  border-radius: 9999px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.question-btn:hover {
-  background-color: var(--light-border, #E5F0FF);
-}
-
 /* 입력 영역 */
 .input-area {
   padding: 2rem;
@@ -509,7 +456,7 @@ const handleKeyPress = (e) => {
   margin: 0;
 }
 
-/* 💡 AI 컨테이너 (말풍선과 카드를 묶음) */
+/* AI 컨테이너 (말풍선과 카드를 묶음) */
 .ai-container {
   display: flex;
   flex-direction: column;
@@ -517,7 +464,7 @@ const handleKeyPress = (e) => {
   max-width: 100%;
 }
 
-/* 💡 후보 카드 영역 */
+/* 후보 카드 영역 */
 .candidate-wrapper {
   display: flex;
   flex-wrap: wrap;

@@ -7,20 +7,20 @@ const router = useRouter()
 const route = useRoute()
 const accountStore = useAccountStore()
 
-// 1. 초기 탭 설정 (주소창에 ?mode=signup 있으면 회원가입 탭 열기)
+// 초기 탭 설정 (주소창에 ?mode=signup 있으면 회원가입 탭 열기)
 const activeTab = ref(route.query.mode === 'signup' ? 'signup' : 'login')
 
-// 2. 주소(URL)가 바뀌면 탭도 자동으로 바뀜 (헤더 버튼 대응)
+// 주소(URL)가 바뀌면 탭도 자동으로 바뀜 (헤더 버튼 대응)
 watch(() => route.query.mode, (newMode) => {
   activeTab.value = (newMode === 'signup') ? 'signup' : 'login'
 })
 
-// 3. 탭 버튼 클릭 시 주소 변경
+// 탭 버튼 클릭 시 주소 변경
 const setTab = (mode) => {
   router.replace({ query: { mode: mode } })
 }
 
-// --- 데이터 정의 ---
+// 데이터 정의
 const loginData = ref({
   username: '',
   password: '',
@@ -38,14 +38,14 @@ const signupData = ref({
   agreeTerms: false,
 })
 
-// --- 핸들러 ---
+// 핸들러
 const handleLogin = async () => {
-  // 1. 입력값 확인
+  // 입력값 확인
   if (!loginData.value.username || !loginData.value.password) {
     alert('아이디와 비밀번호를 모두 입력해주세요.')
     return
   }
-  // 2. 스토어의 로그인 액션 호출
+  // 스토어의 로그인 액션 호출
   await accountStore.login(loginData.value)
 }
 
@@ -55,7 +55,6 @@ const handleSignup = () => {
     return;
   }
   
-  // 스토어 액션 호출
   accountStore.signup(signupData.value);
 }
 </script>
