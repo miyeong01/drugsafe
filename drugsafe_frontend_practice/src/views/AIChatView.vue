@@ -178,7 +178,7 @@ const handleKeyPress = (e) => {
           <div class="input-wrapper">
             <input type="text" v-model="message" @keydown="handleKeyPress" placeholder="증상이나 궁금하신 의약품 이름을 입력하세요..."
               class="chat-input" />
-            <button @click="handleSend" :disabled="!message.trim()" class="send-btn">
+            <button @click="handleSend()" :disabled="!message.trim()" class="send-btn">
               <Send class="send-icon" />
             </button>
           </div>
