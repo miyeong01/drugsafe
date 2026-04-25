@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 소스 복사
 COPY . .
 
+# DB 디렉토리 생성
+RUN mkdir -p /app/data
+
 # static 파일 수집
 RUN python manage.py collectstatic --noinput
 
