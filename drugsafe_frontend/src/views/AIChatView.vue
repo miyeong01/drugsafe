@@ -64,7 +64,7 @@ const handleSend = async (manualMessage = null) => {
 
   try {
     const res = await axios.post(
-      'http://localhost:8000/api/medicines/chatbot/',
+      `${import.meta.env.VITE_API_URL}/api/medicines/chatbot/`,
       { message: userMessage }
     );
     const answer = res.data.answer;

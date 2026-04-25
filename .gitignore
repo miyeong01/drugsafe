@@ -1,3 +1,7 @@
+# 환경변수 파일
+drugsafe_frontend/.env
+drugsafe_frontend/.env.production
+
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
 
