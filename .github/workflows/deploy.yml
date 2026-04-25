@@ -35,6 +35,15 @@ jobs:
           build-args: |
             VITE_API_URL=http://${{ secrets.EC2_HOST }}
 
+      - name: docker-compose.yml EC2로 복사
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/drugsafe/"
+
       - name: EC2 배포
         uses: appleboy/ssh-action@v1
         with:
@@ -43,6 +52,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/drugsafe
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker-compose pull
+            docker-compose up -d --remove-orphans
             docker image prune -f

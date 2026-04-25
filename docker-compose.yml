@@ -1,8 +1,6 @@
 services:
   backend:
     image: ${DOCKER_HUB_USERNAME}/drugsafe-backend:latest
-    build:
-      context: ./drugsafe_backend
     env_file:
       - .env
     volumes:
@@ -11,8 +9,6 @@ services:
 
   frontend:
     image: ${DOCKER_HUB_USERNAME}/drugsafe-frontend:latest
-    build:
-      context: ./drugsafe_frontend
     restart: unless-stopped
 
   nginx:
