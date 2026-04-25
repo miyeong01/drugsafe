@@ -2,6 +2,14 @@
 
 > Docker + GitHub Actions + AWS EC2 기반 CI/CD 파이프라인 구축
 
+## 핵심 경험
+
+- Docker 멀티스테이지 빌드로 프론트엔드(Vue)/백엔드(Django) 각각 컨테이너화
+- GitHub Actions로 `master` 브랜치 push 시 EC2 자동 배포 파이프라인 구축
+- Nginx 리버스 프록시로 단일 포트(80)에서 SPA + REST API 동시 서빙
+- Docker Named Volume으로 SQLite 데이터 영속성 확보
+- 배포 과정에서 발생한 8가지 이슈 직접 디버깅 및 해결
+
 ## 기술 스택
 
 | 역할 | 기술 |
