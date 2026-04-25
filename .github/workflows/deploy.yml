@@ -53,5 +53,6 @@ jobs:
           script: |
             cd ~/drugsafe
             docker-compose pull
-            docker-compose up -d --remove-orphans
+            docker-compose down
+            docker-compose up -d
             docker image prune -f
